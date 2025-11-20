@@ -79,6 +79,9 @@ export default function LoginPage() {
       // Redirect to home page
       router.push("/");
     } catch (error) {
+      // Log the error with full details for debugging
+      logger.apiError("POST", "/auth/login", error);
+
       const message = getErrorMessage(
         error,
         "Failed to login. Please try again.",

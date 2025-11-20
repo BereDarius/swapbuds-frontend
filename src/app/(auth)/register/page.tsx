@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { getErrorMessage } from "@/lib/errors";
+import { logger } from "@/lib/logger";
 import { useAuthStore } from "@/stores/authStore";
 
 /**
@@ -93,6 +94,9 @@ export default function RegisterPage() {
       // Redirect to home page
       router.push("/");
     } catch (error) {
+      // Log the error with full details for debugging
+      logger.apiError("POST", "/auth/register", error);
+
       const message = getErrorMessage(
         error,
         "Failed to create account. Please try again.",

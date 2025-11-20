@@ -1,4 +1,9 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import axios, {
+  AxiosError,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
+import { logger } from "./logger";
 
 /**
  * Base URL for all API requests
@@ -40,16 +45,28 @@ export const api = axios.create({
  *
  * This ensures authenticated endpoints receive the necessary credentials
  * without manually adding headers to each request.
+ *
+ * Also logs all API requests in development mode.
  */
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // Log API request
+    logger.apiRequest(
+      config.method?.toUpperCase() || "GET",
+      config.url || "",
+      config.data,
+    );
+
     const token = localStorage.getItem("accessToken");
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error),
+  (error) => {
+    logger.error("API Request Error", error);
+    return Promise.reject(error);
+  },
 );
 
 /**
@@ -62,10 +79,28 @@ api.interceptors.request.use(
  * This provides a centralized logout mechanism when the backend
  * rejects the JWT token, preventing users from staying on protected
  * pages with invalid credentials.
+ *
+ * Also logs all API responses and errors.
  */
 api.interceptors.response.use(
-  (response) => response,
+  (response: AxiosResponse) => {
+    // Log successful API response
+    logger.apiResponse(
+      response.config.method?.toUpperCase() || "GET",
+      response.config.url || "",
+      response.status,
+      response.data,
+    );
+    return response;
+  },
   async (error: AxiosError) => {
+    // Log API error with full details
+    logger.apiError(
+      error.config?.method?.toUpperCase() || "UNKNOWN",
+      error.config?.url || "UNKNOWN",
+      error,
+    );
+
     if (error.response?.status === 401) {
       // Clear token and redirect to login
       localStorage.removeItem("accessToken");
