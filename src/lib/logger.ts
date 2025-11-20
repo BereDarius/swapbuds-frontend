@@ -71,8 +71,9 @@ class Logger {
       }
     }
 
-    // In production, send errors to Sentry for monitoring
-    if (!this.isDevelopment && entry.level === "error") {
+    // Send errors to Sentry for monitoring (development and production)
+    // Note: Sentry will work in both environments, but you can disable for dev if needed
+    if (entry.level === "error") {
       if (entry.error) {
         // Send error to Sentry with context
         Sentry.captureException(entry.error, {
@@ -82,6 +83,7 @@ class Logger {
           },
           tags: {
             logMessage: entry.message,
+            environment: this.isDevelopment ? "development" : "production",
           },
         });
       } else {
@@ -91,9 +93,15 @@ class Logger {
           contexts: {
             custom: entry.context,
           },
+          tags: {
+            environment: this.isDevelopment ? "development" : "production",
+          },
         });
       }
-      console.error(formatted); // Still log to console
+
+      if (!this.isDevelopment) {
+        console.error(formatted); // Log to console in production too
+      }
     }
   }
 
