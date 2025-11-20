@@ -321,15 +321,6 @@ echo $NODE_ENV
 
 ---
 
-## 📬 Support
-
-For issues and questions:
-
-- Open an issue on [GitHub](https://github.com/BereDarius/swapbuds-frontend/issues)
-- Check the [main project](https://github.com/BereDarius/swapbuds)
-
----
-
 <div align="center">
   <p>Part of the <a href="https://github.com/BereDarius/swapbuds">SWAPBUDS</a> project</p>
   <p>Made with ❤️ using Next.js</p>
