@@ -1,6 +1,8 @@
+import * as Sentry from "@sentry/nextjs";
+
 /**
  * Frontend logging utility
- * Logs errors to console in development and can be extended to send to external services
+ * Logs errors to console in development and sends to Sentry in production
  */
 
 type LogLevel = "info" | "warn" | "error" | "debug";
@@ -69,12 +71,29 @@ class Logger {
       }
     }
 
-    // In production, you could send to external logging service
-    // Example: Sentry, LogRocket, Datadog, etc.
+    // In production, send errors to Sentry for monitoring
     if (!this.isDevelopment && entry.level === "error") {
-      // TODO: Send to external logging service
-      // Example: Sentry.captureException(entry.error);
-      console.error(formatted); // Still log to console for now
+      if (entry.error) {
+        // Send error to Sentry with context
+        Sentry.captureException(entry.error, {
+          level: "error",
+          contexts: {
+            custom: entry.context,
+          },
+          tags: {
+            logMessage: entry.message,
+          },
+        });
+      } else {
+        // Send message to Sentry if no error object
+        Sentry.captureMessage(entry.message, {
+          level: "error",
+          contexts: {
+            custom: entry.context,
+          },
+        });
+      }
+      console.error(formatted); // Still log to console
     }
   }
 
