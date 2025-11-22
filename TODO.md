@@ -17,6 +17,256 @@
 
 ---
 
+## Version 0.2.1 - Legal Compliance & GDPR UI
+
+**Timeline:** 1 week
+
+### Features
+
+- [ ] Cookie consent banner (GDPR compliant)
+- [ ] Terms of Service page (Romanian + English)
+- [ ] Privacy Policy page (Romanian + English)
+- [ ] Cookie Policy page
+- [ ] Community Guidelines page
+- [ ] TOS/Privacy acceptance during signup
+- [ ] Cookie preferences management
+- [ ] Data export request UI
+- [ ] Account deletion UI with confirmation
+- [ ] Legal document version tracking
+
+### Technical Implementation
+
+- [ ] `CookieBanner` component with granular consent options
+- [ ] `LegalDocument` component for displaying TOS/Privacy
+- [ ] `CookiePreferences` modal for managing cookies
+- [ ] `DataExportRequest` component
+- [ ] `AccountDeletion` component with warnings
+- [ ] `ConsentCheckbox` component for signup flow
+- [ ] Cookie consent store with Zustand
+- [ ] API hooks: `useAcceptLegal`, `useDataExport`, `useDeleteAccount`
+- [ ] LocalStorage for cookie preferences
+- [ ] Block non-essential cookies until consent given
+
+### Pages & Routes
+
+| Route               | Component           | Description               |
+| ------------------- | ------------------- | ------------------------- |
+| `/legal/terms`      | TermsOfServicePage  | TOS (RO/EN)               |
+| `/legal/privacy`    | PrivacyPolicyPage   | Privacy Policy (RO/EN)    |
+| `/legal/cookies`    | CookiePolicyPage    | Cookie Policy             |
+| `/legal/guidelines` | CommunityGuidelines | Community rules           |
+| `/settings/privacy` | PrivacySettingsPage | Cookie & data preferences |
+| `/settings/data`    | DataManagementPage  | Export/delete data        |
+
+### Cookie Consent Banner
+
+**Must Include (GDPR ePrivacy Directive):**
+
+- [ ] Show on first visit before tracking
+- [ ] Granular consent options:
+  - Essential cookies (always on, can't be disabled)
+  - Functional cookies (optional)
+  - Analytics cookies (optional)
+  - Marketing cookies (optional - not used initially)
+- [ ] "Accept All" button
+- [ ] "Reject All" (except essential) button
+- [ ] "Customize" button to manage preferences
+- [ ] Link to Cookie Policy
+- [ ] Remember choice for 12 months
+- [ ] Easy to reopen from footer/settings
+
+**Cookie Categories:**
+
+```typescript
+interface CookieConsent {
+  essential: boolean; // Always true, can't be changed
+  functional: boolean; // User preferences, language
+  analytics: boolean; // Google Analytics, usage tracking
+  marketing: boolean; // Ads (not used initially)
+  timestamp: Date;
+  version: string; // Policy version accepted
+}
+```
+
+### Legal Documents Display
+
+- [ ] Romanian version as primary (mandatory by law)
+- [ ] English version toggle
+- [ ] Display effective date and version number
+- [ ] Table of contents with anchor links
+- [ ] Print-friendly layout
+- [ ] Last updated timestamp
+- [ ] Highlight changes since last version (if user is logged in)
+
+### Signup Flow Integration
+
+**Registration Steps:**
+
+1. User fills registration form with **Date of Birth field**
+2. **Real-time age validation** (must be 18+ to continue)
+3. Show TOS & Privacy Policy summary with links
+4. Require checkboxes:
+   - [ ] "I confirm I am at least 18 years old" (required - age declaration)
+   - [ ] "I accept the Terms of Service" (required)
+   - [ ] "I accept the Privacy Policy" (required)
+   - [ ] "I consent to marketing emails" (optional)
+5. Disable submit button if DOB shows under 18
+6. Show error message if user is under 18: "You must be at least 18 years old to use SwapBuds"
+7. Store consent with timestamp and IP
+8. Proceed with registration
+
+**Age Verification:**
+
+```tsx
+interface SignupForm {
+  email: string;
+  password: string;
+  dateOfBirth: Date; // Required field
+  selfDeclaredAge18: boolean; // Checkbox confirmation
+  acceptTOS: boolean;
+  acceptPrivacy: boolean;
+  marketingConsent: boolean;
+}
+
+// Validation
+const age = calculateAge(dateOfBirth);
+if (age < 18) {
+  throw new Error("You must be at least 18 years old to register");
+}
+```
+
+### Data Management UI
+
+**Data Export:**
+
+- [ ] "Request Data Export" button in settings
+- [ ] Show pending/processing status
+- [ ] Email notification when ready
+- [ ] Download button (available for 7 days)
+- [ ] Rate limit: 1 request per 24 hours
+- [ ] Progress indicator during processing
+
+**Account Deletion:**
+
+- [ ] "Delete Account" button in settings (danger zone)
+- [ ] Multi-step confirmation:
+  1. Warning modal explaining consequences
+  2. Type "DELETE" to confirm
+  3. Enter password for verification
+  4. Final confirmation
+- [ ] Explain 30-day grace period
+- [ ] Option to cancel deletion during grace period
+- [ ] Show scheduled deletion date
+- [ ] List what will be deleted vs anonymized
+
+### UI Components
+
+**CookieBanner Component:**
+
+```tsx
+<CookieBanner
+  onAcceptAll={() => acceptAll()}
+  onRejectAll={() => rejectAll()}
+  onCustomize={() => openPreferences()}
+  language="ro" // or "en"
+/>
+```
+
+**ConsentCheckbox Component:**
+
+```tsx
+<ConsentCheckbox
+  type="terms" | "privacy" | "marketing"
+  required={true/false}
+  documentLink="/legal/terms"
+  onChange={(accepted) => handleConsent(accepted)}
+/>
+```
+
+### Styling & UX
+
+- [ ] Cookie banner: Bottom of screen, non-intrusive but clear
+- [ ] Banner shouldn't block critical UI
+- [ ] Sticky on scroll until decision made
+- [ ] Mobile-responsive (stack buttons vertically)
+- [ ] Dark mode support
+- [ ] Accessible (WCAG 2.1 AA)
+- [ ] Keyboard navigation support
+
+### Analytics Integration
+
+- [ ] Only initialize Google Analytics if user consents
+- [ ] Only initialize Sentry performance monitoring if consented
+- [ ] Disable tracking if consent withdrawn
+- [ ] Respect DNT (Do Not Track) header
+
+### Romanian Language
+
+**Key Terms Translation:**
+
+- Terms of Service = Termeni și Condiții
+- Privacy Policy = Politica de Confidențialitate
+- Cookie Policy = Politica de Cookie-uri
+- I Accept = Accept
+- I Agree = Sunt de acord
+- Required = Obligatoriu
+- Optional = Opțional
+- Data Export = Export Date
+- Delete Account = Șterge Contul
+
+### Testing
+
+- [ ] Test cookie banner shows on first visit
+- [ ] Test cookie preferences persist
+- [ ] Test blocking analytics without consent
+- [ ] Test signup with/without consent checkboxes
+- [ ] Test data export request flow
+- [ ] Test account deletion flow with confirmations
+- [ ] Test Romanian/English language toggle
+- [ ] E2E tests for legal acceptance flow
+
+### Age Verification UI Components
+
+**Date of Birth Input:**
+
+- [ ] DatePicker component (day/month/year dropdowns)
+- [ ] Client-side age calculation
+- [ ] Real-time validation (must be 18+)
+- [ ] Show error: "You must be at least 18 years old"
+- [ ] Visual indicator (red border) if under 18
+- [ ] Disable form submission if under 18
+
+**Age Declaration Checkbox:**
+
+- [ ] Required checkbox: "I confirm I am at least 18 years old"
+- [ ] Link to age policy explanation
+- [ ] Cannot be unchecked once checked
+- [ ] Stored with timestamp on backend
+
+**Post-Signup Age Verification Prompt:**
+
+- [ ] Banner: "Verify your age with ID for verified badge"
+- [ ] Link to ID verification flow
+- [ ] Explain benefits (verified badge, increased trust)
+- [ ] Can be dismissed but shows periodically
+
+### Compliance Checklist
+
+- [ ] Cookie banner shows before any tracking
+- [ ] Non-essential cookies blocked until consent
+- [ ] Legal documents in Romanian (mandatory)
+- [ ] **Date of Birth field required on signup**
+- [ ] **Real-time age validation (18+ only)**
+- [ ] **Age declaration checkbox required**
+- [ ] **Form submission blocked if under 18**
+- [ ] TOS and Privacy acceptance tracked with timestamp
+- [ ] Data export feature functional
+- [ ] Account deletion feature functional
+- [ ] Cookie preferences easy to change
+- [ ] All forms GDPR compliant
+
+---
+
 ## Version 0.3.0 - Item Management UI
 
 **Timeline:** 2 weeks
