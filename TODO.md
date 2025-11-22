@@ -1,8 +1,40 @@
-# SwapBuds Frontend - Roadmap to v1.0.0
+# SwapBuds Frontend - Launch Roadmap (16 Weeks)
 
-## Current Status: v0.2.0
+**Target Launch:** March 17, 2026
+**Current Status:** v0.2.0 (Auth foundation complete)
+**Working Schedule:** Part-time, 20-25 hours/week (evenings + weekends)
 
-### What's Implemented
+See **plans/LAUNCH_ROADMAP.md** for detailed week-by-week breakdown and timeline.
+
+---
+
+## Implementation Timeline
+
+This roadmap aligns with the 16-week launch plan. All dates and priorities are based on **realistic solo developer timeline** working part-time.
+
+### Phase 1: Core MVP Features (Weeks 1-6)
+
+Focus on legal compliance first, then essential features needed for beta launch.
+
+### Phase 2: Testing & Deployment (Weeks 7-10)
+
+Deploy to free tier infrastructure, fix bugs, optimize performance.
+
+### Phase 3: Beta Testing (Weeks 11-14)
+
+100+ beta users test the platform, gather feedback, iterate quickly.
+
+### Phase 4: Public Launch (Weeks 15-16)
+
+Final polish, marketing preparation, public announcement.
+
+---
+
+## CURRENT IMPLEMENTATION STATUS
+
+### v0.2.0 - Authentication Foundation ✅
+
+**Completed:**
 
 - ✅ Authentication UI (login, register)
 - ✅ JWT token management
@@ -17,9 +49,13 @@
 
 ---
 
-## Version 0.2.1 - Legal Compliance & GDPR UI
+## Week 1-2: Legal Compliance & Age Verification (CRITICAL)
 
-**Timeline:** 1 week
+**Version 0.2.1 - Legal Compliance & GDPR UI**
+
+**Timeline:** Week 1-2 (Dec 2-15, 2025)
+**Priority:** CRITICAL - Must be done first for legal compliance
+**Estimated Time:** 15-20 hours
 
 ### Features
 
@@ -267,9 +303,13 @@ if (age < 18) {
 
 ---
 
-## Version 0.3.0 - Item Management UI
+## Week 3: Item Browsing & Creation (HIGH PRIORITY)
 
-**Timeline:** 2 weeks
+**Version 0.3.0 - Item Management UI**
+
+**Timeline:** Week 3 (Dec 16-22, 2025)
+**Priority:** HIGH - Core feature for MVP
+**Estimated Time:** 20-25 hours
 
 ### Features
 
@@ -316,9 +356,13 @@ if (age < 18) {
 
 ---
 
-## Version 0.4.0 - User Profiles & Social Features
+## Week 4: User Profiles (HIGH PRIORITY)
 
-**Timeline:** 1.5 weeks
+**Version 0.4.0 - User Profiles**
+
+**Timeline:** Week 4 (Dec 23-29, 2025)
+**Priority:** HIGH - Basic profiles needed for trades
+**Estimated Time:** 15-20 hours
 
 ### Features
 
@@ -362,9 +406,13 @@ if (age < 18) {
 
 ---
 
-## Version 0.5.0 - Trading System UI
+## Week 5-6: Trading System (CRITICAL)
 
-**Timeline:** 2 weeks
+**Version 0.5.0 - Trading System UI**
+
+**Timeline:** Week 5-6 (Dec 30, 2025 - Jan 12, 2026)
+**Priority:** CRITICAL - Core MVP feature
+**Estimated Time:** 30-35 hours
 
 ### Features
 
@@ -408,9 +456,13 @@ if (age < 18) {
 
 ---
 
-## Version 0.6.0 - Notifications System UI
+## Week 7: Notifications System (HIGH PRIORITY)
 
-**Timeline:** 1 week
+**Version 0.6.0 - Notifications System UI**
+
+**Timeline:** Week 7 (Jan 13-19, 2026)
+**Priority:** HIGH - Important for user engagement
+**Estimated Time:** 15-20 hours
 
 ### Features
 
@@ -454,9 +506,13 @@ if (age < 18) {
 
 ---
 
-## Version 0.7.0 - Real-time Messaging UI
+## Week 8-9: Real-time Messaging (CRITICAL)
 
-**Timeline:** 2 weeks
+**Version 0.7.0 - Real-time Messaging UI**
+
+**Timeline:** Week 8-9 (Jan 20 - Feb 2, 2026)
+**Priority:** CRITICAL - Essential for trades
+**Estimated Time:** 25-30 hours
 
 ### Features
 
@@ -504,9 +560,13 @@ if (age < 18) {
 
 ---
 
-## Version 0.8.0 - Reviews System UI
+## Week 10: Reviews System (HIGH PRIORITY)
 
-**Timeline:** 1 week
+**Version 0.8.0 - Reviews System UI**
+
+**Timeline:** Week 10 (Feb 3-9, 2026)
+**Priority:** HIGH - Trust & reputation feature
+**Estimated Time:** 15-20 hours
 
 ### Features
 
@@ -546,9 +606,13 @@ if (age < 18) {
 
 ---
 
-## Version 0.9.0 - Multi-Item Trades & Counter-Offers UI
+## Week 11: Multi-Item Trades & Counter-Offers (MEDIUM PRIORITY)
 
-**Timeline:** 1.5 weeks
+**Version 0.9.0 - Multi-Item Trades & Counter-Offers UI**
+
+**Timeline:** Week 11 (Feb 10-16, 2026)
+**Priority:** MEDIUM - Nice-to-have for MVP
+**Estimated Time:** 20-25 hours
 
 ### Features
 
@@ -580,12 +644,22 @@ if (age < 18) {
 
 ---
 
-## Version 0.10.0 - Trade Statistics & Filtering UI
+## Week 12-13: Beta Testing & Polish (HIGH PRIORITY)
 
-**Timeline:** 1 week
+**Version 0.10.0 - Dashboard & Remaining Features**
 
-### Features
+**Timeline:** Week 12-13 (Feb 17 - Mar 2, 2026)
+**Priority:** HIGH - Beta testing preparation
+**Estimated Time:** 25-30 hours
 
+### Focus Areas
+
+- [ ] User dashboard with basic stats
+- [ ] Settings & preferences UI
+- [ ] Search enhancements
+- [ ] Bug fixes from testing
+- [ ] Performance optimization
+- [ ] Mobile responsiveness polish
 - [ ] User statistics dashboard
 - [ ] Trade filtering interface
 - [ ] Advanced search filters
@@ -622,9 +696,82 @@ if (age < 18) {
 
 ---
 
-## Version 0.11.0 - Dispute Resolution UI
+## Week 14-16: Final Polish & Launch Prep (CRITICAL)
 
-**Timeline:** 1.5 weeks
+**Version 1.0.0 - Public Launch**
+
+**Timeline:** Week 14-16 (Mar 3-17, 2026)
+**Priority:** CRITICAL - Launch preparation
+**Estimated Time:** 30-35 hours
+
+### Launch Requirements
+
+- [ ] All critical bugs fixed
+- [ ] Performance optimized (Lighthouse score 90+)
+- [ ] SEO optimization complete
+- [ ] Analytics setup verified
+- [ ] Error tracking validated
+- [ ] Mobile app (PWA) tested
+- [ ] Legal pages finalized
+- [ ] Marketing landing page ready
+
+---
+
+## POST-LAUNCH ROADMAP (After March 2026)
+
+These features are for Year 1 growth phase, after successful public launch.
+
+---
+
+## Version 1.1.0 - Advanced Features (Year 1, Q2)
+
+**Timeline:** 3-6 months after launch
+**Priority:** MEDIUM
+
+### Features
+
+- [ ] Advanced dashboard & analytics
+- [ ] Dispute resolution UI
+- [ ] Admin moderation panel
+- [ ] Enhanced search & discovery
+
+---
+
+## Version 1.2.0 - Social Features (Year 1, Q3)
+
+**Timeline:** 6-9 months after launch
+**Priority:** LOW
+
+### Features
+
+- [ ] Follow system UI
+- [ ] Activity feed
+- [ ] Social sharing
+- [ ] Community features
+
+---
+
+## Version 1.3.0 - Premium Features (Year 1, Q4)
+
+**Timeline:** 9-12 months after launch
+**Priority:** LOW - Monetization
+
+### Features
+
+- [ ] Subscription management UI
+- [ ] Featured listings UI
+- [ ] Analytics dashboard (premium)
+- [ ] Priority support chat UI
+
+---
+
+## APPENDIX: Detailed Feature Specifications
+
+Below are detailed specifications for features in the timeline. These serve as blueprints when ready to implement.
+
+### Dispute Resolution UI (v1.1.0)
+
+**Timeline:** Post-launch
 
 ### Features
 
@@ -664,11 +811,9 @@ if (age < 18) {
 - Timeline: all messages and status changes
 - Severity: low, medium, high badges
 
----
+### User Settings & Preferences UI (v0.10.0)
 
-## Version 0.12.0 - User Settings & Preferences UI
-
-**Timeline:** 1 week
+**Included in Week 12-13**
 
 ### Features
 
@@ -712,11 +857,9 @@ if (age < 18) {
 - Delete account: multi-step confirmation
 - Form validation: inline error messages
 
----
+### Search & Discovery Enhancement (v0.10.0)
 
-## Version 0.13.0 - Search & Discovery Enhancement
-
-**Timeline:** 1 week
+**Included in Week 12-13**
 
 ### Features
 
@@ -755,11 +898,9 @@ if (age < 18) {
 - Sort dropdown: Newest First, Most Popular, Most Liked, Closest to Me
 - No results: helpful message with search tips
 
----
+### Performance & Polish (v1.0.0)
 
-## Version 0.14.0 - Performance & Polish
-
-**Timeline:** 1 week
+**Included in Week 14-16 (Launch Prep)**
 
 ### Features
 
@@ -795,11 +936,9 @@ if (age < 18) {
 - Keyboard nav: all interactive elements reachable
 - Focus indicators: visible, clear
 
----
+### UI/UX Improvements (v1.0.0)
 
-## Version 0.15.0 - UI/UX Improvements & Design Polish
-
-**Timeline:** 1.5 weeks
+**Included in Week 14-16 (Launch Prep)**
 
 ### Features
 
@@ -985,11 +1124,9 @@ export const theme = {
 - [ ] Chip/Pill components
 - [ ] Divider components
 
----
+### Marketing Landing Page (v1.0.0)
 
-## Version 1.0.0 - Production Ready
-
-**Timeline:** 1 week
+**Included in Week 14-16 (Launch Prep)**
 
 ### Features
 
@@ -1075,9 +1212,9 @@ export const theme = {
 
 ---
 
-## Post v1.0.0 - Future Enhancements
+## APPENDIX CONTINUED: Additional Feature Blueprints
 
-These features align with backend v1.1.0+ releases:
+### Admin & Support Tools UI (v1.1.0 - Post-Launch)
 
 ### v1.1.0 - Admin & Support Tools UI
 
@@ -1203,29 +1340,11 @@ components/
 
 ---
 
-## Estimated Total Timeline
-
-- **v0.3.0**: 2 weeks
-- **v0.4.0**: 1.5 weeks
-- **v0.5.0**: 2 weeks
-- **v0.6.0**: 1 week
-- **v0.7.0**: 2 weeks
-- **v0.8.0**: 1 week
-- **v0.9.0**: 1.5 weeks
-- **v0.10.0**: 1 week
-- **v0.11.0**: 1.5 weeks
-- **v0.12.0**: 1 week
-- **v0.13.0**: 1 week
-- **v0.14.0**: 1 week
-- **v1.0.0**: 1 week
-
-**Total: ~18 weeks (4.5 months)**
-
-With parallel development and optimization, this could be reduced to **3-4 months** for a production-ready v1.0.0 frontend that fully matches the backend API capabilities.
+## END OF FRONTEND TODO
 
 ---
 
-## Success Criteria for v1.0.0
+## Success Criteria for v1.0.0 Launch (March 17, 2026)
 
 ✅ All backend API endpoints have corresponding UI
 ✅ 484 backend tests passing, 100+ frontend E2E tests passing
