@@ -59,6 +59,11 @@ Final polish, marketing preparation, public announcement.
 
 ### Features
 
+- [ ] **Google reCAPTCHA v3 (Invisible) Integration**
+- [ ] **Bot protection on registration and login forms**
+- [ ] **Automatic token generation on form submit**
+- [ ] **No user interaction required (completely invisible)**
+- [ ] **Graceful fallback if reCAPTCHA unavailable**
 - [ ] Cookie consent banner (GDPR compliant)
 - [ ] Terms of Service page (Romanian + English)
 - [ ] Privacy Policy page (Romanian + English)
@@ -69,8 +74,26 @@ Final polish, marketing preparation, public announcement.
 - [ ] Data export request UI
 - [ ] Account deletion UI with confirmation
 - [ ] Legal document version tracking
+- [ ] **reCAPTCHA disclosure in Privacy Policy**
 
 ### Technical Implementation
+
+**reCAPTCHA v3 Integration:**
+
+- [ ] Install `react-google-recaptcha-v3` package
+- [ ] Add environment variable: `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
+- [ ] Create `Providers` component with `GoogleReCaptchaProvider`
+- [ ] Wrap app with reCAPTCHA provider in `layout.tsx`
+- [ ] Create `useRecaptcha` custom hook for token generation
+- [ ] Update `RegisterPage` to generate and send reCAPTCHA token
+- [ ] Update `LoginPage` to generate and send reCAPTCHA token
+- [ ] Add error handling for failed token generation
+- [ ] Add loading states during token generation
+- [ ] Test with various browsers and ad blockers
+- [ ] Document reCAPTCHA in Privacy Policy (GDPR requirement)
+- [ ] Add reCAPTCHA to security cookie consent category
+
+**Legal Compliance UI:**
 
 - [ ] `CookieBanner` component with granular consent options
 - [ ] `LegalDocument` component for displaying TOS/Privacy
