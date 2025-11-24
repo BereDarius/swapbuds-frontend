@@ -59,52 +59,54 @@ Final polish, marketing preparation, public announcement.
 
 ### Features
 
-- [ ] **Google reCAPTCHA v3 (Invisible) Integration**
-- [ ] **Bot protection on registration and login forms**
-- [ ] **Automatic token generation on form submit**
-- [ ] **No user interaction required (completely invisible)**
-- [ ] **Graceful fallback if reCAPTCHA unavailable**
-- [ ] Cookie consent banner (GDPR compliant)
-- [ ] Terms of Service page (Romanian + English)
-- [ ] Privacy Policy page (Romanian + English)
-- [ ] Cookie Policy page
-- [ ] Community Guidelines page
-- [ ] TOS/Privacy acceptance during signup
-- [ ] Cookie preferences management
-- [ ] Data export request UI
-- [ ] Account deletion UI with confirmation
-- [ ] Legal document version tracking
-- [ ] **reCAPTCHA disclosure in Privacy Policy**
+- [x] **Google reCAPTCHA v3 (Invisible) Integration**
+- [x] **Bot protection on registration and login forms**
+- [x] **Automatic token generation on form submit**
+- [x] **No user interaction required (completely invisible)**
+- [x] **Graceful fallback if reCAPTCHA unavailable**
+- [x] Cookie consent banner (GDPR compliant)
+- [x] Terms of Service page (Romanian + English)
+- [x] Privacy Policy page (Romanian + English)
+- [x] Cookie Policy page
+- [x] Community Guidelines page
+- [x] TOS/Privacy acceptance during signup
+- [x] Cookie preferences management
+- [x] Data export request UI
+- [x] Account deletion UI with confirmation
+- [x] Legal document version tracking
+- [ ] **reCAPTCHA disclosure in Privacy Policy** (backend content responsibility)
 
 ### Technical Implementation
 
 **reCAPTCHA v3 Integration:**
 
-- [ ] Install `react-google-recaptcha-v3` package
-- [ ] Add environment variable: `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
-- [ ] Create `Providers` component with `GoogleReCaptchaProvider`
-- [ ] Wrap app with reCAPTCHA provider in `layout.tsx`
-- [ ] Create `useRecaptcha` custom hook for token generation
-- [ ] Update `RegisterPage` to generate and send reCAPTCHA token
-- [ ] Update `LoginPage` to generate and send reCAPTCHA token
-- [ ] Add error handling for failed token generation
-- [ ] Add loading states during token generation
-- [ ] Test with various browsers and ad blockers
-- [ ] Document reCAPTCHA in Privacy Policy (GDPR requirement)
-- [ ] Add reCAPTCHA to security cookie consent category
+- [x] Install `react-google-recaptcha-v3` package
+- [x] Add environment variable: `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`
+- [x] Create `Providers` component with `GoogleReCaptchaProvider`
+- [x] Wrap app with reCAPTCHA provider in `layout.tsx`
+- [x] Create `useRecaptcha` custom hook for token generation
+- [x] Update `RegisterPage` to generate and send reCAPTCHA token
+- [x] Update `LoginPage` to generate and send reCAPTCHA token
+- [x] Add reCAPTCHA notice with Google policy links
+- [x] Add error handling for failed token generation
+- [x] Add loading states during token generation
+- [x] E2E tests for reCAPTCHA integration
+- [ ] Test with various browsers and ad blockers (needs manual testing)
+- [ ] Document reCAPTCHA in Privacy Policy (backend content responsibility)
+- [x] Add reCAPTCHA to security cookie consent category
 
 **Legal Compliance UI:**
 
-- [ ] `CookieBanner` component with granular consent options
-- [ ] `LegalDocument` component for displaying TOS/Privacy
-- [ ] `CookiePreferences` modal for managing cookies
-- [ ] `DataExportRequest` component
-- [ ] `AccountDeletion` component with warnings
-- [ ] `ConsentCheckbox` component for signup flow
-- [ ] Cookie consent store with Zustand
-- [ ] API hooks: `useAcceptLegal`, `useDataExport`, `useDeleteAccount`
-- [ ] LocalStorage for cookie preferences
-- [ ] Block non-essential cookies until consent given
+- [x] `CookieBanner` component with granular consent options
+- [x] `LegalDocument` component for displaying TOS/Privacy
+- [x] `CookiePreferences` modal for managing cookies
+- [x] `DataExportRequest` component
+- [x] `AccountDeletion` component with warnings
+- [x] `ConsentCheckbox` component for signup flow
+- [x] Cookie consent store with Zustand
+- [x] API hooks: `useAcceptLegal`, `useDataExport`, `useDeleteAccount` (API client created)
+- [x] LocalStorage for cookie preferences
+- [x] Block non-essential cookies until consent given
 
 ### Pages & Routes
 
@@ -275,32 +277,35 @@ if (age < 18) {
 
 ### Testing
 
-- [ ] Test cookie banner shows on first visit
-- [ ] Test cookie preferences persist
-- [ ] Test blocking analytics without consent
-- [ ] Test signup with/without consent checkboxes
-- [ ] Test data export request flow
-- [ ] Test account deletion flow with confirmations
-- [ ] Test Romanian/English language toggle
-- [ ] E2E tests for legal acceptance flow
+- [x] Test cookie banner shows on first visit
+- [x] Test cookie preferences persist
+- [ ] Test blocking analytics without consent (requires backend integration)
+- [x] Test signup with/without consent checkboxes
+- [x] Test data export request flow
+- [x] Test account deletion flow with confirmations
+- [ ] Test Romanian/English language toggle (backend serves content)
+- [x] E2E tests for legal acceptance flow
+- [x] E2E tests for login flow with reCAPTCHA
+- [x] E2E tests for registration flow
+- [x] E2E tests for cookie consent
 
 ### Age Verification UI Components
 
 **Date of Birth Input:**
 
-- [ ] DatePicker component (day/month/year dropdowns)
-- [ ] Client-side age calculation
-- [ ] Real-time validation (must be 18+)
-- [ ] Show error: "You must be at least 18 years old"
-- [ ] Visual indicator (red border) if under 18
-- [ ] Disable form submission if under 18
+- [x] DatePicker component (day/month/year dropdowns)
+- [x] Client-side age calculation
+- [x] Real-time validation (must be 18+)
+- [x] Show error: "You must be at least 18 years old"
+- [x] Visual indicator (red border) if under 18
+- [x] Disable form submission if under 18
 
 **Age Declaration Checkbox:**
 
-- [ ] Required checkbox: "I confirm I am at least 18 years old"
-- [ ] Link to age policy explanation
-- [ ] Cannot be unchecked once checked
-- [ ] Stored with timestamp on backend
+- [x] Required checkbox: "I confirm I am at least 18 years old"
+- [x] Link to age policy explanation
+- [x] Cannot be unchecked once checked
+- [x] Stored with timestamp on backend
 
 **Post-Signup Age Verification Prompt:**
 
@@ -311,13 +316,13 @@ if (age < 18) {
 
 ### Compliance Checklist
 
-- [ ] Cookie banner shows before any tracking
-- [ ] Non-essential cookies blocked until consent
-- [ ] Legal documents in Romanian (mandatory)
-- [ ] **Date of Birth field required on signup**
-- [ ] **Real-time age validation (18+ only)**
-- [ ] **Age declaration checkbox required**
-- [ ] **Form submission blocked if under 18**
+- [x] Cookie banner shows before any tracking
+- [x] Non-essential cookies blocked until consent
+- [x] Legal documents in Romanian (mandatory)
+- [x] **Date of Birth field required on signup**
+- [x] **Real-time age validation (18+ only)**
+- [x] **Age declaration checkbox required**
+- [x] **Form submission blocked if under 18**
 - [ ] TOS and Privacy acceptance tracked with timestamp
 - [ ] Data export feature functional
 - [ ] Account deletion feature functional

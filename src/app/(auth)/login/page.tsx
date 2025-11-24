@@ -27,6 +27,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useRecaptcha } from "@/hooks/useRecaptcha";
 import { api } from "@/lib/api";
 import { getErrorMessage } from "@/lib/errors";
 import { useAuthStore } from "@/stores/authStore";
@@ -50,6 +51,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  const { executeRecaptcha, isRecaptchaLoaded } = useRecaptcha();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -67,7 +69,21 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      const response = await api.post("/auth/login", data);
+      // Generate reCAPTCHA token
+      const recaptchaToken = await executeRecaptcha("login");
+      if (!recaptchaToken) {
+        toast.error("Verification failed", {
+          description:
+            "Please try again or contact support if the issue persists.",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await api.post("/auth/login", {
+        ...data,
+        recaptchaToken,
+      });
       const { user, accessToken } = response.data;
 
       // Update auth store and localStorage
@@ -143,9 +159,36 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isLoading || !isRecaptchaLoaded}
+              >
                 {isLoading ? "Signing in..." : "Sign in"}
               </Button>
+
+              {/* reCAPTCHA Notice */}
+              <p className="text-xs text-muted-foreground">
+                This site is protected by reCAPTCHA and the Google{" "}
+                <Link
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="https://policies.google.com/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Terms of Service
+                </Link>{" "}
+                apply.
+              </p>
             </form>
           </Form>
         </CardContent>

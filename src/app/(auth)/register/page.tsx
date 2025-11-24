@@ -285,6 +285,30 @@ export default function RegisterPage() {
               >
                 {isLoading ? "Creating account..." : "Create account"}
               </Button>
+
+              {/* reCAPTCHA Notice */}
+              <p className="text-xs text-muted-foreground">
+                This site is protected by reCAPTCHA and the Google{" "}
+                <Link
+                  href="https://policies.google.com/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Privacy Policy
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="https://policies.google.com/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline hover:text-foreground"
+                >
+                  Terms of Service
+                </Link>{" "}
+                apply.
+              </p>
+
               {!isRecaptchaLoaded && (
                 <p className="text-center text-xs text-muted-foreground">
                   Loading security verification...
