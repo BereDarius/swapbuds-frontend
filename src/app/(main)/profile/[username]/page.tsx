@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getItems } from "@/lib/api/items";
+import { getConversations } from "@/lib/api/messages";
 import { getUserProfile, getUserStatistics } from "@/lib/api/users";
 import { useAuthStore } from "@/stores/authStore";
 import { ItemStatus } from "@/types/item";
@@ -19,12 +20,14 @@ import {
   CheckCircle2,
   Edit,
   MapPin,
+  MessageSquare,
   Package,
   Star,
   TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function ProfilePage() {
   const params = useParams();
@@ -42,11 +45,21 @@ export default function ProfilePage() {
     queryFn: () => getUserProfile(username),
   });
 
+  // Check if viewing own profile
+  const isOwnProfile = currentUser?.id === profile?.id;
+
   // Fetch user statistics
   const { data: stats } = useQuery({
     queryKey: ["userStats", profile?.id],
     queryFn: () => getUserStatistics(profile!.id),
     enabled: !!profile?.id,
+  });
+
+  // Fetch conversations to check if one exists with this user
+  const { data: conversations } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: getConversations,
+    enabled: !!profile && !isOwnProfile,
   });
 
   // Fetch user's items
@@ -62,7 +75,26 @@ export default function ProfilePage() {
     enabled: !!profile?.id,
   });
 
-  const isOwnProfile = currentUser?.id === profile?.id;
+  // Handle messaging this user
+  const handleMessageUser = () => {
+    if (!profile) return;
+
+    // Check if conversation exists
+    const existingConv = conversations?.find(
+      (conv) =>
+        (conv.user1Id === currentUser?.id && conv.user2Id === profile.id) ||
+        (conv.user2Id === currentUser?.id && conv.user1Id === profile.id),
+    );
+
+    if (existingConv) {
+      router.push(`/messages/${existingConv.id}`);
+    } else {
+      // No existing conversation
+      toast.info(
+        `Start a conversation by sending a message to ${profile.username}`,
+      );
+    }
+  };
 
   if (profileLoading) {
     return (
@@ -149,14 +181,21 @@ export default function ProfilePage() {
                 </div>
               </div>
 
-              {isOwnProfile && (
-                <Button asChild variant="outline" className="mt-2">
-                  <Link href="/settings/profile">
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit Profile
-                  </Link>
-                </Button>
-              )}
+              <div className="flex gap-2 mt-2">
+                {isOwnProfile ? (
+                  <Button asChild variant="outline">
+                    <Link href="/settings/profile">
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit Profile
+                    </Link>
+                  </Button>
+                ) : (
+                  <Button onClick={handleMessageUser} variant="outline">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Message User
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </CardContent>

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getConversations } from "@/lib/api/messages";
 import {
   acceptTrade,
   cancelTrade,
@@ -21,6 +22,7 @@ import {
   CheckCircle2,
   Clock,
   Loader2,
+  MessageSquare,
   Package,
   Truck,
   XCircle,
@@ -46,6 +48,13 @@ export default function TradeDetailPage() {
     queryKey: ["trade", tradeId],
     queryFn: () => getTradeById(tradeId),
     enabled: !!tradeId,
+  });
+
+  // Fetch conversations to check if one exists with the other user
+  const { data: conversations } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: getConversations,
+    enabled: !!trade && !!user,
   });
 
   // Handle trade actions
@@ -102,6 +111,31 @@ export default function TradeDetailPage() {
     } catch (error) {
       toast.error("Failed to complete trade");
       console.error("Complete trade error:", error);
+    }
+  };
+
+  // Handle messaging the other user
+  const handleMessageUser = () => {
+    if (!trade) return;
+    const otherUserId = isProposer ? trade.responder.id : trade.proposer.id;
+
+    // Check if conversation exists
+    const existingConv = conversations?.find(
+      (conv) =>
+        (conv.user1Id === user?.id && conv.user2Id === otherUserId) ||
+        (conv.user2Id === user?.id && conv.user1Id === otherUserId),
+    );
+
+    if (existingConv) {
+      router.push(`/messages/${existingConv.id}`);
+    } else {
+      // No existing conversation - navigate to messages and will create on first message
+      toast.info(
+        "Start a conversation by sending a message to " +
+          (isProposer ? trade.responder.username : trade.proposer.username),
+      );
+      // For now, just show info. To properly create conversation, we'd need to send first message
+      // or have a separate endpoint to create empty conversations
     }
   };
 
@@ -216,6 +250,11 @@ export default function TradeDetailPage() {
                   Reputation: {trade.proposer.reputationScore.toFixed(1)}
                 </p>
               </div>
+              {isResponder && (
+                <Button variant="outline" size="sm" onClick={handleMessageUser}>
+                  <MessageSquare className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -246,6 +285,11 @@ export default function TradeDetailPage() {
                   Reputation: {trade.responder.reputationScore.toFixed(1)}
                 </p>
               </div>
+              {isProposer && (
+                <Button variant="outline" size="sm" onClick={handleMessageUser}>
+                  <MessageSquare className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

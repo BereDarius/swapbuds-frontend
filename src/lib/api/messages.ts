@@ -1,0 +1,61 @@
+import type {
+  Conversation,
+  GetMessagesDto,
+  Message,
+  MessagesResponse,
+  SendMessageDto,
+} from "@/types/message";
+import api from "../api";
+
+// Get all conversations for the current user
+export async function getConversations(): Promise<Conversation[]> {
+  const response = await api.get("/messages/conversations");
+  return response.data;
+}
+
+// Get messages in a conversation
+export async function getMessages(
+  conversationId: string,
+  params?: GetMessagesDto,
+): Promise<MessagesResponse> {
+  const response = await api.get(`/messages/conversations/${conversationId}`, {
+    params,
+  });
+  return response.data;
+}
+
+// Send a message
+export async function sendMessage(data: SendMessageDto): Promise<Message> {
+  const response = await api.post("/messages", data);
+  return response.data;
+}
+
+// Mark a specific message as read
+export async function markMessageAsRead(messageId: string): Promise<Message> {
+  const response = await api.patch(`/messages/${messageId}/read`);
+  return response.data;
+}
+
+// Mark all messages in a conversation as read
+export async function markConversationAsRead(
+  conversationId: string,
+): Promise<{ count: number }> {
+  const response = await api.patch(
+    `/messages/conversations/${conversationId}/read`,
+  );
+  return response.data;
+}
+
+// Get unread message count
+export async function getUnreadCount(): Promise<number> {
+  const response = await api.get("/messages/unread/count");
+  return response.data.count;
+}
+
+// Delete a message (soft delete)
+export async function deleteMessage(
+  messageId: string,
+): Promise<{ message: string }> {
+  const response = await api.delete(`/messages/${messageId}`);
+  return response.data;
+}
