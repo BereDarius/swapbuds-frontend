@@ -7,6 +7,7 @@
 
 "use client";
 
+import { TradeProposalDialog } from "@/components/trades/trade-proposal-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,9 +30,11 @@ import {
   CONDITION_INFO,
   DELIVERY_METHOD_INFO,
   DELIVERY_SCOPE_INFO,
+  ItemStatus,
 } from "@/types/item";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ArrowLeftRight,
   Calendar,
   Edit,
   Eye,
@@ -56,6 +59,7 @@ export default function ItemDetailPage() {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [tradeDialogOpen, setTradeDialogOpen] = useState(false);
 
   const {
     data: item,
@@ -264,6 +268,25 @@ export default function ItemDetailPage() {
                 </div>
               )}
             </div>
+
+            {/* Trade Proposal Button (for non-owners) */}
+            {!isOwner && user && item.status === ItemStatus.AVAILABLE && (
+              <div className="mb-4">
+                <Button
+                  onClick={() => setTradeDialogOpen(true)}
+                  className="w-full sm:w-auto"
+                  size="lg"
+                >
+                  <ArrowLeftRight className="mr-2 h-5 w-5" />
+                  Propose Trade
+                </Button>
+                <TradeProposalDialog
+                  open={tradeDialogOpen}
+                  onOpenChange={setTradeDialogOpen}
+                  requestedItem={item}
+                />
+              </div>
+            )}
 
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
