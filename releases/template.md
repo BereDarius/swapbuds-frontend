@@ -25,9 +25,9 @@
 
 [If new pages/routes added]
 
-| Route        | Page        | Description   | Auth Required |
-| ------------ | ----------- | ------------- | ------------- |
-| `/[path]`    | [PageName]  | [Description] | [Yes/No]      |
+| Route     | Page       | Description   | Auth Required |
+| --------- | ---------- | ------------- | ------------- |
+| `/[path]` | [PageName] | [Description] | [Yes/No]      |
 
 ## 🎨 UI Components
 
