@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { deleteAccount, requestDataExport } from "@/lib/api/users";
+import { requestDataExport, requestDeletion } from "@/lib/api/gdpr";
 import { useAuthStore } from "@/stores/authStore";
 import {
   AlertTriangle,
@@ -42,8 +42,8 @@ export default function AccountSettingsPage() {
   const handleDataExport = async () => {
     setIsExporting(true);
     try {
-      const result = await requestDataExport();
-      toast.success(result.message || "Data export requested successfully!");
+      await requestDataExport();
+      toast.success("Data export requested successfully!");
     } catch (error) {
       const err = error as { response?: { data?: { message?: string } } };
       toast.error(
@@ -63,8 +63,8 @@ export default function AccountSettingsPage() {
 
     setIsDeleting(true);
     try {
-      await deleteAccount(password);
-      toast.success("Account deleted successfully");
+      await requestDeletion();
+      toast.success("Account deletion requested successfully");
       clearAuth();
       router.push("/");
     } catch (error) {

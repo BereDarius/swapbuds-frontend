@@ -17,11 +17,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getUnreadCount } from "@/lib/api/messages";
-import { useSocket } from "@/lib/socket";
+import { getMessageUnreadCount } from "@/lib/api/messages";
+import { getNotificationUnreadCount } from "@/lib/api/notifications";
+import { useMessagesSocket, useNotificationsSocket } from "@/lib/socket";
 import { useAuthStore } from "@/stores/authStore";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  Bell,
   Heart,
   LogOut,
   Menu,
@@ -43,12 +45,21 @@ export function Navbar() {
   const { user, clearAuth } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { onMessage, onMessageRead, onConversationRead, onMessageDeleted } =
-    useSocket();
+    useMessagesSocket();
+  const { onNotification } = useNotificationsSocket();
 
   // Get unread messages count
   const { data: unreadMessagesCount = 0 } = useQuery({
     queryKey: ["messages", "unread-count"],
-    queryFn: getUnreadCount,
+    queryFn: getMessageUnreadCount,
+    enabled: !!user,
+    refetchInterval: 5000, // Refetch every 5 seconds to ensure it stays updated
+  });
+
+  // Get unread notifications count
+  const { data: unreadNotificationsCount = 0 } = useQuery({
+    queryKey: ["notifications", "unread-count"],
+    queryFn: getNotificationUnreadCount,
     enabled: !!user,
     refetchInterval: 5000, // Refetch every 5 seconds to ensure it stays updated
   });
@@ -95,6 +106,19 @@ export function Navbar() {
     onMessageDeleted,
     queryClient,
   ]);
+
+  // Real-time updates for unread notification count
+  useEffect(() => {
+    if (!user) return;
+
+    const cleanup = onNotification(() => {
+      queryClient.invalidateQueries({
+        queryKey: ["notifications", "unread-count"],
+      });
+    });
+
+    return cleanup;
+  }, [user, onNotification, queryClient]);
 
   const handleLogout = () => {
     clearAuth();
@@ -147,6 +171,21 @@ export function Navbar() {
                       className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
                     >
                       {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                    </Badge>
+                  )}
+                </Link>
+              </Button>
+              <Button variant="ghost" size="icon" asChild className="relative">
+                <Link href="/notifications">
+                  <Bell className="h-5 w-5" />
+                  {unreadNotificationsCount > 0 && (
+                    <Badge
+                      variant="destructive"
+                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
+                    >
+                      {unreadNotificationsCount > 9
+                        ? "9+"
+                        : unreadNotificationsCount}
                     </Badge>
                   )}
                 </Link>

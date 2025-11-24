@@ -1,20 +1,12 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+import type { User } from "@/types/auth";
+
 /**
- * User profile data structure
- * Represents the authenticated user's basic information
+ * User type is imported from auth types to maintain consistency
+ * @see {@link User} from @/types/auth
  */
-interface User {
-  /** Unique user identifier from database */
-  id: string;
-  /** User's email address */
-  email: string;
-  /** User's display name */
-  username: string;
-  /** Optional profile picture URL (Cloudinary) */
-  avatarUrl?: string;
-}
 
 /**
  * Authentication store state and actions

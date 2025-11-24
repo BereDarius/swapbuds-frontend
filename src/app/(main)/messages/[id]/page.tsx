@@ -12,7 +12,7 @@ import {
   markConversationAsRead,
   sendMessage,
 } from "@/lib/api/messages";
-import { useSocket } from "@/lib/socket";
+import { useMessagesSocket } from "@/lib/socket";
 import { useAuthStore } from "@/stores/authStore";
 import type { Message } from "@/types/message";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -44,7 +44,7 @@ export default function ConversationDetailPage({
     isConnected,
     joinConversation,
     leaveConversation,
-  } = useSocket();
+  } = useMessagesSocket();
   const [messageText, setMessageText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [typerUsername, setTyperUsername] = useState("");
@@ -111,35 +111,43 @@ export default function ConversationDetailPage({
 
   // WebSocket: Listen for message read status updates
   useEffect(() => {
-    const cleanup = onMessageRead((data) => {
-      if (data.conversationId === conversationId) {
-        queryClient.invalidateQueries({
-          queryKey: ["messages", conversationId],
-        });
-      }
-    });
+    const cleanup = onMessageRead(
+      (data: { messageId: string; conversationId: string }) => {
+        if (data.conversationId === conversationId) {
+          queryClient.invalidateQueries({
+            queryKey: ["messages", conversationId],
+          });
+        }
+      },
+    );
 
     return cleanup;
   }, [conversationId, onMessageRead, queryClient]);
 
   // WebSocket: Listen for typing indicators
   useEffect(() => {
-    const cleanup = onTyping((data) => {
-      if (data.conversationId === conversationId) {
-        setIsTyping(data.isTyping);
-        setTyperUsername(data.typerUsername);
+    const cleanup = onTyping(
+      (data: {
+        conversationId: string;
+        isTyping: boolean;
+        typerUsername: string;
+      }) => {
+        if (data.conversationId === conversationId) {
+          setIsTyping(data.isTyping);
+          setTyperUsername(data.typerUsername);
 
-        // Clear typing indicator after 3 seconds
-        if (data.isTyping && typingTimeoutRef.current) {
-          clearTimeout(typingTimeoutRef.current);
+          // Clear typing indicator after 3 seconds
+          if (data.isTyping && typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+          }
+          if (data.isTyping) {
+            typingTimeoutRef.current = setTimeout(() => {
+              setIsTyping(false);
+            }, 3000);
+          }
         }
-        if (data.isTyping) {
-          typingTimeoutRef.current = setTimeout(() => {
-            setIsTyping(false);
-          }, 3000);
-        }
-      }
-    });
+      },
+    );
 
     return () => {
       cleanup();
@@ -168,7 +176,7 @@ export default function ConversationDetailPage({
     if (!messageText.trim() || !conversation?.otherUser) return;
 
     // Stop typing indicator when sending
-    emitTyping(conversationId, false);
+    emitTyping(conversationId, false, user?.username || "");
 
     sendMessageMutation.mutate({
       recipientId: conversation.otherUser.id,
@@ -182,9 +190,9 @@ export default function ConversationDetailPage({
 
     // Emit typing indicator
     if (e.target.value && !isTyping) {
-      emitTyping(conversationId, true);
+      emitTyping(conversationId, true, user?.username || "");
     } else if (!e.target.value && isTyping) {
-      emitTyping(conversationId, false);
+      emitTyping(conversationId, false, user?.username || "");
     }
   };
 

@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { getConversations, sendMessage } from "@/lib/api/messages";
-import { useSocket } from "@/lib/socket";
+import { useMessagesSocket } from "@/lib/socket";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageSquare, Search, Send } from "lucide-react";
 import Link from "next/link";
@@ -26,7 +26,7 @@ export default function MessagesPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { onMessage, onConversationRead } = useSocket();
+  const { onMessage, onConversationRead } = useMessagesSocket();
 
   // Get compose parameters from URL
   const compose = searchParams.get("compose") === "true";

@@ -128,7 +128,7 @@ export function TradeProposalDialog({
               <div className="relative h-16 w-16 shrink-0 rounded-md overflow-hidden bg-muted">
                 {requestedItem.images?.[0] ? (
                   <Image
-                    src={requestedItem.images[0].url}
+                    src={requestedItem.images[0]}
                     alt={requestedItem.title}
                     fill
                     className="object-cover"
@@ -143,7 +143,7 @@ export function TradeProposalDialog({
               <div className="flex-1 min-w-0">
                 <p className="font-medium truncate">{requestedItem.title}</p>
                 <p className="text-sm text-muted-foreground">
-                  by {requestedItem.user?.username}
+                  by {requestedItem.owner?.username}
                 </p>
               </div>
             </div>
@@ -199,7 +199,7 @@ export function TradeProposalDialog({
                       <div className="relative h-16 w-16 shrink-0 rounded-md overflow-hidden bg-muted">
                         {item.images?.[0] ? (
                           <Image
-                            src={item.images[0].url}
+                            src={item.images[0]}
                             alt={item.title}
                             fill
                             className="object-cover"

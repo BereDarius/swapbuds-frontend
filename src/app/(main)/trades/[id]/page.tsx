@@ -1,11 +1,14 @@
 "use client";
 
+import { ReviewCard } from "@/components/reviews/review-card";
+import { ReviewForm } from "@/components/reviews/review-form";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { getConversations } from "@/lib/api/messages";
+import { getTradeReviews } from "@/lib/api/reviews";
 import {
   acceptTrade,
   cancelTrade,
@@ -14,22 +17,26 @@ import {
   rejectTrade,
 } from "@/lib/api/trades";
 import { useAuthStore } from "@/stores/authStore";
+import type { Review } from "@/types/review";
 import { TRADE_STATUS_INFO, TradeStatus } from "@/types/trade";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
+  AlertCircle,
   ArrowRight,
   CheckCircle2,
   Clock,
   Loader2,
   MessageSquare,
   Package,
+  Star,
   Truck,
   XCircle,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function TradeDetailPage() {
@@ -38,6 +45,8 @@ export default function TradeDetailPage() {
   const tradeId = params.id as string;
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  const [reviewToEdit, setReviewToEdit] = useState<Review | null>(null);
 
   // Fetch trade details
   const {
@@ -55,6 +64,13 @@ export default function TradeDetailPage() {
     queryKey: ["conversations"],
     queryFn: getConversations,
     enabled: !!trade && !!user,
+  });
+
+  // Fetch reviews for this trade
+  const { data: reviews } = useQuery({
+    queryKey: ["reviews", "trade", tradeId],
+    queryFn: () => getTradeReviews(tradeId),
+    enabled: !!tradeId && !!trade && trade.status === TradeStatus.COMPLETED,
   });
 
   // Handle trade actions
@@ -484,27 +500,119 @@ export default function TradeDetailPage() {
         </CardContent>
       </Card>
 
+      {/* Reviews Section (for completed trades) */}
+      {trade.status === TradeStatus.COMPLETED && (
+        <Card className="mb-6">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Star className="h-5 w-5" />
+                Reviews
+              </CardTitle>
+              {/* Show "Leave Review" button if user hasn't reviewed yet */}
+              {reviews && !reviews.find((r) => r.reviewerId === user?.id) && (
+                <Button
+                  onClick={() => {
+                    setReviewToEdit(null);
+                    setReviewFormOpen(true);
+                  }}
+                  size="sm"
+                >
+                  <Star className="h-4 w-4 mr-2" />
+                  Leave Review
+                </Button>
+              )}
+            </div>
+          </CardHeader>
+          <CardContent>
+            {reviews && reviews.length > 0 ? (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    showTarget
+                    onEdit={
+                      review.reviewerId === user?.id
+                        ? () => {
+                            setReviewToEdit(review);
+                            setReviewFormOpen(true);
+                          }
+                        : undefined
+                    }
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Star className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>No reviews yet</p>
+                <p className="text-sm">
+                  Be the first to review this trade experience
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Review Form Dialog */}
+      {trade.status === TradeStatus.COMPLETED && (
+        <ReviewForm
+          tradeId={tradeId}
+          existingReview={reviewToEdit ?? undefined}
+          open={reviewFormOpen}
+          onOpenChange={setReviewFormOpen}
+          recipientUsername={
+            isProposer ? trade.responder.username : trade.proposer.username
+          }
+        />
+      )}
+
       {/* Action Buttons */}
-      {(canAccept || canReject || canCancel || canComplete) && (
+      {(canAccept ||
+        canReject ||
+        canCancel ||
+        canComplete ||
+        trade.status === TradeStatus.COMPLETED ||
+        trade.status === TradeStatus.REJECTED ||
+        trade.status === TradeStatus.CANCELLED) && (
         <Card>
           <CardContent className="pt-6">
-            <div className="flex gap-3 justify-end">
-              {canCancel && (
-                <Button variant="outline" onClick={handleCancel}>
-                  Cancel Trade
-                </Button>
-              )}
-              {canReject && (
-                <Button variant="destructive" onClick={handleReject}>
-                  Reject
-                </Button>
-              )}
-              {canAccept && (
-                <Button onClick={handleAccept}>Accept Trade</Button>
-              )}
-              {canComplete && (
-                <Button onClick={handleComplete}>Mark as Completed</Button>
-              )}
+            <div className="flex gap-3 justify-between">
+              {/* Report Problem Button (for completed/rejected/cancelled trades) */}
+              <div>
+                {(trade.status === TradeStatus.COMPLETED ||
+                  trade.status === TradeStatus.REJECTED ||
+                  trade.status === TradeStatus.CANCELLED) && (
+                  <Link href={`/trades/${tradeId}/dispute`}>
+                    <Button variant="outline" className="text-destructive">
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                      Report Problem
+                    </Button>
+                  </Link>
+                )}
+              </div>
+
+              {/* Trade Action Buttons */}
+              <div className="flex gap-3">
+                {canCancel && (
+                  <Button variant="outline" onClick={handleCancel}>
+                    Cancel Trade
+                  </Button>
+                )}
+                {canReject && (
+                  <Button variant="destructive" onClick={handleReject}>
+                    Reject
+                  </Button>
+                )}
+                {canAccept && (
+                  <Button onClick={handleAccept}>Accept Trade</Button>
+                )}
+                {canComplete && (
+                  <Button onClick={handleComplete}>Mark as Completed</Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

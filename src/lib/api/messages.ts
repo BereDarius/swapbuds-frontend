@@ -47,7 +47,7 @@ export async function markConversationAsRead(
 }
 
 // Get unread message count
-export async function getUnreadCount(): Promise<number> {
+export async function getMessageUnreadCount(): Promise<number> {
   const response = await api.get("/messages/unread/count");
   return response.data.count;
 }

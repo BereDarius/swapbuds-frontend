@@ -1,23 +1,8 @@
+import type {
+  Notification,
+  NotificationPreferences,
+} from "@/types/notification";
 import api from "../api";
-
-export interface Notification {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  isRead: boolean;
-  createdAt: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface NotificationPreferences {
-  emailNotifications: boolean;
-  pushNotifications: boolean;
-  newMessage: boolean;
-  tradeUpdate: boolean;
-  newReview: boolean;
-  systemAlert: boolean;
-}
 
 // Get all notifications for the current user
 export async function getNotifications(
@@ -30,7 +15,7 @@ export async function getNotifications(
 }
 
 // Get unread notification count
-export async function getUnreadCount(): Promise<number> {
+export async function getNotificationUnreadCount(): Promise<number> {
   const response = await api.get("/notifications/unread-count");
   return response.data.count;
 }

@@ -7,6 +7,7 @@
 
 "use client";
 
+import { FlagDialog } from "@/components/moderation/flag-dialog";
 import { TradeProposalDialog } from "@/components/trades/trade-proposal-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -23,8 +24,16 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  createComment,
+  deleteComment as deleteCommentApi,
+  getItemComments,
+} from "@/lib/api/comments";
 import { deleteItem, getItemById } from "@/lib/api/items";
+import { checkIfLiked, likeItem, unlikeItem } from "@/lib/api/likes";
 import { useAuthStore } from "@/stores/authStore";
+import { type Comment } from "@/types/comment";
 import {
   CATEGORY_INFO,
   CONDITION_INFO,
@@ -32,7 +41,8 @@ import {
   DELIVERY_SCOPE_INFO,
   ItemStatus,
 } from "@/types/item";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatDistanceToNow } from "date-fns";
 import {
   ArrowLeftRight,
   Calendar,
@@ -42,12 +52,13 @@ import {
   MapPin,
   MessageCircle,
   Package,
+  Send,
   Trash2,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function ItemDetailPage() {
@@ -60,6 +71,8 @@ export default function ItemDetailPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [tradeDialogOpen, setTradeDialogOpen] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [replyTo, setReplyTo] = useState<string | null>(null);
 
   const {
     data: item,
@@ -71,15 +84,78 @@ export default function ItemDetailPage() {
     enabled: !!itemId,
   });
 
+  // Fetch comments
+  const { data: comments = [] } = useQuery({
+    queryKey: ["comments", "item", itemId],
+    queryFn: () => getItemComments(itemId),
+    enabled: !!itemId,
+  });
+
+  // Check if item is liked
+  const { data: isLiked = false } = useQuery({
+    queryKey: ["like", "item", itemId],
+    queryFn: () => checkIfLiked(itemId),
+    enabled: !!itemId && !!user,
+  });
+
+  // Like/unlike mutations
+  const likeMutation = useMutation({
+    mutationFn: () => likeItem(itemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["like", "item", itemId] });
+      queryClient.invalidateQueries({ queryKey: ["item", itemId] });
+      toast.success("Item liked");
+    },
+    onError: () => {
+      toast.error("Failed to like item");
+    },
+  });
+
+  const unlikeMutation = useMutation({
+    mutationFn: () => unlikeItem(itemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["like", "item", itemId] });
+      queryClient.invalidateQueries({ queryKey: ["item", itemId] });
+      toast.success("Item unliked");
+    },
+    onError: () => {
+      toast.error("Failed to unlike item");
+    },
+  });
+
+  // Comment mutations
+  const createCommentMutation = useMutation({
+    mutationFn: (data: { content: string; parentCommentId?: string }) =>
+      createComment(itemId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", "item", itemId] });
+      queryClient.invalidateQueries({ queryKey: ["item", itemId] });
+      setCommentText("");
+      setReplyTo(null);
+      toast.success("Comment posted");
+    },
+    onError: () => {
+      toast.error("Failed to post comment");
+    },
+  });
+
+  const deleteCommentMutation = useMutation({
+    mutationFn: (commentId: string) => deleteCommentApi(commentId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", "item", itemId] });
+      queryClient.invalidateQueries({ queryKey: ["item", itemId] });
+      toast.success("Comment deleted");
+    },
+    onError: () => {
+      toast.error("Failed to delete comment");
+    },
+  });
+
   // Increment view count on mount
-  // TODO: Re-enable when backend endpoint is implemented
-  // useEffect(() => {
-  //   if (itemId) {
-  //     incrementItemView(itemId).catch(() => {
-  //       // Silently fail if view increment fails
-  //     });
-  //   }
-  // }, [itemId]);
+  useEffect(() => {
+    // View tracking would go here if backend supports it
+    // For now, views are tracked server-side when the item is fetched
+  }, [itemId]);
 
   const handleDelete = async () => {
     if (!itemId) return;
@@ -99,6 +175,39 @@ export default function ItemDetailPage() {
     } finally {
       setIsDeleting(false);
       setDeleteDialogOpen(false);
+    }
+  };
+
+  const handleLikeToggle = () => {
+    if (!user) {
+      toast.error("Please log in to like items");
+      return;
+    }
+    if (isLiked) {
+      unlikeMutation.mutate();
+    } else {
+      likeMutation.mutate();
+    }
+  };
+
+  const handleCommentSubmit = () => {
+    if (!user) {
+      toast.error("Please log in to comment");
+      return;
+    }
+    if (!commentText.trim()) {
+      toast.error("Comment cannot be empty");
+      return;
+    }
+    createCommentMutation.mutate({
+      content: commentText,
+      parentCommentId: replyTo ?? undefined,
+    });
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    if (window.confirm("Are you sure you want to delete this comment?")) {
+      deleteCommentMutation.mutate(commentId);
     }
   };
 
@@ -268,20 +377,36 @@ export default function ItemDetailPage() {
 
             {/* Trade Proposal Button (for non-owners) */}
             {!isOwner && user && item.status === ItemStatus.AVAILABLE && (
-              <div className="mb-4">
+              <div className="mb-4 flex gap-2">
                 <Button
                   onClick={() => setTradeDialogOpen(true)}
-                  className="w-full sm:w-auto"
+                  className="flex-1 sm:flex-none"
                   size="lg"
                 >
                   <ArrowLeftRight className="mr-2 h-5 w-5" />
                   Propose Trade
                 </Button>
+                <FlagDialog
+                  contentType="ITEM"
+                  contentId={item.id}
+                  triggerButton={
+                    <Button variant="outline" size="lg">
+                      Report
+                    </Button>
+                  }
+                />
                 <TradeProposalDialog
                   open={tradeDialogOpen}
                   onOpenChange={setTradeDialogOpen}
                   requestedItem={item}
                 />
+              </div>
+            )}
+
+            {/* Report Button (for non-owners when item not available) */}
+            {!isOwner && user && item.status !== ItemStatus.AVAILABLE && (
+              <div className="mb-4">
+                <FlagDialog contentType="ITEM" contentId={item.id} />
               </div>
             )}
 
@@ -396,18 +521,201 @@ export default function ItemDetailPage() {
           </Card>
 
           {/* Action Buttons */}
-          {!isOwner && item.status === "AVAILABLE" && (
+          {!isOwner && item.status === "AVAILABLE" && user && (
             <div className="flex gap-3">
-              <Button className="flex-1" size="lg">
+              <Button
+                onClick={() => setTradeDialogOpen(true)}
+                className="flex-1"
+                size="lg"
+              >
+                <ArrowLeftRight className="mr-2 h-5 w-5" />
                 Propose Trade
               </Button>
-              <Button variant="outline" size="lg">
-                <Heart className="h-5 w-5" />
+              <Button
+                variant={isLiked ? "default" : "outline"}
+                size="lg"
+                onClick={handleLikeToggle}
+                disabled={likeMutation.isPending || unlikeMutation.isPending}
+              >
+                <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
               </Button>
             </div>
           )}
         </div>
       </div>
+
+      {/* Comments Section */}
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="h-5 w-5" />
+            Comments ({comments.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Comment Form */}
+          {user && (
+            <div className="flex gap-3">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src={user.avatarUrl || undefined} />
+                <AvatarFallback>
+                  {user.username.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 space-y-2">
+                <Textarea
+                  placeholder="Write a comment..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  rows={3}
+                />
+                <div className="flex justify-end gap-2">
+                  {replyTo && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setReplyTo(null);
+                        setCommentText("");
+                      }}
+                    >
+                      Cancel Reply
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleCommentSubmit}
+                    disabled={
+                      !commentText.trim() || createCommentMutation.isPending
+                    }
+                    size="sm"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    {createCommentMutation.isPending ? "Posting..." : "Post"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!user && (
+            <div className="text-center py-4 text-muted-foreground">
+              <p>
+                <Link href="/login" className="text-primary hover:underline">
+                  Log in
+                </Link>{" "}
+                to comment
+              </p>
+            </div>
+          )}
+
+          <Separator />
+
+          {/* Comments List */}
+          {comments.length > 0 ? (
+            <div className="space-y-4">
+              {comments.map((comment) => (
+                <CommentCard
+                  key={comment.id}
+                  comment={comment}
+                  currentUserId={user?.id}
+                  onDelete={handleDeleteComment}
+                  onReply={(commentId) => {
+                    setReplyTo(commentId);
+                    setCommentText(`@${comment.author.username} `);
+                  }}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <MessageCircle className="h-12 w-12 mx-auto mb-2 opacity-50" />
+              <p>No comments yet</p>
+              <p className="text-sm">Be the first to comment on this item</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </>
+  );
+}
+
+// Comment Card Component
+interface CommentCardProps {
+  comment: Comment;
+  currentUserId?: string;
+  onDelete: (commentId: string) => void;
+  onReply: (commentId: string) => void;
+}
+
+function CommentCard({
+  comment,
+  currentUserId,
+  onDelete,
+  onReply,
+}: CommentCardProps) {
+  const isOwner = currentUserId === comment.authorId;
+
+  return (
+    <div className="flex gap-3">
+      <Link href={`/profile/${comment.author.username}`}>
+        <Avatar className="h-10 w-10">
+          <AvatarImage src={comment.author.avatarUrl || undefined} />
+          <AvatarFallback>
+            {comment.author.username.charAt(0).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+      </Link>
+      <div className="flex-1">
+        <div className="flex items-center gap-2 mb-1">
+          <Link
+            href={`/profile/${comment.author.username}`}
+            className="font-semibold hover:underline"
+          >
+            {comment.author.username}
+          </Link>
+          <span className="text-xs text-muted-foreground">
+            {formatDistanceToNow(new Date(comment.createdAt), {
+              addSuffix: true,
+            })}
+          </span>
+        </div>
+        <p className="text-sm whitespace-pre-wrap mb-2">{comment.content}</p>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 text-xs"
+            onClick={() => onReply(comment.id)}
+          >
+            Reply
+          </Button>
+          {isOwner && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs text-destructive hover:text-destructive"
+              onClick={() => onDelete(comment.id)}
+            >
+              <Trash2 className="h-3 w-3 mr-1" />
+              Delete
+            </Button>
+          )}
+        </div>
+        {/* Nested Replies */}
+        {comment.replies && comment.replies.length > 0 && (
+          <div className="mt-4 ml-4 space-y-4 border-l-2 border-muted pl-4">
+            {comment.replies.map((reply) => (
+              <CommentCard
+                key={reply.id}
+                comment={reply}
+                currentUserId={currentUserId}
+                onDelete={onDelete}
+                onReply={onReply}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

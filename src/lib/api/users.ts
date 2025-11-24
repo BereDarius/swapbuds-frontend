@@ -81,18 +81,3 @@ export async function resetSettings(): Promise<UserSettings> {
   const response = await api.post<UserSettings>("/users/me/settings/reset");
   return response.data;
 }
-
-/**
- * Request data export (GDPR)
- */
-export async function requestDataExport(): Promise<{ message: string }> {
-  const response = await api.get<{ message: string }>("/gdpr/export");
-  return response.data;
-}
-
-/**
- * Delete account (GDPR)
- */
-export async function deleteAccount(password: string): Promise<void> {
-  await api.delete("/gdpr/delete", { data: { password } });
-}

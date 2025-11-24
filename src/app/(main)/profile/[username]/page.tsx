@@ -1,6 +1,7 @@
 "use client";
 
 import { ItemCard } from "@/components/items/item-card";
+import { ReviewCard } from "@/components/reviews/review-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getItems } from "@/lib/api/items";
 import { getConversations } from "@/lib/api/messages";
+import { getUserReviews } from "@/lib/api/reviews";
 import { getUserProfile, getUserStatistics } from "@/lib/api/users";
 import { useAuthStore } from "@/stores/authStore";
 import { ItemStatus } from "@/types/item";
@@ -73,6 +75,19 @@ export default function ProfilePage() {
       }),
     enabled: !!profile?.id,
   });
+
+  // Fetch user's reviews
+  const { data: reviews } = useQuery({
+    queryKey: ["reviews", "user", profile?.id],
+    queryFn: () => getUserReviews(profile!.id),
+    enabled: !!profile?.id,
+  });
+
+  // Calculate average rating from reviews
+  const averageRating =
+    reviews && reviews.length > 0
+      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      : 0;
 
   // Handle messaging this user
   const handleMessageUser = () => {
@@ -209,9 +224,15 @@ export default function ProfilePage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {profile.reputationScore.toFixed(1)}
+              {averageRating > 0 ? averageRating.toFixed(1) : "N/A"}
             </div>
-            <p className="text-xs text-muted-foreground">Out of 5.0</p>
+            <p className="text-xs text-muted-foreground">
+              {reviews && reviews.length > 0
+                ? `Based on ${reviews.length} ${
+                    reviews.length === 1 ? "review" : "reviews"
+                  }`
+                : "No reviews yet"}
+            </p>
           </CardContent>
         </Card>
 
@@ -305,6 +326,9 @@ export default function ProfilePage() {
       <Tabs defaultValue="items" className="space-y-6">
         <TabsList>
           <TabsTrigger value="items">Items ({profile.itemsCount})</TabsTrigger>
+          <TabsTrigger value="reviews">
+            Reviews ({reviews?.length || 0})
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="items" className="space-y-4">
@@ -328,6 +352,89 @@ export default function ProfilePage() {
                     <Link href="/items/new">List Your First Item</Link>
                   </Button>
                 )}
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="reviews" className="space-y-4">
+          {reviews && reviews.length > 0 ? (
+            <div className="space-y-4">
+              {/* Average Rating Summary */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4">
+                    <div className="text-center">
+                      <div className="text-4xl font-bold">
+                        {averageRating.toFixed(1)}
+                      </div>
+                      <div className="flex items-center justify-center gap-1 mt-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`h-4 w-4 ${
+                              star <= Math.round(averageRating)
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {reviews.length}{" "}
+                        {reviews.length === 1 ? "review" : "reviews"}
+                      </p>
+                    </div>
+                    <Separator orientation="vertical" className="h-20" />
+                    <div className="flex-1 space-y-2">
+                      {[5, 4, 3, 2, 1].map((rating) => {
+                        const count = reviews.filter(
+                          (r) => r.rating === rating,
+                        ).length;
+                        const percentage =
+                          reviews.length > 0
+                            ? (count / reviews.length) * 100
+                            : 0;
+                        return (
+                          <div
+                            key={rating}
+                            className="flex items-center gap-2 text-sm"
+                          >
+                            <span className="w-8">{rating}★</span>
+                            <div className="flex-1 bg-muted rounded-full h-2">
+                              <div
+                                className="bg-yellow-400 h-2 rounded-full"
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                            <span className="w-8 text-muted-foreground">
+                              {count}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Review List */}
+              {reviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Star className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground mb-4">
+                  {isOwnProfile
+                    ? "You haven't received any reviews yet"
+                    : "This user hasn't received any reviews yet"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Reviews are given after completing trades
+                </p>
               </CardContent>
             </Card>
           )}

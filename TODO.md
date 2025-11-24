@@ -1,10 +1,41 @@
 # SwapBuds Frontend - Launch Roadmap (16 Weeks)
 
 **Target Launch:** March 17, 2026
-**Current Status:** v0.2.0 (Auth foundation complete)
+**Current Status:** v0.7.0 (Core MVP ~60% Complete)
+**Current Date:** November 24, 2025
 **Working Schedule:** Part-time, 20-25 hours/week (evenings + weekends)
 
 See **plans/LAUNCH_ROADMAP.md** for detailed week-by-week breakdown and timeline.
+
+---
+
+## 🎯 CURRENT PROGRESS SUMMARY
+
+**Overall Completion:** ~60% of backend features implemented in frontend
+**Timeline Status:** On track for Week 3, but Week 1-2 items need attention
+**Critical Blockers:** Age verification, Review submission, Dispute system
+
+### What's Working ✅
+
+- Authentication (login, register, OAuth components)
+- Items (browse, create, edit, delete, comments, likes)
+- Trades (view, create, accept, reject, counter-offers)
+- Messages (real-time chat, typing indicators, WebSocket)
+- User Profiles (view, edit, stats, items, reviews display)
+- Notifications (page, WebSocket, preferences)
+- Settings (profile, account, privacy, notifications)
+- Legal (TOS, Privacy, Guidelines, Cookies, consent banner)
+
+### What's Missing ❌
+
+- Age verification during registration (CRITICAL - Week 1-2)
+- Review submission form (backend exists, no UI)
+- Dispute creation and management (no UI)
+- Support ticket system (no UI)
+- Admin dashboard (no UI)
+- Moderation tools (no UI)
+- ID verification flow (no UI)
+- Recommendations display
 
 ---
 
@@ -32,13 +63,16 @@ Final polish, marketing preparation, public announcement.
 
 ## CURRENT IMPLEMENTATION STATUS
 
-### v0.2.0 - Authentication Foundation ✅
+### v0.7.0 - Core Features Implemented ✅
 
-**Completed:**
+**Completed Features:**
+
+#### Authentication & Security ✅
 
 - ✅ Authentication UI (login, register)
 - ✅ JWT token management
 - ✅ Protected routes
+- ✅ OAuth components (Google, Facebook, Apple buttons)
 - ✅ Error tracking (Sentry)
 - ✅ Form validation (React Hook Form + Zod)
 - ✅ State management (Zustand)
@@ -46,6 +80,478 @@ Final polish, marketing preparation, public announcement.
 - ✅ Toast notifications (Sonner)
 - ✅ shadcn/ui components
 - ✅ Responsive design
+- ✅ Google reCAPTCHA v3 integration
+- ✅ reCAPTCHA provider and hooks
+
+#### Legal & GDPR ✅
+
+- ✅ Cookie consent banner (GDPR compliant)
+- ✅ Terms of Service page
+- ✅ Privacy Policy page
+- ✅ Cookie Policy page
+- ✅ Community Guidelines page
+- ✅ Legal document acceptance tracking
+- ✅ Cookie preferences management
+- ✅ Data export request UI
+- ✅ Account deletion UI with confirmation
+- ✅ Privacy settings page
+
+#### Items Management ✅
+
+- ✅ Items listing page with grid/list view toggle
+- ✅ Item detail page with image gallery
+- ✅ Create/edit item form with image upload
+- ✅ Category and condition filters
+- ✅ Search functionality with debouncing
+- ✅ Pagination
+- ✅ Item owner profile preview
+- ✅ Image upload component
+- ✅ Item deletion with confirmation modal
+- ✅ Comments on items
+- ✅ Like/unlike items functionality
+- ✅ Item cards with hover effects
+
+#### Trading System ✅
+
+- ✅ Trade list page (sent/received/status filters)
+- ✅ Trade detail page with information
+- ✅ Trade proposal dialog
+- ✅ Accept/reject/cancel trade actions
+- ✅ Trade status indicators
+- ✅ Trade cards with status badges
+- ✅ Multi-item trade support in UI
+
+#### Real-time Messaging ✅
+
+- ✅ Conversations list page
+- ✅ Chat window with message history
+- ✅ Send messages with real-time delivery
+- ✅ Typing indicators
+- ✅ WebSocket integration (MessagesGateway)
+- ✅ Message bubbles
+- ✅ Unread message handling
+- ✅ Message timestamps
+
+#### User Profiles ✅
+
+- ✅ User profile page with tabs
+- ✅ Profile statistics display
+- ✅ User's items display
+- ✅ User's reviews display (view only)
+- ✅ Edit profile functionality
+- ✅ Avatar upload
+- ✅ Bio and location fields
+- ✅ Public profile view
+
+#### Notifications ✅
+
+- ✅ Notifications page
+- ✅ Notification preferences page
+- ✅ Real-time notifications with WebSocket
+- ✅ Unread badge count
+- ✅ Mark as read functionality
+- ✅ WebSocket NotificationsGateway integration
+
+#### Settings ✅
+
+- ✅ Profile settings page
+- ✅ Account settings page (GDPR features)
+- ✅ Privacy settings page
+- ✅ Notification preferences page
+
+#### Socket System ✅
+
+- ✅ Modular socket architecture
+- ✅ Socket helper pattern (matching api.ts)
+- ✅ MessagesGateway integration
+- ✅ NotificationsGateway integration
+- ✅ SupportGateway prepared (no UI)
+- ✅ Logger integration (no console.log)
+- ✅ Automatic reconnection
+- ✅ Token management
+
+#### API Clients ✅
+
+- ✅ 16 API clients created and typed
+- ✅ auth.ts, items.ts, trades.ts, messages.ts
+- ✅ notifications.ts, users.ts, reviews.ts
+- ✅ comments.ts, likes.ts, upload.ts
+- ✅ legal.ts, disputes.ts, admin.ts
+- ✅ moderation.ts, support.ts, verification.ts, gdpr.ts
+- ✅ All using @/types for type imports
+- ✅ Consistent error handling pattern
+
+#### Type System ✅
+
+- ✅ 15 type files in @/types folder
+- ✅ auth.ts, item.ts, trade.ts, user.ts
+- ✅ message.ts, notification.ts, review.ts
+- ✅ comment.ts, dispute.ts, admin.ts
+- ✅ moderation.ts, support.ts, verification.ts, gdpr.ts
+- ✅ All type exports centralized
+- ✅ No type re-exports from API files
+
+---
+
+---
+
+## ⚠️ CRITICAL GAPS - IMMEDIATE ATTENTION REQUIRED
+
+### 1. Age Verification (Week 1-2 OVERDUE) 🔴
+
+**Status:** ❌ MISSING - Blocks public launch
+**Backend:** ✅ Exists
+**Frontend:** ❌ Not implemented
+**Priority:** CRITICAL
+
+**What's Missing:**
+
+- [ ] Date of Birth field in registration form
+- [ ] Real-time age validation (18+ requirement)
+- [ ] "I confirm I am 18+" checkbox
+- [ ] Block form submission if under 18
+- [ ] Age verification error messages
+- [ ] Age declaration stored with timestamp
+
+### 2. Review Submission (Week 7 Coming Soon) 🟡
+
+**Status:** ⚠️ PARTIAL - Can view, can't create
+**Backend:** ✅ Full system exists
+**Frontend:** ❌ No submission form
+**Priority:** HIGH
+
+**What's Missing:**
+
+- [ ] `/trades/[id]/review` page
+- [ ] Review submission form component
+- [ ] Star rating input (1-5)
+- [ ] Review categories (itemCondition, communication, delivery)
+- [ ] "Leave Review" button after trade completion
+- [ ] Review edit/delete functionality
+
+### 3. Dispute System (User Protection) 🔴
+
+**Status:** ❌ COMPLETELY MISSING
+**Backend:** ✅ Full system exists
+**Frontend:** ❌ Zero UI
+**Priority:** CRITICAL
+
+**What's Missing:**
+
+- [ ] `/disputes` page - View user's disputes
+- [ ] `/trades/[id]/dispute` - Create dispute
+- [ ] Dispute creation dialog/form
+- [ ] Dispute reason selection (ITEM_NOT_RECEIVED, etc.)
+- [ ] Evidence upload functionality
+- [ ] Dispute status tracking in trade detail
+- [ ] Admin resolution display
+
+### 4. Support Tickets (User Help) 🟡
+
+**Status:** ❌ MISSING
+**Backend:** ✅ Full system + WebSocket exists
+**Frontend:** ❌ No UI
+**Priority:** HIGH
+
+**What's Missing:**
+
+- [ ] `/support` page - View tickets
+- [ ] `/support/new` - Create ticket form
+- [ ] `/support/[id]` - Live chat with agent
+- [ ] Support ticket categories (ACCOUNT, TRADE, etc.)
+- [ ] Priority level selection
+- [ ] Support WebSocket hooks
+- [ ] Live chat component (different from messages)
+
+### 5. Admin Dashboard (Platform Management) 🟠
+
+**Status:** ❌ MISSING
+**Backend:** ✅ Full system exists
+**Frontend:** ❌ No UI
+**Priority:** MEDIUM (Week 11)
+
+**What's Missing:**
+
+- [ ] `/admin/dashboard` - Platform statistics
+- [ ] `/admin/users` - User management
+- [ ] `/admin/items` - Review flagged items
+- [ ] `/admin/trades` - Review problematic trades
+- [ ] `/admin/audit-logs` - System audit trail
+- [ ] User suspend/ban/role change UI
+- [ ] Bulk action capabilities
+
+### 6. Moderation Tools (Content Safety) 🟠
+
+**Status:** ❌ MISSING
+**Backend:** ✅ Full system exists
+**Frontend:** ❌ No UI
+**Priority:** MEDIUM (Week 11)
+
+**What's Missing:**
+
+- [ ] "Report Item" button on item pages
+- [ ] "Report Trade" option in trade details
+- [ ] Flag reason selection dialog
+- [ ] `/moderation` dashboard for moderators
+- [ ] Approve/reject flagged content
+- [ ] Bulk moderation actions
+
+### 7. ID Verification Flow 🟡
+
+**Status:** ❌ MISSING
+**Backend:** ✅ Full system exists
+**Frontend:** ❌ No UI
+**Priority:** MEDIUM
+
+**What's Missing:**
+
+- [ ] `/verification` page
+- [ ] ID document upload form
+- [ ] Document type selection (passport/ID/license)
+- [ ] Selfie upload for verification
+- [ ] Verification status display
+- [ ] Verified badge on profiles
+
+### 8. Recommendations Display 🟢
+
+**Status:** ❌ NOT USED
+**Backend:** ✅ Algorithm exists
+**Frontend:** ❌ Not displaying
+**Priority:** LOW
+
+**What's Missing:**
+
+- [ ] "Recommended for you" section on homepage
+- [ ] "Similar items" on item detail page
+- [ ] Interest-based suggestions
+- [ ] Use GET `/items/recommendations` endpoint
+
+---
+
+## 🚨 IMMEDIATE ACTION ITEMS (Priority Order)
+
+### 1. Age Verification (4 hours) 🔴 CRITICAL - BLOCKS LAUNCH
+
+**Timeline:** Week 1-2 (OVERDUE)
+**Why Critical:** Legal requirement, blocks public launch
+
+**Tasks:**
+
+- [ ] Add Date of Birth field to registration form
+- [ ] Add age calculation function (must be 18+)
+- [ ] Add "I confirm I am 18+" checkbox
+- [ ] Add real-time validation (disable submit if under 18)
+- [ ] Add age error message: "You must be at least 18 years old"
+- [ ] Send dateOfBirth and selfDeclaredAge18 to backend
+- [ ] Test age verification flow end-to-end
+
+**Files to modify:**
+
+- `src/app/(auth)/register/page.tsx` - Add DOB field
+- `src/types/auth.ts` - Add dateOfBirth to RegisterData
+- Backend already accepts these fields ✅
+
+### 2. Review Submission (4 hours) 🟡 HIGH - Week 7 Feature
+
+**Timeline:** Week 7 (Jan 13-19, 2026)
+**Why Important:** Complete the reviews system (viewing works, creation doesn't)
+
+**Tasks:**
+
+- [ ] Create `/trades/[id]/review` page
+- [ ] Create `ReviewForm` component with star rating
+- [ ] Add rating categories (itemCondition, communication, delivery)
+- [ ] Add "Leave Review" button in trade detail (if COMPLETED)
+- [ ] Connect to existing `createReview` API function
+- [ ] Add success/error handling
+- [ ] Test review submission flow
+
+**Files to create:**
+
+- `src/app/(main)/trades/[id]/review/page.tsx`
+- `src/components/reviews/review-form.tsx`
+- `src/components/reviews/star-rating.tsx`
+
+### 3. Dispute System (6 hours) 🔴 CRITICAL - User Protection
+
+**Timeline:** Before beta launch (Week 11)
+**Why Critical:** Users need way to report problems with trades
+
+**Tasks:**
+
+- [ ] Create `/disputes` page - List user's disputes
+- [ ] Create `/trades/[id]/dispute` page - Create new dispute
+- [ ] Create `DisputeForm` component
+- [ ] Add dispute reason selection (ITEM_NOT_RECEIVED, ITEM_NOT_AS_DESCRIBED, etc.)
+- [ ] Add evidence upload functionality
+- [ ] Add "Report Problem" button in trade detail page
+- [ ] Show dispute status in trade detail if exists
+- [ ] Connect to existing `disputes.ts` API client
+
+**Files to create:**
+
+- `src/app/(main)/disputes/page.tsx`
+- `src/app/(main)/trades/[id]/dispute/page.tsx`
+- `src/components/disputes/dispute-form.tsx`
+
+### 4. Support Ticket System (6 hours) 🟡 HIGH - User Help
+
+**Timeline:** Before beta launch (Week 11)
+**Why Important:** Users need help channel
+
+**Tasks:**
+
+- [ ] Create `/support` page - List user's tickets
+- [ ] Create `/support/new` page - Create ticket form
+- [ ] Create `/support/[id]` page - Live chat with agent
+- [ ] Add support ticket categories (ACCOUNT, TRADE, PAYMENT, etc.)
+- [ ] Add priority selection (LOW, MEDIUM, HIGH)
+- [ ] Integrate SupportGateway WebSocket (already exists)
+- [ ] Create support chat hooks (similar to messages)
+- [ ] Connect to existing `support.ts` API client
+
+**Files to create:**
+
+- `src/app/(main)/support/page.tsx`
+- `src/app/(main)/support/new/page.tsx`
+- `src/app/(main)/support/[id]/page.tsx`
+- `src/lib/socket/support.ts` (update existing)
+- `src/hooks/use-support-chat.ts`
+
+### 5. Moderation Tools (4 hours) 🟠 MEDIUM - Week 11
+
+**Timeline:** Week 11 (Feb 10-16, 2026)
+**Why Important:** Content safety and platform trust
+
+**Tasks:**
+
+- [ ] Add "Report Item" button on item detail page
+- [ ] Add "Report Trade" option in trade detail page
+- [ ] Create flag reason selection dialog
+- [ ] Create `/moderation` dashboard (moderator role only)
+- [ ] Show flagged content for moderators
+- [ ] Add approve/reject actions
+- [ ] Connect to existing `moderation.ts` API client
+
+**Files to create:**
+
+- `src/components/moderation/flag-dialog.tsx`
+- `src/app/(main)/moderation/page.tsx` (role-protected)
+
+### 6. Admin Dashboard (8 hours) 🟠 MEDIUM - Week 11
+
+**Timeline:** Week 11 (Feb 10-16, 2026)
+**Why Important:** Platform management after launch
+
+**Tasks:**
+
+- [ ] Create `/admin` route group (admin role only)
+- [ ] Create `/admin/dashboard` - Platform statistics
+- [ ] Create `/admin/users` - User management
+- [ ] Create `/admin/items` - Review flagged items
+- [ ] Create `/admin/trades` - Review problematic trades
+- [ ] Create `/admin/audit-logs` - System audit trail
+- [ ] Add user actions: suspend, ban, change role
+- [ ] Connect to existing `admin.ts` API client
+
+**Files to create:**
+
+- `src/app/(main)/admin/layout.tsx` (role check)
+- `src/app/(main)/admin/dashboard/page.tsx`
+- `src/app/(main)/admin/users/page.tsx`
+- `src/app/(main)/admin/items/page.tsx`
+- `src/app/(main)/admin/trades/page.tsx`
+- `src/app/(main)/admin/audit-logs/page.tsx`
+
+### 7. ID Verification (4 hours) 🟡 MEDIUM - Optional for Launch
+
+**Timeline:** After public launch
+**Why Important:** Verified badge increases trust
+
+**Tasks:**
+
+- [ ] Create `/verification` page
+- [ ] Create ID document upload form
+- [ ] Add document type selection (passport/ID/license)
+- [ ] Add selfie upload requirement
+- [ ] Show verification status
+- [ ] Add verified badge to profiles
+- [ ] Connect to existing `verification.ts` API client
+
+**Files to create:**
+
+- `src/app/(main)/verification/page.tsx`
+- `src/components/verification/id-verification-form.tsx`
+
+---
+
+## 📊 COMPLETION TRACKING
+
+### By Feature Category:
+
+**Authentication & Legal:** 95% ✅
+
+- ✅ Login/Register
+- ✅ Legal pages
+- ✅ Cookie consent
+- ✅ GDPR features
+- ❌ Age verification (5% missing)
+
+**Items:** 100% ✅
+
+- ✅ Browse, create, edit, delete
+- ✅ Comments, likes
+- ✅ Image upload
+
+**Trades:** 95% ✅
+
+- ✅ Create, view, accept, reject
+- ✅ Multi-item support
+- ❌ No dispute creation (5% missing)
+
+**Messages:** 90% ✅
+
+- ✅ Real-time chat
+- ✅ Typing indicators
+- ❌ Read receipts partial
+
+**Profiles:** 100% ✅
+
+- ✅ View, edit
+- ✅ Stats, items, reviews
+
+**Notifications:** 90% ✅
+
+- ✅ Page, preferences
+- ✅ WebSocket
+- ❌ No dropdown in header
+
+**Reviews:** 40% ⚠️
+
+- ✅ View on profiles
+- ❌ Can't submit reviews
+
+**Disputes:** 0% ❌
+
+- ❌ No UI at all
+
+**Support:** 0% ❌
+
+- ❌ No UI at all
+
+**Admin:** 0% ❌
+
+- ❌ No UI at all
+
+**Moderation:** 0% ❌
+
+- ❌ No UI at all
+
+**Verification:** 0% ❌
+
+- ❌ No UI at all
+
+**Overall Frontend Completion: ~60%**
 
 ---
 
@@ -53,11 +559,13 @@ Final polish, marketing preparation, public announcement.
 
 **Version 0.2.1 - Legal Compliance & GDPR UI**
 
-**Timeline:** Week 1-2 (Dec 2-15, 2025)
+**Timeline:** Week 1-2 (Dec 2-15, 2025) - **NOW OVERDUE**
 **Priority:** CRITICAL - Must be done first for legal compliance
 **Estimated Time:** 15-20 hours
 
-### Features
+### Features Status
+
+#### Legal & GDPR ✅ COMPLETE
 
 - [x] **Google reCAPTCHA v3 (Invisible) Integration**
 - [x] **Bot protection on registration and login forms**
@@ -74,7 +582,16 @@ Final polish, marketing preparation, public announcement.
 - [x] Data export request UI
 - [x] Account deletion UI with confirmation
 - [x] Legal document version tracking
-- [ ] **reCAPTCHA disclosure in Privacy Policy** (backend content responsibility)
+- [x] **reCAPTCHA disclosure in Privacy Policy**
+
+#### Age Verification ❌ MISSING - CRITICAL BLOCKER
+
+- [ ] **Date of Birth field in registration form**
+- [ ] **Real-time age validation (must be 18+)**
+- [ ] **"I confirm I am 18+" checkbox**
+- [ ] **Block form submission if under 18**
+- [ ] **Age verification error messages**
+- [ ] **Age declaration stored with timestamp**
 
 ### Technical Implementation
 
@@ -333,35 +850,39 @@ if (age < 18) {
 
 ## Week 3: Item Browsing & Creation (HIGH PRIORITY)
 
-**Version 0.3.0 - Item Management UI**
+**Version 0.3.0 - Item Management UI** ✅ COMPLETE
 
-**Timeline:** Week 3 (Dec 16-22, 2025)
+**Timeline:** Week 3 (Dec 16-22, 2025) - CURRENT WEEK
 **Priority:** HIGH - Core feature for MVP
 **Estimated Time:** 20-25 hours
+**Status:** ✅ All features implemented
 
-### Features
+### Features Status
 
-- [ ] Items listing page with grid/list view toggle
-- [ ] Item detail page with image gallery
-- [ ] Create/edit item form with image upload
-- [ ] Category and condition filters
-- [ ] Search functionality with debouncing
-- [ ] Pagination and infinite scroll
-- [ ] Item owner profile preview
-- [ ] Image upload with Cloudinary integration
-- [ ] Item deletion with confirmation modal
+- [x] Items listing page with grid/list view toggle
+- [x] Item detail page with image gallery
+- [x] Create/edit item form with image upload
+- [x] Category and condition filters
+- [x] Search functionality with debouncing
+- [x] Pagination
+- [x] Item owner profile preview
+- [x] Image upload component
+- [x] Item deletion with confirmation modal
+- [x] Comments on items
+- [x] Like/unlike items
 
-### Technical Implementation
+### Technical Implementation - COMPLETE ✅
 
-- [ ] `ItemsPage` component with TanStack Query
-- [ ] `ItemCard` component with hover effects
-- [ ] `ItemDetail` component with carousel
-- [ ] `ItemForm` component with multi-step form
-- [ ] `ImageUpload` component with drag-and-drop
-- [ ] API hooks: `useItems`, `useItemDetail`, `useCreateItem`, `useUpdateItem`, `useDeleteItem`
-- [ ] Item store with Zustand (filters, view preferences)
-- [ ] Responsive image gallery with lightbox
-- [ ] Skeleton loaders for items
+- [x] `ItemsPage` component with TanStack Query
+- [x] `ItemCard` component with hover effects
+- [x] `ItemDetail` component with image gallery
+- [x] `ItemForm` component
+- [x] `ImageUpload` component
+- [x] API hooks: `getItems`, `getItemById`, `createItem`, `updateItem`, `deleteItem`
+- [x] Responsive image gallery
+- [x] Skeleton loaders for items
+- [x] Comment section component
+- [x] Like button with optimistic updates
 
 ### Pages & Routes
 
@@ -386,34 +907,34 @@ if (age < 18) {
 
 ## Week 4: User Profiles (HIGH PRIORITY)
 
-**Version 0.4.0 - User Profiles**
+**Version 0.4.0 - User Profiles** ✅ COMPLETE
 
 **Timeline:** Week 4 (Dec 23-29, 2025)
 **Priority:** HIGH - Basic profiles needed for trades
 **Estimated Time:** 15-20 hours
+**Status:** ✅ All features implemented
 
-### Features
+### Features Status
 
-- [ ] User profile page with stats
-- [ ] Edit profile form (avatar, bio, location)
-- [ ] User's items, likes, and comments tabs
-- [ ] Like/unlike items functionality
-- [ ] Comment on items with real-time updates
-- [ ] User reputation display
-- [ ] Avatar upload with cropping
-- [ ] Public vs private profile toggle
+- [x] User profile page with stats
+- [x] Edit profile form (avatar, bio, location)
+- [x] User's items tab
+- [x] User's reviews display (view only)
+- [x] Like/unlike items functionality
+- [x] Comment on items
+- [x] User statistics display
+- [x] Avatar upload
+- [ ] Public vs private profile toggle (not yet implemented)
 
-### Technical Implementation
+### Technical Implementation - COMPLETE ✅
 
-- [ ] `ProfilePage` component with tabs
-- [ ] `EditProfileForm` component
-- [ ] `LikeButton` component with optimistic updates
-- [ ] `CommentSection` component with nested replies
-- [ ] `CommentForm` component
-- [ ] API hooks: `useProfile`, `useUpdateProfile`, `useLikeItem`, `useComments`, `useAddComment`
-- [ ] Avatar upload with react-image-crop
-- [ ] Real-time comment updates with polling
-- [ ] Profile store with Zustand
+- [x] `ProfilePage` component with tabs
+- [x] Edit profile functionality
+- [x] `LikeButton` component with optimistic updates
+- [x] Comment section on items
+- [x] API functions: `getUserProfile`, `updateUserProfile`, `likeItem`, `unlikeItem`, `getItemComments`, `createComment`
+- [x] Avatar upload
+- [x] User statistics display
 
 ### Pages & Routes
 
@@ -436,34 +957,34 @@ if (age < 18) {
 
 ## Week 5-6: Trading System (CRITICAL)
 
-**Version 0.5.0 - Trading System UI**
+**Version 0.5.0 - Trading System UI** ✅ COMPLETE
 
 **Timeline:** Week 5-6 (Dec 30, 2025 - Jan 12, 2026)
 **Priority:** CRITICAL - Core MVP feature
 **Estimated Time:** 30-35 hours
+**Status:** ✅ All core features implemented
 
-### Features
+### Features Status
 
-- [ ] Create trade proposal UI
-- [ ] Trade list page (incoming/outgoing/completed)
-- [ ] Trade detail page with status timeline
-- [ ] Accept/reject/cancel trade actions
-- [ ] Trade status indicators
-- [ ] Trade notifications integration
-- [ ] Complete trade confirmation
-- [ ] Trade history filtering
+- [x] Create trade proposal UI
+- [x] Trade list page (sent/received/status filters)
+- [x] Trade detail page with information
+- [x] Accept/reject/cancel trade actions
+- [x] Trade status indicators
+- [x] Trade notifications integration (via WebSocket)
+- [x] Trade history filtering (by direction and status)
+- [x] Multi-item trade support
 
-### Technical Implementation
+### Technical Implementation - COMPLETE ✅
 
-- [ ] `CreateTradePage` component with item selection
-- [ ] `TradesPage` component with tabs
-- [ ] `TradeCard` component with status badge
-- [ ] `TradeDetail` component with timeline
-- [ ] `TradeActions` component (accept/reject/cancel)
-- [ ] API hooks: `useTrades`, `useTradeDetail`, `useCreateTrade`, `useAcceptTrade`, `useRejectTrade`, `useCancelTrade`, `useCompleteTrade`
-- [ ] Trade store with Zustand
-- [ ] Status timeline component
-- [ ] Trade filters (status, date range)
+- [x] `TradeProposalDialog` component with item selection
+- [x] `TradesPage` component with tabs
+- [x] `TradeCard` component with status badge
+- [x] `TradeDetail` page component
+- [x] Trade action buttons (accept/reject/cancel)
+- [x] API functions: `getTrades`, `getTradeById`, `createTrade`, `acceptTrade`, `rejectTrade`, `cancelTrade`, `completeTrade`
+- [x] Trade status filters
+- [x] Direction filters (sent/received)
 
 ### Pages & Routes
 
@@ -486,33 +1007,35 @@ if (age < 18) {
 
 ## Week 7: Notifications System (HIGH PRIORITY)
 
-**Version 0.6.0 - Notifications System UI**
+**Version 0.6.0 - Notifications System UI** ✅ COMPLETE
 
 **Timeline:** Week 7 (Jan 13-19, 2026)
 **Priority:** HIGH - Important for user engagement
 **Estimated Time:** 15-20 hours
+**Status:** ✅ Core features implemented
 
-### Features
+### Features Status
 
-- [ ] Notifications dropdown in header
-- [ ] Notification list page
-- [ ] Notification preferences page
-- [ ] Real-time notifications with WebSocket
-- [ ] Unread badge count
-- [ ] Mark as read/unread functionality
+- [x] Notification list page
+- [x] Notification preferences page
+- [x] Real-time notifications with WebSocket
+- [x] Unread badge count
+- [x] Mark as read functionality
+- [x] Notification types (trade, message, review, etc.)
+- [ ] Notifications dropdown in header (page exists, no dropdown)
 - [ ] Notification sound toggle
 - [ ] Group notifications by type
 - [ ] Delete notifications
 
-### Technical Implementation
+### Technical Implementation - MOSTLY COMPLETE ✅
 
-- [ ] `NotificationDropdown` component
-- [ ] `NotificationItem` component
-- [ ] `NotificationsPage` component
-- [ ] `NotificationPreferences` component
-- [ ] API hooks: `useNotifications`, `useUnreadCount`, `useMarkAsRead`, `useMarkAllAsRead`, `useDeleteNotification`, `useNotificationPreferences`
-- [ ] WebSocket connection for real-time updates
-- [ ] Notification store with Zustand
+- [x] `NotificationsPage` component
+- [x] `NotificationPreferences` component
+- [x] API functions: `getNotifications`, `markAsRead`, `markAllAsRead`, `getNotificationPreferences`, `updateNotificationPreferences`
+- [x] WebSocket NotificationsGateway integration
+- [x] Real-time notification updates
+- [x] Notification hooks in socket system
+- [ ] Notification dropdown component (not yet created)
 - [ ] Browser notification API integration
 - [ ] Notification sound effects
 
@@ -536,37 +1059,39 @@ if (age < 18) {
 
 ## Week 8-9: Real-time Messaging (CRITICAL)
 
-**Version 0.7.0 - Real-time Messaging UI**
+**Version 0.7.0 - Real-time Messaging UI** ✅ COMPLETE
 
 **Timeline:** Week 8-9 (Jan 20 - Feb 2, 2026)
 **Priority:** CRITICAL - Essential for trades
 **Estimated Time:** 25-30 hours
+**Status:** ✅ All core features implemented
 
-### Features
+### Features Status
 
-- [ ] Chat/conversations list page
-- [ ] Chat window with message history
-- [ ] Send messages with real-time delivery
-- [ ] Typing indicators
-- [ ] Message read receipts
-- [ ] Unread message badges
-- [ ] Message timestamps
+- [x] Chat/conversations list page
+- [x] Chat window with message history
+- [x] Send messages with real-time delivery
+- [x] Typing indicators
+- [x] Unread message handling
+- [x] Message timestamps
+- [x] WebSocket MessagesGateway integration
+- [ ] Message read receipts (partial)
 - [ ] Delete messages
 - [ ] Emoji picker
 - [ ] Link preview for URLs
 
-### Technical Implementation
+### Technical Implementation - COMPLETE ✅
 
-- [ ] `ConversationsPage` component with list
-- [ ] `ChatWindow` component
-- [ ] `MessageBubble` component
-- [ ] `MessageInput` component with emoji picker
-- [ ] API hooks: `useConversations`, `useMessages`, `useSendMessage`, `useDeleteMessage`, `useMarkAsRead`
-- [ ] WebSocket integration for real-time messaging
-- [ ] Message store with Zustand
-- [ ] Auto-scroll to bottom on new messages
-- [ ] Optimistic UI updates
-- [ ] Link preview component
+- [x] `ConversationsPage` component (MessagesPage)
+- [x] Chat window component
+- [x] `MessageBubble` component
+- [x] Message input component
+- [x] API functions: `getConversations`, `getConversationMessages`, `sendMessage`, `markAsRead`
+- [x] WebSocket integration for real-time messaging
+- [x] useMessages hook for WebSocket
+- [x] Auto-scroll to bottom on new messages
+- [x] Typing indicator support
+- [x] Real-time message delivery
 
 ### Pages & Routes
 
@@ -590,31 +1115,41 @@ if (age < 18) {
 
 ## Week 10: Reviews System (HIGH PRIORITY)
 
-**Version 0.8.0 - Reviews System UI**
+**Version 0.8.0 - Reviews System UI** ⚠️ PARTIAL
 
 **Timeline:** Week 10 (Feb 3-9, 2026)
 **Priority:** HIGH - Trust & reputation feature
 **Estimated Time:** 15-20 hours
+**Status:** ⚠️ VIEWING WORKS, CREATION MISSING
 
-### Features
+### Features Status
 
-- [ ] Leave review after completed trade
-- [ ] View user reviews on profile
-- [ ] Review form with rating (1-5 stars)
-- [ ] Review list with filtering
-- [ ] Edit/delete own reviews
-- [ ] Reputation score display
-- [ ] Review statistics (avg rating, count)
+- [ ] **Leave review after completed trade** ❌ MISSING - CRITICAL
+- [x] View user reviews on profile ✅
+- [ ] **Review form with rating (1-5 stars)** ❌ MISSING
+- [ ] **Review submission page** ❌ MISSING
+- [x] Review display on profiles ✅
+- [x] Reputation score display ✅
+- [x] Review statistics (avg rating, count) ✅
+- [ ] Edit/delete own reviews ❌
 
-### Technical Implementation
+### Technical Implementation - PARTIAL ⚠️
 
-- [ ] `ReviewForm` component with star rating
-- [ ] `ReviewCard` component
-- [ ] `ReviewList` component with pagination
-- [ ] `ReputationBadge` component
-- [ ] API hooks: `useReviews`, `useCreateReview`, `useUpdateReview`, `useDeleteReview`, `useUserReputation`
-- [ ] Star rating component
-- [ ] Review filters (rating, date)
+- [ ] `ReviewForm` component with star rating ❌ NOT CREATED
+- [x] `ReviewCard` component ✅ EXISTS
+- [x] Review display in profile ✅
+- [ ] `ReviewSubmissionPage` component ❌ NOT CREATED
+- [x] API functions: `getUserReviews`, `getTradeReviews` ✅
+- [ ] API functions: `createReview`, `updateReview`, `deleteReview` ✅ EXIST BUT NOT USED
+- [ ] Star rating input component ❌
+- [ ] `/trades/[id]/review` route ❌ MISSING
+
+### CRITICAL MISSING FEATURES:
+
+1. **No way to submit reviews** - Backend ready, no frontend UI
+2. **No review form component**
+3. **No review submission page**
+4. **No "Leave Review" button after trade completion**
 
 ### Pages & Routes
 
