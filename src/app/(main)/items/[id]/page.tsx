@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { deleteItem, getItemById, incrementItemView } from "@/lib/api/items";
+import { deleteItem, getItemById } from "@/lib/api/items";
 import { useAuthStore } from "@/stores/authStore";
 import {
   CATEGORY_INFO,
@@ -47,7 +47,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function ItemDetailPage() {
@@ -72,13 +72,14 @@ export default function ItemDetailPage() {
   });
 
   // Increment view count on mount
-  useEffect(() => {
-    if (itemId) {
-      incrementItemView(itemId).catch(() => {
-        // Silently fail if view increment fails
-      });
-    }
-  }, [itemId]);
+  // TODO: Re-enable when backend endpoint is implemented
+  // useEffect(() => {
+  //   if (itemId) {
+  //     incrementItemView(itemId).catch(() => {
+  //       // Silently fail if view increment fails
+  //     });
+  //   }
+  // }, [itemId]);
 
   const handleDelete = async () => {
     if (!itemId) return;
@@ -101,7 +102,7 @@ export default function ItemDetailPage() {
     }
   };
 
-  const isOwner = user?.id === item?.userId;
+  const isOwner = user?.id === item?.owner.id;
   const conditionInfo = item ? CONDITION_INFO[item.condition] : null;
   const categoryInfo = item ? CATEGORY_INFO[item.category] : null;
   const images = item?.images || [];
@@ -109,21 +110,19 @@ export default function ItemDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="container py-8">
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="space-y-4">
-            <Skeleton className="aspect-square w-full" />
-            <div className="grid grid-cols-4 gap-2">
-              {Array.from({ length: 4 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-square" />
-              ))}
-            </div>
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div className="space-y-4">
+          <Skeleton className="aspect-square w-full" />
+          <div className="grid grid-cols-4 gap-2">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-square" />
+            ))}
           </div>
-          <div className="space-y-6">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-40 w-full" />
-          </div>
+        </div>
+        <div className="space-y-6">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-20 w-full" />
+          <Skeleton className="h-40 w-full" />
         </div>
       </div>
     );
@@ -131,18 +130,14 @@ export default function ItemDetailPage() {
 
   if (error || !item) {
     return (
-      <div className="container py-8">
-        <Card className="border-destructive">
-          <CardContent className="p-8 text-center">
-            <p className="text-destructive">
-              Item not found or failed to load.
-            </p>
-            <Button className="mt-4" onClick={() => router.push("/items")}>
-              Back to Items
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="border-destructive">
+        <CardContent className="p-8 text-center">
+          <p className="text-destructive">Item not found or failed to load.</p>
+          <Button className="mt-4" onClick={() => router.push("/items")}>
+            Back to Items
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -155,7 +150,7 @@ export default function ItemDetailPage() {
   }[conditionInfo!.color];
 
   return (
-    <div className="container py-8">
+    <>
       {/* Back Button */}
       <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
         ← Back
@@ -166,9 +161,9 @@ export default function ItemDetailPage() {
         <div className="space-y-4">
           {/* Main Image */}
           <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
-            {selectedImage || images.length > 0 ? (
+            {selectedImage || images[0] ? (
               <Image
-                src={selectedImage?.url || images[0]?.url}
+                src={selectedImage || images[0] || "/placeholder.png"}
                 alt={item.title}
                 fill
                 className="object-cover"
@@ -192,25 +187,27 @@ export default function ItemDetailPage() {
           {/* Thumbnail Strip */}
           {images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
-              {images.map((image, index) => (
-                <button
-                  key={image.id}
-                  onClick={() => setSelectedImageIndex(index)}
-                  className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-all ${
-                    selectedImageIndex === index
-                      ? "border-primary"
-                      : "border-transparent hover:border-muted-foreground/50"
-                  }`}
-                >
-                  <Image
-                    src={image.url}
-                    alt={`${item.title} - Image ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="25vw"
-                  />
-                </button>
-              ))}
+              {images
+                .filter((image) => image && image.trim() !== "")
+                .map((image, index) => (
+                  <button
+                    key={`image-${index}`}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-all ${
+                      selectedImageIndex === index
+                        ? "border-primary"
+                        : "border-transparent hover:border-muted-foreground/50"
+                    }`}
+                  >
+                    <Image
+                      src={image}
+                      alt={`${item.title} - Image ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="25vw"
+                    />
+                  </button>
+                ))}
             </div>
           )}
         </div>
@@ -332,15 +329,17 @@ export default function ItemDetailPage() {
                 <MapPin className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Delivery:</span>
                 <div className="flex flex-wrap gap-1">
-                  {item.deliveryMethods.map((method) => (
+                  {item.deliveryMethods?.map((method) => (
                     <Badge key={method} variant="secondary" className="text-xs">
                       {DELIVERY_METHOD_INFO[method].icon}{" "}
                       {DELIVERY_METHOD_INFO[method].label}
                     </Badge>
                   ))}
-                  <Badge variant="outline" className="text-xs">
-                    {DELIVERY_SCOPE_INFO[item.deliveryScope].label}
-                  </Badge>
+                  {item.deliveryScope && (
+                    <Badge variant="outline" className="text-xs">
+                      {DELIVERY_SCOPE_INFO[item.deliveryScope].label}
+                    </Badge>
+                  )}
                 </div>
               </div>
 
@@ -355,11 +354,11 @@ export default function ItemDetailPage() {
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Heart className="h-4 w-4" />
-                  {item._count?.likes || 0} likes
+                  {item.likesCount} likes
                 </span>
                 <span className="flex items-center gap-1">
                   <MessageCircle className="h-4 w-4" />
-                  {item._count?.comments || 0} comments
+                  {item.commentsCount} comments
                 </span>
                 <span className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
@@ -370,33 +369,31 @@ export default function ItemDetailPage() {
           </Card>
 
           {/* Owner Card */}
-          {item.user && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Listed by</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Link
-                  href={`/profile/${item.user.id}`}
-                  className="flex items-center gap-3 transition-colors hover:text-primary"
-                >
-                  <Avatar className="h-12 w-12">
-                    <AvatarImage src={item.user.avatarUrl || undefined} />
-                    <AvatarFallback>
-                      {item.user.username.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold">{item.user.username}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Reputation: {item.user.reputationScore.toFixed(1)}
-                      {item.user.isVerified && " • Verified"}
-                    </p>
-                  </div>
-                </Link>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Listed by</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Link
+                href={`/profile/${item.owner.id}`}
+                className="flex items-center gap-3 transition-colors hover:text-primary"
+              >
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={item.owner.avatarUrl || undefined} />
+                  <AvatarFallback>
+                    {item.owner.username.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-semibold">{item.owner.username}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Reputation: {(item.owner.reputationScore || 0).toFixed(1)}
+                    {item.owner.isVerified && " • Verified"}
+                  </p>
+                </div>
+              </Link>
+            </CardContent>
+          </Card>
 
           {/* Action Buttons */}
           {!isOwner && item.status === "AVAILABLE" && (
@@ -411,6 +408,6 @@ export default function ItemDetailPage() {
           )}
         </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -16,9 +16,6 @@ export enum ItemCategory {
   HOME = "HOME",
   TOYS = "TOYS",
   COLLECTIBLES = "COLLECTIBLES",
-  ART = "ART",
-  MUSIC = "MUSIC",
-  GAMES = "GAMES",
   OTHER = "OTHER",
 }
 
@@ -93,22 +90,19 @@ export interface Item {
   condition: ItemCondition;
   category: ItemCategory;
   status: ItemStatus;
-  userId: string;
   deliveryMethods: DeliveryMethod[];
   deliveryScope: DeliveryScope;
-  estimatedValue: number | null;
+  estimatedValue?: number;
   currency: string;
   viewCount: number;
   createdAt: string;
   updatedAt: string;
+  likesCount: number;
+  commentsCount: number;
 
   // Relations (optional, loaded when needed)
-  images?: ItemImage[];
-  user?: ItemOwner;
-  _count?: {
-    likes: number;
-    comments: number;
-  };
+  images: string[]; // Array of Cloudinary URLs
+  owner: ItemOwner;
 }
 
 /**
@@ -123,7 +117,7 @@ export interface CreateItemDto {
   deliveryScope: DeliveryScope;
   estimatedValue?: number;
   currency?: string;
-  imageUrls?: string[]; // Cloudinary URLs after upload
+  images?: string[]; // Cloudinary URLs after upload
 }
 
 /**
@@ -139,7 +133,7 @@ export interface UpdateItemDto {
   deliveryScope?: DeliveryScope;
   estimatedValue?: number;
   currency?: string;
-  imageUrls?: string[]; // New images to add
+  images?: string[]; // New images to add
   removeImageIds?: string[]; // Image IDs to remove
 }
 
@@ -225,21 +219,6 @@ export const CATEGORY_INFO: Record<
     label: "Collectibles",
     icon: "🎨",
     description: "Trading cards, figurines, memorabilia",
-  },
-  [ItemCategory.ART]: {
-    label: "Art",
-    icon: "🖼️",
-    description: "Paintings, prints, crafts",
-  },
-  [ItemCategory.MUSIC]: {
-    label: "Music",
-    icon: "🎵",
-    description: "Instruments, vinyl, CDs",
-  },
-  [ItemCategory.GAMES]: {
-    label: "Games",
-    icon: "🎮",
-    description: "Video games, consoles, board games",
   },
   [ItemCategory.OTHER]: {
     label: "Other",

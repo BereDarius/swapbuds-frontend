@@ -27,7 +27,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export default function ProfilePage() {
   const params = useParams();
@@ -89,9 +88,9 @@ export default function ProfilePage() {
     if (existingConv) {
       router.push(`/messages/${existingConv.id}`);
     } else {
-      // No existing conversation
-      toast.info(
-        `Start a conversation by sending a message to ${profile.username}`,
+      // Navigate to messages page with recipient info to compose new message
+      router.push(
+        `/messages?compose=true&recipientId=${profile.id}&recipientUsername=${profile.username}`,
       );
     }
   };

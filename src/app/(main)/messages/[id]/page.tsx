@@ -19,24 +19,32 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Send } from "lucide-react";
 import Link from "next/link";
 import { notFound, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 interface ConversationDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 export default function ConversationDetailPage({
   params,
 }: ConversationDetailPageProps) {
-  const conversationId = params.id;
+  const { id } = use(params);
+  const conversationId = id;
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
-  const { onMessage, onMessageRead, onTyping, emitTyping, isConnected } =
-    useSocket();
+  const {
+    onMessage,
+    onMessageRead,
+    onTyping,
+    emitTyping,
+    isConnected,
+    joinConversation,
+    leaveConversation,
+  } = useSocket();
   const [messageText, setMessageText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [typerUsername, setTyperUsername] = useState("");
@@ -65,6 +73,14 @@ export default function ConversationDetailPage({
     queryFn: () => getMessages(conversationId),
     enabled: !!conversation,
   });
+
+  // Join conversation room on mount for typing indicators
+  useEffect(() => {
+    joinConversation(conversationId);
+    return () => {
+      leaveConversation(conversationId);
+    };
+  }, [conversationId, joinConversation, leaveConversation]);
 
   // Mark messages as read
   useEffect(() => {

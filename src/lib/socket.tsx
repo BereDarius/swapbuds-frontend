@@ -34,6 +34,9 @@ interface SocketContextType {
     }) => void,
   ) => () => void;
   emitTyping: (conversationId: string, isTyping: boolean) => void;
+  // Conversation room management
+  joinConversation: (conversationId: string) => void;
+  leaveConversation: (conversationId: string) => void;
 }
 
 const SocketContext = createContext<SocketContextType | null>(null);
@@ -174,6 +177,20 @@ export function SocketProvider({ children }: SocketProviderProps) {
     }
   };
 
+  const joinConversation = (conversationId: string) => {
+    const currentSocket = socketRef.current;
+    if (currentSocket) {
+      currentSocket.emit("joinConversation", conversationId);
+    }
+  };
+
+  const leaveConversation = (conversationId: string) => {
+    const currentSocket = socketRef.current;
+    if (currentSocket) {
+      currentSocket.emit("leaveConversation", conversationId);
+    }
+  };
+
   const value: SocketContextType = {
     isConnected,
     onMessage,
@@ -182,6 +199,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
     onMessageDeleted,
     onTyping,
     emitTyping,
+    joinConversation,
+    leaveConversation,
   };
 
   return (

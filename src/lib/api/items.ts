@@ -36,13 +36,37 @@ import { api } from "../api";
 export const getItems = async (
   filters: ItemFilters = {},
 ): Promise<PaginatedItemsResponse> => {
+  // If userId is specified, use the dedicated user items endpoint
+  if (filters.userId) {
+    const { userId, ...otherFilters } = filters;
+    const params = new URLSearchParams();
+    if (otherFilters.status) params.append("status", otherFilters.status);
+    if (otherFilters.page) params.append("page", otherFilters.page.toString());
+    if (otherFilters.limit)
+      params.append("limit", otherFilters.limit.toString());
+
+    const queryString = params.toString();
+    const url = queryString
+      ? `/items/user/${userId}?${queryString}`
+      : `/items/user/${userId}`;
+    const response = await api.get<Item[]>(url);
+
+    // Backend returns array, convert to paginated response
+    return {
+      items: response.data,
+      total: response.data.length,
+      page: otherFilters.page || 1,
+      limit: otherFilters.limit || 20,
+      totalPages: 1,
+    };
+  }
+
   const params = new URLSearchParams();
 
   // Add filters to query params
   if (filters.category) params.append("category", filters.category);
   if (filters.condition) params.append("condition", filters.condition);
   if (filters.status) params.append("status", filters.status);
-  if (filters.userId) params.append("userId", filters.userId);
   if (filters.search) params.append("search", filters.search);
   if (filters.minValue !== undefined)
     params.append("minValue", filters.minValue.toString());
@@ -153,10 +177,10 @@ export const uploadImage = async (
   file: File,
 ): Promise<CloudinaryUploadResponse> => {
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("files", file); // Backend expects 'files' field name
 
-  const response = await api.post<CloudinaryUploadResponse>(
-    "/upload/image",
+  const response = await api.post<{ images: CloudinaryUploadResponse[] }>(
+    "/upload/images", // Backend endpoint is plural
     formData,
     {
       headers: {
@@ -165,7 +189,8 @@ export const uploadImage = async (
     },
   );
 
-  return response.data;
+  // Return first image since we only upload one
+  return response.data.images[0];
 };
 
 /**
@@ -178,9 +203,13 @@ export const uploadImage = async (
  * ```typescript
  * await deleteImage("items/abc123");
  * ```
+ *
+ * @note Currently not implemented - images are deleted when items are deleted
  */
 export const deleteImage = async (publicId: string): Promise<void> => {
-  await api.delete(`/upload/image/${publicId}`);
+  // TODO: Implement delete endpoint in backend if needed
+  // For now, images are cleaned up when items are deleted
+  console.warn("Image delete endpoint not yet implemented:", publicId);
 };
 
 /**
@@ -193,9 +222,16 @@ export const deleteImage = async (publicId: string): Promise<void> => {
  * ```typescript
  * await incrementItemView("cm3abc123");
  * ```
+ *
+ * @note Backend endpoint not yet implemented - fails silently
  */
 export const incrementItemView = async (id: string): Promise<void> => {
-  await api.post(`/items/${id}/view`);
+  try {
+    await api.post(`/items/${id}/view`);
+  } catch {
+    // Endpoint not implemented yet - fail silently
+    console.debug("View tracking not available:", id);
+  }
 };
 
 /**
@@ -214,7 +250,25 @@ export const getUserItems = async (
   userId: string,
   filters: Omit<ItemFilters, "userId"> = {},
 ): Promise<PaginatedItemsResponse> => {
-  return getItems({ ...filters, userId });
+  const params = new URLSearchParams();
+  if (filters.status) params.append("status", filters.status);
+  if (filters.page) params.append("page", filters.page.toString());
+  if (filters.limit) params.append("limit", filters.limit.toString());
+
+  const queryString = params.toString();
+  const url = queryString
+    ? `/items/user/${userId}?${queryString}`
+    : `/items/user/${userId}`;
+  const response = await api.get<Item[]>(url);
+
+  // Backend returns array, convert to paginated response
+  return {
+    items: response.data,
+    total: response.data.length,
+    page: filters.page || 1,
+    limit: filters.limit || 20,
+    totalPages: 1,
+  };
 };
 
 /**

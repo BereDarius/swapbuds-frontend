@@ -102,6 +102,11 @@ export function DateOfBirthInput({
     const dayNum = parseInt(newDay);
     if (month && year) {
       onChange(new Date(year, month - 1, dayNum));
+    } else if (!value) {
+      // Set a partial date if month/year not selected yet (use defaults)
+      const tempMonth = month || 1;
+      const tempYear = year || new Date().getFullYear() - 18;
+      onChange(new Date(tempYear, tempMonth - 1, dayNum));
     }
   };
 
@@ -112,6 +117,11 @@ export function DateOfBirthInput({
       const maxDaysInMonth = new Date(year, monthNum, 0).getDate();
       const adjustedDay = Math.min(day, maxDaysInMonth);
       onChange(new Date(year, monthNum - 1, adjustedDay));
+    } else {
+      // Set a partial date with defaults
+      const tempDay = day || 1;
+      const tempYear = year || new Date().getFullYear() - 18;
+      onChange(new Date(tempYear, monthNum - 1, tempDay));
     }
   };
 
@@ -122,6 +132,11 @@ export function DateOfBirthInput({
       const maxDaysInMonth = new Date(yearNum, month, 0).getDate();
       const adjustedDay = Math.min(day, maxDaysInMonth);
       onChange(new Date(yearNum, month - 1, adjustedDay));
+    } else {
+      // Set a partial date with defaults
+      const tempDay = day || 1;
+      const tempMonth = month || 1;
+      onChange(new Date(yearNum, tempMonth - 1, tempDay));
     }
   };
 

@@ -1,5 +1,7 @@
 import { CookieBanner } from "@/components/cookie-consent/cookie-banner";
 import { CookiePreferencesModal } from "@/components/cookie-consent/cookie-preferences-modal";
+import { Footer } from "@/components/layout/footer";
+import { Navbar } from "@/components/layout/navbar";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
@@ -33,7 +35,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          {children}
+          <div className="flex min-h-screen flex-col">
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
           <Toaster />
           <CookieBanner />
           <CookiePreferencesModal />

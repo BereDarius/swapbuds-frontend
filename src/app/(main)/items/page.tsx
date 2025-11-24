@@ -79,7 +79,7 @@ export default function ItemsPage() {
   };
 
   return (
-    <div className="container py-8">
+    <>
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
@@ -116,14 +116,16 @@ export default function ItemsPage() {
           <div className="flex-1 min-w-[200px]">
             <Label>Category</Label>
             <Select
-              value={filters.category || ""}
-              onValueChange={(value) => handleFilterChange("category", value)}
+              value={filters.category || "ALL"}
+              onValueChange={(value) =>
+                handleFilterChange("category", value === "ALL" ? "" : value)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="All categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All categories</SelectItem>
+                <SelectItem value="ALL">All categories</SelectItem>
                 {Object.values(ItemCategory).map((category) => (
                   <SelectItem key={category} value={category}>
                     {CATEGORY_INFO[category].icon}{" "}
@@ -138,14 +140,16 @@ export default function ItemsPage() {
           <div className="flex-1 min-w-[200px]">
             <Label>Condition</Label>
             <Select
-              value={filters.condition || ""}
-              onValueChange={(value) => handleFilterChange("condition", value)}
+              value={filters.condition || "ALL"}
+              onValueChange={(value) =>
+                handleFilterChange("condition", value === "ALL" ? "" : value)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Any condition" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any condition</SelectItem>
+                <SelectItem value="ALL">Any condition</SelectItem>
                 {Object.values(ItemCondition).map((condition) => (
                   <SelectItem key={condition} value={condition}>
                     {CONDITION_INFO[condition].label}
@@ -290,6 +294,6 @@ export default function ItemsPage() {
           </Button>
         </div>
       )}
-    </div>
+    </>
   );
 }

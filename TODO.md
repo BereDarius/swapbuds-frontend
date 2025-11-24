@@ -1368,6 +1368,18 @@ components/
 
 ---
 
+## Known Issues & Improvements Needed
+
+### Messages System
+
+- **WebSocket event listeners not firing in navbar**: The navbar sets up listeners for `onMessage`, `onMessageRead`, `onConversationRead`, and `onMessageDeleted` events to update the unread message count badge in real-time, but these events are not being triggered when messages are sent/read. Currently relying on 5-second polling as a workaround.
+  - **Impact**: Unread message badge doesn't update instantly when new messages arrive
+  - **Current workaround**: useQuery refetchInterval set to 5000ms (5 seconds)
+  - **Root cause**: Likely socket event registration timing or event name mismatch between frontend listeners and backend emits
+  - **Suggested fix**: Debug WebSocket event flow, verify event names match between frontend socket.tsx listeners and backend messages.gateway.ts emits, ensure socket is connected before registering listeners
+
+---
+
 ## END OF FRONTEND TODO
 
 ---

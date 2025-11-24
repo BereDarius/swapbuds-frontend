@@ -1,0 +1,11 @@
+{
+  "watch": [
+    ".env",
+    ".env.local",
+    ".env.development",
+    ".env.development.local"
+  ],
+  "exec": "next dev",
+  "ext": "env",
+  "delay": 1000
+}

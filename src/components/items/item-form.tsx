@@ -56,7 +56,7 @@ const itemFormSchema = z.object({
   condition: z.nativeEnum(ItemCondition, {
     message: "Please select a condition",
   }),
-  imageUrls: z
+  images: z
     .array(z.string().url())
     .min(1, "At least one image is required")
     .max(5, "Maximum 5 images allowed"),
@@ -98,7 +98,7 @@ export function ItemForm({
       description: item?.description || "",
       category: item?.category || undefined,
       condition: item?.condition || undefined,
-      imageUrls: item?.images?.map((img) => img.url) || [],
+      images: item?.images || [],
       estimatedValue: item?.estimatedValue || null,
       deliveryMethods: item?.deliveryMethods || [],
       deliveryScope: item?.deliveryScope || undefined,
@@ -115,7 +115,7 @@ export function ItemForm({
         description: values.description,
         category: values.category,
         condition: values.condition,
-        imageUrls: values.imageUrls,
+        images: values.images,
         estimatedValue: values.estimatedValue || undefined,
         deliveryMethods: values.deliveryMethods,
         deliveryScope: values.deliveryScope,
@@ -259,7 +259,7 @@ export function ItemForm({
         {/* Images */}
         <FormField
           control={form.control}
-          name="imageUrls"
+          name="images"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Images</FormLabel>

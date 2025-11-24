@@ -135,7 +135,8 @@ export default function RegisterPage() {
         password: data.password,
         dateOfBirth: data.dateOfBirth.toISOString(),
         selfDeclaredAge18: data.selfDeclaredAge18,
-        marketingConsent: data.marketingConsent || false,
+        tosVersion: "1.0.0", // Current Terms of Service version
+        privacyVersion: "1.0.0", // Current Privacy Policy version
         recaptchaToken,
       };
 
