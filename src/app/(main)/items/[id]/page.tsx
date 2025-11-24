@@ -11,9 +11,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getItemById, incrementItemView } from "@/lib/api/items";
+import { deleteItem, getItemById, incrementItemView } from "@/lib/api/items";
 import { useAuthStore } from "@/stores/authStore";
 import {
   CATEGORY_INFO,
@@ -21,7 +30,7 @@ import {
   DELIVERY_METHOD_INFO,
   DELIVERY_SCOPE_INFO,
 } from "@/types/item";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Calendar,
   Edit,
@@ -36,13 +45,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function ItemDetailPage() {
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const itemId = params.id as string;
   const { user } = useAuthStore();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     data: item,
@@ -62,6 +75,27 @@ export default function ItemDetailPage() {
       });
     }
   }, [itemId]);
+
+  const handleDelete = async () => {
+    if (!itemId) return;
+
+    try {
+      setIsDeleting(true);
+      await deleteItem(itemId);
+
+      // Invalidate queries and redirect
+      queryClient.invalidateQueries({ queryKey: ["items"] });
+
+      toast.success("Item deleted successfully");
+      router.push("/items");
+    } catch (error) {
+      console.error("Failed to delete item:", error);
+      toast.error("Failed to delete item. Please try again.");
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+    }
+  };
 
   const isOwner = user?.id === item?.userId;
   const conditionInfo = item ? CONDITION_INFO[item.condition] : null;
@@ -192,9 +226,41 @@ export default function ItemDetailPage() {
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="icon">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <Dialog
+                    open={deleteDialogOpen}
+                    onOpenChange={setDeleteDialogOpen}
+                  >
+                    <DialogTrigger asChild>
+                      <Button variant="outline" size="icon">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Delete Item</DialogTitle>
+                        <DialogDescription>
+                          Are you sure you want to delete this item? This action
+                          cannot be undone.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <DialogFooter>
+                        <Button
+                          variant="outline"
+                          onClick={() => setDeleteDialogOpen(false)}
+                          disabled={isDeleting}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={handleDelete}
+                          disabled={isDeleting}
+                        >
+                          {isDeleting ? "Deleting..." : "Delete"}
+                        </Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               )}
             </div>
