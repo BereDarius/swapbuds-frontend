@@ -1,5 +1,6 @@
 "use client";
 
+import { RecaptchaProvider } from "@/components/recaptcha/recaptcha-provider";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState, type ReactNode } from "react";
@@ -45,9 +46,11 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
-      {/* Development-only devtools panel for inspecting queries/cache */}
-      <ReactQueryDevtools initialIsOpen={false} />
+      <RecaptchaProvider>
+        {children}
+        {/* Development-only devtools panel for inspecting queries/cache */}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </RecaptchaProvider>
     </QueryClientProvider>
   );
 }

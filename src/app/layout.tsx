@@ -1,3 +1,5 @@
+import { CookieBanner } from "@/components/cookie-consent/cookie-banner";
+import { CookiePreferencesModal } from "@/components/cookie-consent/cookie-preferences-modal";
 import { Providers } from "@/components/providers";
 import { Toaster } from "@/components/ui/sonner";
 import type { Metadata } from "next";
@@ -33,6 +35,8 @@ export default function RootLayout({
         <Providers>
           {children}
           <Toaster />
+          <CookieBanner />
+          <CookiePreferencesModal />
         </Providers>
       </body>
     </html>
