@@ -12,6 +12,7 @@ import {
   markConversationAsRead,
   sendMessage,
 } from "@/lib/api/messages";
+import { useSocket } from "@/lib/socket";
 import { useAuthStore } from "@/stores/authStore";
 import type { Message } from "@/types/message";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -34,8 +35,13 @@ export default function ConversationDetailPage({
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+  const { onMessage, onMessageRead, onTyping, emitTyping, isConnected } =
+    useSocket();
   const [messageText, setMessageText] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [typerUsername, setTyperUsername] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get conversation details
   const {
@@ -49,7 +55,7 @@ export default function ConversationDetailPage({
 
   const conversation = conversations?.find((c) => c.id === conversationId);
 
-  // Get messages
+  // Get messages (no polling - WebSocket will handle updates)
   const {
     data: messagesData,
     isLoading: messagesLoading,
@@ -58,7 +64,6 @@ export default function ConversationDetailPage({
     queryKey: ["messages", conversationId],
     queryFn: () => getMessages(conversationId),
     enabled: !!conversation,
-    refetchInterval: 5000, // Poll every 5 seconds for new messages
   });
 
   // Mark messages as read
@@ -72,6 +77,61 @@ export default function ConversationDetailPage({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messagesData?.messages]);
+
+  // WebSocket: Listen for new messages
+  useEffect(() => {
+    const cleanup = onMessage((message: Message) => {
+      // Only update if message is for this conversation
+      if (message.conversationId === conversationId) {
+        queryClient.invalidateQueries({
+          queryKey: ["messages", conversationId],
+        });
+        queryClient.invalidateQueries({ queryKey: ["conversations"] });
+      }
+    });
+
+    return cleanup;
+  }, [conversationId, onMessage, queryClient]);
+
+  // WebSocket: Listen for message read status updates
+  useEffect(() => {
+    const cleanup = onMessageRead((data) => {
+      if (data.conversationId === conversationId) {
+        queryClient.invalidateQueries({
+          queryKey: ["messages", conversationId],
+        });
+      }
+    });
+
+    return cleanup;
+  }, [conversationId, onMessageRead, queryClient]);
+
+  // WebSocket: Listen for typing indicators
+  useEffect(() => {
+    const cleanup = onTyping((data) => {
+      if (data.conversationId === conversationId) {
+        setIsTyping(data.isTyping);
+        setTyperUsername(data.typerUsername);
+
+        // Clear typing indicator after 3 seconds
+        if (data.isTyping && typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+        }
+        if (data.isTyping) {
+          typingTimeoutRef.current = setTimeout(() => {
+            setIsTyping(false);
+          }, 3000);
+        }
+      }
+    });
+
+    return () => {
+      cleanup();
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, [conversationId, onTyping]);
 
   // Send message mutation
   const sendMessageMutation = useMutation({
@@ -91,11 +151,25 @@ export default function ConversationDetailPage({
   const handleSendMessage = () => {
     if (!messageText.trim() || !conversation?.otherUser) return;
 
+    // Stop typing indicator when sending
+    emitTyping(conversationId, false);
+
     sendMessageMutation.mutate({
       recipientId: conversation.otherUser.id,
       content: messageText.trim(),
       tradeId: conversation.tradeId || undefined,
     });
+  };
+
+  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setMessageText(e.target.value);
+
+    // Emit typing indicator
+    if (e.target.value && !isTyping) {
+      emitTyping(conversationId, true);
+    } else if (!e.target.value && isTyping) {
+      emitTyping(conversationId, false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -243,31 +317,44 @@ export default function ConversationDetailPage({
               <div ref={messagesEndRef} />
             </div>
           )}
+
+          {/* Typing Indicator */}
+          {isTyping && typerUsername && (
+            <div className="text-sm text-muted-foreground italic px-4 pb-2">
+              {typerUsername} is typing...
+            </div>
+          )}
         </CardContent>
       </Card>
 
       {/* Message Input */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex gap-2">
-            <Textarea
-              placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="min-h-20 resize-none"
-              maxLength={5000}
-              disabled={sendMessageMutation.isPending}
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!messageText.trim() || sendMessageMutation.isPending}
-              size="icon"
-              className="shrink-0"
-            >
-              <Send className="h-5 w-5" />
-            </Button>
-          </div>
+          {isConnected ? (
+            <div className="flex gap-2">
+              <Textarea
+                placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
+                value={messageText}
+                onChange={handleMessageChange}
+                onKeyDown={handleKeyDown}
+                className="min-h-20 resize-none"
+                maxLength={5000}
+                disabled={sendMessageMutation.isPending}
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!messageText.trim() || sendMessageMutation.isPending}
+                size="icon"
+                className="shrink-0"
+              >
+                <Send className="h-5 w-5" />
+              </Button>
+            </div>
+          ) : (
+            <div className="text-center text-sm text-muted-foreground py-4">
+              Connecting to real-time messaging...
+            </div>
+          )}
           <p className="text-xs text-muted-foreground mt-2">
             {messageText.length}/5000 characters
           </p>

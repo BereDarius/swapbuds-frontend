@@ -5,12 +5,16 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getConversations } from "@/lib/api/messages";
-import { useQuery } from "@tanstack/react-query";
+import { useSocket } from "@/lib/socket";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageSquare, Search } from "lucide-react";
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function MessagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const queryClient = useQueryClient();
+  const { onMessage, onConversationRead } = useSocket();
 
   const {
     data: conversations,
@@ -20,6 +24,26 @@ export default function MessagesPage() {
     queryKey: ["conversations"],
     queryFn: getConversations,
   });
+
+  // WebSocket: Listen for new messages to update conversation list
+  useEffect(() => {
+    const cleanup = onMessage(() => {
+      // Refresh conversations list when any message is received
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    });
+
+    return cleanup;
+  }, [onMessage, queryClient]);
+
+  // WebSocket: Listen for conversation read updates
+  useEffect(() => {
+    const cleanup = onConversationRead(() => {
+      // Refresh conversations list when messages are marked as read
+      queryClient.invalidateQueries({ queryKey: ["conversations"] });
+    });
+
+    return cleanup;
+  }, [onConversationRead, queryClient]);
 
   // Filter conversations based on search query
   const filteredConversations = conversations?.filter((conv) => {
@@ -99,7 +123,7 @@ export default function MessagesPage() {
             </p>
             {!searchQuery && (
               <Button asChild>
-                <a href="/trades">Browse Trades</a>
+                <Link href="/trades">Browse Trades</Link>
               </Button>
             )}
           </CardContent>
