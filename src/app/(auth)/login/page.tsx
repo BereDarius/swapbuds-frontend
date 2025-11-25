@@ -18,14 +18,16 @@ import { getErrorMessage } from "@/lib/errors";
 import { useAuthStore } from "@/stores/authStore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
+  const { user } = useAuthStore();
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState("");
   const { executeRecaptcha, isRecaptchaLoaded } = useRecaptcha();
 
   const [formData, setFormData] = useState({
@@ -33,14 +35,23 @@ export default function LoginPage() {
     password: "",
   });
 
+  useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+  }, [user, router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError("");
 
     try {
       const recaptchaToken = await executeRecaptcha("login");
       if (!recaptchaToken) {
-        toast.error("Verification failed. Please try again.");
+        const errorMsg = "Verification failed. Please try again.";
+        setError(errorMsg);
+        toast.error(errorMsg);
         setIsLoading(false);
         return;
       }
@@ -51,12 +62,21 @@ export default function LoginPage() {
       });
 
       const { user, accessToken } = response.data;
+
+      // Store remember me preference
+      if (rememberMe) {
+        localStorage.setItem("rememberMe", "true");
+      } else {
+        localStorage.setItem("rememberMe", "false");
+      }
+
       setAuth(user, accessToken);
 
       toast.success(`Welcome back, ${user.username}!`);
       router.push("/items");
     } catch (error) {
       const message = getErrorMessage(error, "Invalid email or password");
+      setError(message);
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -72,6 +92,11 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input

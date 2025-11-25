@@ -296,8 +296,8 @@ export default function SupportChatPage() {
           ) : (
             <div className="space-y-4">
               {messages.map((msg) => {
-                const isAgent = msg.author?.role !== "USER";
-                const isOwn = msg.authorId === user?.id;
+                const isOwn = msg.senderId === user?.id;
+                const isAgent = !isOwn && msg.sender?.role !== "USER";
 
                 return (
                   <div
@@ -316,7 +316,7 @@ export default function SupportChatPage() {
                         <AvatarFallback>
                           {isAgent
                             ? "SA"
-                            : msg.author?.username?.slice(0, 2).toUpperCase() ||
+                            : msg.sender?.username?.slice(0, 2).toUpperCase() ||
                               "??"}
                         </AvatarFallback>
                       </Avatar>
@@ -330,9 +330,9 @@ export default function SupportChatPage() {
                               : "bg-muted"
                           }`}
                         >
-                          {isAgent && !isOwn && (
+                          {isAgent && (
                             <p className="text-xs font-semibold mb-1">
-                              {msg.author?.username || "Support Agent"}
+                              {msg.sender?.username || "Support Agent"}
                             </p>
                           )}
                           <p className="whitespace-pre-wrap wrap-break-word">

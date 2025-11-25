@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   getNotifications,
+  markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "@/lib/api/notifications";
 import { useNotificationsSocket } from "@/lib/socket/notifications";
@@ -31,6 +32,13 @@ export default function NotificationsPage() {
 
   const markReadMutation = useMutation({
     mutationFn: markNotificationAsRead,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+  });
+
+  const markAllReadMutation = useMutation({
+    mutationFn: markAllNotificationsAsRead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
@@ -100,11 +108,14 @@ export default function NotificationsPage() {
         {unreadNotifications.length > 0 && (
           <Button
             variant="outline"
-            onClick={() => {
-              unreadNotifications.forEach((n) => markReadMutation.mutate(n.id));
-            }}
+            onClick={() => markAllReadMutation.mutate()}
+            disabled={markAllReadMutation.isPending}
           >
-            <Check className="mr-2 h-4 w-4" />
+            {markAllReadMutation.isPending ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Check className="mr-2 h-4 w-4" />
+            )}
             Mark all read
           </Button>
         )}

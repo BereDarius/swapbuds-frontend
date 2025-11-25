@@ -57,7 +57,10 @@ api.interceptors.request.use(
       config.data,
     );
 
-    const token = localStorage.getItem("accessToken");
+    // Check both localStorage and sessionStorage for token
+    const token =
+      localStorage.getItem("accessToken") ||
+      sessionStorage.getItem("accessToken");
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -102,10 +105,19 @@ api.interceptors.response.use(
     );
 
     if (error.response?.status === 401) {
-      // Clear token and redirect to login
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
-      window.location.href = "/login";
+      // Don't redirect if it's a login or register request failure
+      const isAuthEndpoint =
+        error.config?.url?.includes("/auth/login") ||
+        error.config?.url?.includes("/auth/register");
+
+      if (!isAuthEndpoint) {
+        // Clear token and redirect to login only for authenticated endpoints
+        localStorage.removeItem("accessToken");
+        sessionStorage.removeItem("accessToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("rememberMe");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   },

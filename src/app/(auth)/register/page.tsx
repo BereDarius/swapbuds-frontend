@@ -20,20 +20,27 @@ import {
 } from "@/components/ui/popover";
 import { useRecaptcha } from "@/hooks/useRecaptcha";
 import { api } from "@/lib/api";
+import { getActiveLegalDocument } from "@/lib/api/legal";
 import { getErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
+import { Language, LegalDocumentType } from "@/types/legal";
 import { differenceInYears, format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
+  const { user } = useAuthStore();
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [tosVersion, setTosVersion] = useState<string>("");
+  const [privacyVersion, setPrivacyVersion] = useState<string>("");
+  const [isLoadingLegal, setIsLoadingLegal] = useState(true);
   const { executeRecaptcha, isRecaptchaLoaded } = useRecaptcha();
 
   const [formData, setFormData] = useState({
@@ -55,6 +62,34 @@ export default function RegisterPage() {
     tosAccepted: "",
     privacyAccepted: "",
   });
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      router.push("/");
+    }
+  }, [user, router]);
+
+  // Fetch legal document versions on mount
+  useEffect(() => {
+    const fetchLegalVersions = async () => {
+      try {
+        const [tos, privacy] = await Promise.all([
+          getActiveLegalDocument(LegalDocumentType.TOS, Language.EN),
+          getActiveLegalDocument(LegalDocumentType.PRIVACY_POLICY, Language.EN),
+        ]);
+        setTosVersion(tos.version);
+        setPrivacyVersion(privacy.version);
+      } catch (error) {
+        console.error("Failed to fetch legal documents:", error);
+        toast.error("Failed to load legal documents. Please refresh the page.");
+      } finally {
+        setIsLoadingLegal(false);
+      }
+    };
+
+    fetchLegalVersions();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {
@@ -123,11 +158,14 @@ export default function RegisterPage() {
     }
 
     setIsLoading(true);
+    setAuthError("");
 
     try {
       const recaptchaToken = await executeRecaptcha("register");
       if (!recaptchaToken) {
-        toast.error("Verification failed. Please try again.");
+        const errorMsg = "Verification failed. Please try again.";
+        setAuthError(errorMsg);
+        toast.error(errorMsg);
         setIsLoading(false);
         return;
       }
@@ -138,8 +176,8 @@ export default function RegisterPage() {
         password: formData.password,
         dateOfBirth: formData.dateOfBirth?.toISOString(),
         selfDeclaredAge18: formData.selfDeclaredAge18,
-        tosVersion: "1.0.0",
-        privacyVersion: "1.0.0",
+        tosVersion,
+        privacyVersion,
         recaptchaToken,
       });
 
@@ -150,6 +188,7 @@ export default function RegisterPage() {
       router.push("/items");
     } catch (error) {
       const message = getErrorMessage(error, "Failed to create account");
+      setAuthError(message);
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -169,6 +208,11 @@ export default function RegisterPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {authError && (
+              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                {authError}
+              </div>
+            )}
             {/* Username */}
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
@@ -309,7 +353,7 @@ export default function RegisterPage() {
                 >
                   I accept the{" "}
                   <Link
-                    href="/legal/terms"
+                    href="/terms"
                     target="_blank"
                     className="text-primary hover:underline"
                   >
@@ -342,7 +386,7 @@ export default function RegisterPage() {
                 >
                   I accept the{" "}
                   <Link
-                    href="/legal/privacy"
+                    href="/privacy"
                     target="_blank"
                     className="text-primary hover:underline"
                   >
@@ -360,12 +404,24 @@ export default function RegisterPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading || !isRecaptchaLoaded}
+              disabled={isLoading || !isRecaptchaLoaded || isLoadingLegal}
             >
-              {isLoading ? "Creating account..." : "Create account"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                "Create account"
+              )}
             </Button>
 
-            {!isRecaptchaLoaded && (
+            {isLoadingLegal && (
+              <p className="text-center text-xs text-muted-foreground">
+                Loading legal documents...
+              </p>
+            )}
+            {!isRecaptchaLoaded && !isLoadingLegal && (
               <p className="text-center text-xs text-muted-foreground">
                 Loading security verification...
               </p>

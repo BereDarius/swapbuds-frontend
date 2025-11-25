@@ -36,7 +36,7 @@ export async function getSupportChatById(chatId: string): Promise<SupportChat> {
 export async function createSupportChat(
   data: CreateChatDto,
 ): Promise<SupportChat> {
-  const response = await api.post<SupportChat>("/support/chats", data);
+  const response = await api.post<SupportChat>("/support/chat", data);
   return response.data;
 }
 

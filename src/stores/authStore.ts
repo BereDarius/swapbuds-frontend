@@ -68,18 +68,29 @@ export const useAuthStore = create<AuthState>()(
       },
       /**
        * Sets authentication state after successful login/register
-       * Updates both Zustand store and localStorage
+       * Updates both Zustand store and localStorage/sessionStorage based on rememberMe preference
        */
       setAuth: (user, accessToken) => {
-        localStorage.setItem("accessToken", accessToken);
+        const rememberMe = localStorage.getItem("rememberMe") === "true";
+
+        if (rememberMe) {
+          // Persist token in localStorage for long-term storage
+          localStorage.setItem("accessToken", accessToken);
+        } else {
+          // Use sessionStorage for temporary storage (cleared when browser closes)
+          sessionStorage.setItem("accessToken", accessToken);
+        }
+
         set({ user, accessToken, isAuthenticated: true });
       },
       /**
        * Clears authentication state on logout
-       * Removes token from both Zustand store and localStorage
+       * Removes token from both Zustand store, localStorage, and sessionStorage
        */
       clearAuth: () => {
         localStorage.removeItem("accessToken");
+        sessionStorage.removeItem("accessToken");
+        localStorage.removeItem("rememberMe");
         set({ user: null, accessToken: null, isAuthenticated: false });
       },
     }),

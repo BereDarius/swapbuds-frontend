@@ -127,7 +127,7 @@ export default function Home() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/login">Browse Items</Link>
+              <Link href="/items">Browse Items</Link>
             </Button>
           </div>
 

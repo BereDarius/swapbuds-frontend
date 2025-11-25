@@ -64,10 +64,10 @@ export interface SupportMessageAuthor {
 export interface SupportMessage {
   id: string;
   chatId: string;
-  authorId: string;
-  author: SupportMessageAuthor;
+  senderId: string;
+  sender: SupportMessageAuthor;
   message: string;
-  isInternal: boolean; // Internal notes visible only to support staff
+  isSystem?: boolean; // System messages (e.g., "Agent joined", "Chat closed")
   createdAt: string;
 }
 

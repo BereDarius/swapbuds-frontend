@@ -26,12 +26,9 @@ export async function getMessages(
   conversationId: string,
   params?: GetMessagesDto,
 ): Promise<MessagesResponse> {
-  const response = await api.get(
-    `/messages/conversations/${conversationId}/messages`,
-    {
-      params,
-    },
-  );
+  const response = await api.get(`/messages/conversations/${conversationId}`, {
+    params,
+  });
   return response.data;
 }
 

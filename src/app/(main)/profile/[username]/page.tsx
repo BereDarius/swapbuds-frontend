@@ -109,9 +109,13 @@ export default function UserProfilePage() {
                 </Button>
               ) : (
                 <>
-                  <Button>
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Message
+                  <Button asChild>
+                    <Link
+                      href={`/messages/new?userId=${user.id}&username=${user.username}`}
+                    >
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Message
+                    </Link>
                   </Button>
                   <Button variant="outline">Report</Button>
                 </>
