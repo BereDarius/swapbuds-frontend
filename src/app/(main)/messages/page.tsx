@@ -1,241 +1,125 @@
 "use client";
 
-import { ConversationCard } from "@/components/messages/conversation-card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { getConversations, sendMessage } from "@/lib/api/messages";
-import { useMessagesSocket } from "@/lib/socket";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageSquare, Search, Send } from "lucide-react";
+import { getConversations } from "@/lib/api/messages";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { Loader2, MessageSquare, Search } from "lucide-react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 
 export default function MessagesPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [messageText, setMessageText] = useState("");
-  const queryClient = useQueryClient();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { onMessage, onConversationRead } = useMessagesSocket();
+  const [search, setSearch] = useState("");
 
-  // Get compose parameters from URL
-  const compose = searchParams.get("compose") === "true";
-  const recipientId = searchParams.get("recipientId");
-  const recipientUsername = searchParams.get("recipientUsername");
-
-  const [showComposeDialog, setShowComposeDialog] = useState(
-    compose && !!recipientId,
-  );
-
-  const {
-    data: conversations,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: conversations = [], isLoading } = useQuery({
     queryKey: ["conversations"],
     queryFn: getConversations,
   });
 
-  // WebSocket: Listen for new messages to update conversation list
-  useEffect(() => {
-    const cleanup = onMessage(() => {
-      // Refresh conversations list when any message is received
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
-    });
-
-    return cleanup;
-  }, [onMessage, queryClient]);
-
-  // WebSocket: Listen for conversation read updates
-  useEffect(() => {
-    const cleanup = onConversationRead(() => {
-      // Refresh conversations list when messages are marked as read
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
-    });
-
-    return cleanup;
-  }, [onConversationRead, queryClient]);
-
-  // Send message mutation
-  const sendMessageMutation = useMutation({
-    mutationFn: sendMessage,
-    onSuccess: async (data) => {
-      toast.success("Message sent!");
-      setMessageText("");
-      setShowComposeDialog(false);
-      // Refetch conversations to ensure new conversation is in cache before navigating
-      await queryClient.refetchQueries({ queryKey: ["conversations"] });
-      router.push(`/messages/${data.conversationId}`);
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Failed to send message");
-    },
-  });
-
-  const handleSendMessage = () => {
-    if (!messageText.trim() || !recipientId) return;
-
-    sendMessageMutation.mutate({
-      recipientId,
-      content: messageText.trim(),
-      type: "text",
-    });
-  };
-
-  // Filter conversations based on search query
-  const filteredConversations = conversations?.filter((conv) => {
-    if (!searchQuery) return true;
-    const query = searchQuery.toLowerCase();
-    return conv.otherUser?.username.toLowerCase().includes(query);
-  });
-
-  if (isLoading) {
-    return (
-      <div className="container max-w-4xl py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading conversations...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container max-w-4xl py-8">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              Failed to load conversations
-            </h3>
-            <p className="text-muted-foreground">
-              {error instanceof Error
-                ? error.message
-                : "An error occurred while loading your messages"}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const filteredConversations = conversations.filter((conv) =>
+    conv.otherUser?.username.toLowerCase().includes(search.toLowerCase()),
+  );
 
   return (
-    <>
-      {/* Compose Message Dialog */}
-      <Dialog
-        open={showComposeDialog}
-        onOpenChange={(open) => {
-          setShowComposeDialog(open);
-          if (!open) {
-            // Clear URL params when dialog closes
-            router.push("/messages");
-          }
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              Send message to @{recipientUsername || "user"}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <Textarea
-              placeholder="Type your message..."
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              rows={4}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-            />
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowComposeDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSendMessage}
-                disabled={!messageText.trim() || sendMessageMutation.isPending}
-              >
-                <Send className="h-4 w-4 mr-2" />
-                {sendMessageMutation.isPending ? "Sending..." : "Send"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      <div className="container max-w-4xl py-8">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Messages</h1>
-          <p className="text-muted-foreground">
-            View and manage your conversations
-          </p>
-        </div>
-
-        {/* Search Bar */}
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search conversations by username..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-
-        {/* Conversations List */}
-        {!filteredConversations || filteredConversations.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">
-                {searchQuery ? "No conversations found" : "No messages yet"}
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                {searchQuery
-                  ? "Try searching with a different username"
-                  : "Start a conversation by messaging a user from a trade or their profile"}
-              </p>
-              {!searchQuery && (
-                <Button asChild>
-                  <Link href="/trades">Browse Trades</Link>
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {filteredConversations.map((conversation) => (
-              <ConversationCard
-                key={conversation.id}
-                conversation={conversation}
-              />
-            ))}
-          </div>
-        )}
+    <div className="container mx-auto max-w-4xl px-4 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-2">Messages</h1>
+        <p className="text-muted-foreground">Chat with other traders</p>
       </div>
-    </>
+
+      {/* Search */}
+      <div className="mb-6 relative">
+        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search conversations..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
+      {/* Loading */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
+
+      {/* Empty */}
+      {!isLoading && filteredConversations.length === 0 && (
+        <div className="text-center py-12">
+          <MessageSquare className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No messages yet</h3>
+          <p className="text-muted-foreground mb-6">
+            {search
+              ? "No conversations match your search"
+              : "Start a conversation by messaging a user"}
+          </p>
+          {!search && (
+            <Button asChild>
+              <Link href="/trades">Browse Trades</Link>
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Conversations */}
+      {!isLoading && filteredConversations.length > 0 && (
+        <div className="space-y-2">
+          {filteredConversations.map((conversation) => {
+            const otherUser = conversation.otherUser;
+
+            return (
+              <Link key={conversation.id} href={`/messages/${conversation.id}`}>
+                <Card className="cursor-pointer transition-all hover:shadow-md">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <Avatar>
+                        <AvatarImage src={otherUser?.avatarUrl || undefined} />
+                        <AvatarFallback>
+                          {otherUser?.username.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="font-semibold">{otherUser?.username}</p>
+                          {conversation.lastMessageAt && (
+                            <span className="text-xs text-muted-foreground">
+                              {format(
+                                new Date(conversation.lastMessageAt),
+                                "MMM d, h:mm a",
+                              )}
+                            </span>
+                          )}
+                        </div>
+                        {conversation.lastMessageContent && (
+                          <p className="text-sm text-muted-foreground truncate">
+                            {conversation.lastMessageContent}
+                          </p>
+                        )}
+                        {conversation.trade && (
+                          <Badge variant="outline" className="mt-2">
+                            Trade: {conversation.trade.itemOffered.title}
+                          </Badge>
+                        )}
+                      </div>
+                      {(conversation.unreadCount ?? 0) > 0 && (
+                        <Badge variant="destructive">
+                          {conversation.unreadCount}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 }

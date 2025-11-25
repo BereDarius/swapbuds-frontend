@@ -56,6 +56,14 @@ export function RecaptchaProvider({ children }: RecaptchaProviderProps) {
         defer: true,
         appendTo: "head",
       }}
+      useEnterprise={false}
+      useRecaptchaNet={false}
+      container={{
+        parameters: {
+          badge: "inline", // Move badge inline instead of floating
+          theme: "light",
+        },
+      }}
     >
       {children}
       <GoogleReCaptcha onVerify={handleVerify} />

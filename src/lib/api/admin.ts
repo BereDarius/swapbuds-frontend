@@ -21,9 +21,15 @@ import { api } from "../api";
 /**
  * Get all users (admin view)
  */
-export async function getUsers(
-  query?: GetUsersQueryDto,
-): Promise<{ users: UserProfile[]; total: number }> {
+export async function getUsers(query?: GetUsersQueryDto): Promise<{
+  users: UserProfile[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}> {
   const params = new URLSearchParams();
   if (query?.role) params.append("role", query.role);
   if (query?.isVerified !== undefined)
@@ -83,6 +89,38 @@ export async function bulkUnbanUsers(data: BulkUnbanUsersDto): Promise<void> {
  */
 export async function bulkChangeRole(data: BulkChangeRoleDto): Promise<void> {
   await api.post("/admin/users/bulk-role", data);
+}
+
+/**
+ * Get admin dashboard statistics
+ */
+export async function getAdminStats(): Promise<{
+  users: {
+    total: number;
+    active: number;
+    inactive: number;
+    newLast7Days: number;
+  };
+  items: {
+    total: number;
+    available: number;
+    inTrade: number;
+    newLast7Days: number;
+  };
+  trades: {
+    total: number;
+    active: number;
+    completed: number;
+    newLast7Days: number;
+  };
+  verifications: {
+    total: number;
+    pending: number;
+    approved: number;
+  };
+}> {
+  const response = await api.get("/admin/stats");
+  return response.data;
 }
 
 /**

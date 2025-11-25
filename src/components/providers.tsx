@@ -1,10 +1,23 @@
 "use client";
 
 import { RecaptchaProvider } from "@/components/recaptcha/recaptcha-provider";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { SocketProvider } from "@/lib/socket";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import dynamic from "next/dynamic";
 import { useState, type ReactNode } from "react";
+
+// Lazy load React Query Devtools only in development
+const ReactQueryDevtools =
+  process.env.NODE_ENV === "development"
+    ? dynamic(
+        () =>
+          import("@tanstack/react-query-devtools").then(
+            (mod) => mod.ReactQueryDevtools,
+          ),
+        { ssr: false },
+      )
+    : () => null;
 
 /**
  * Root providers component for application-wide context
@@ -47,13 +60,15 @@ export function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RecaptchaProvider>
-        <SocketProvider>
-          {children}
-          {/* Development-only devtools panel for inspecting queries/cache */}
-          <ReactQueryDevtools initialIsOpen={false} />
-        </SocketProvider>
-      </RecaptchaProvider>
+      <ThemeProvider>
+        <RecaptchaProvider>
+          <SocketProvider>
+            {children}
+            {/* Development-only devtools panel for inspecting queries/cache */}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </SocketProvider>
+        </RecaptchaProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

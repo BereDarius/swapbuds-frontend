@@ -13,14 +13,25 @@ export async function getConversations(): Promise<Conversation[]> {
   return response.data;
 }
 
+// Get a single conversation with metadata
+export async function getConversation(
+  conversationId: string,
+): Promise<Conversation> {
+  const response = await api.get(`/messages/conversations/${conversationId}`);
+  return response.data;
+}
+
 // Get messages in a conversation
 export async function getMessages(
   conversationId: string,
   params?: GetMessagesDto,
 ): Promise<MessagesResponse> {
-  const response = await api.get(`/messages/conversations/${conversationId}`, {
-    params,
-  });
+  const response = await api.get(
+    `/messages/conversations/${conversationId}/messages`,
+    {
+      params,
+    },
+  );
   return response.data;
 }
 

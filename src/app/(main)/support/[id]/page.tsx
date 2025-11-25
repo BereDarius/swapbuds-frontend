@@ -1,404 +1,420 @@
-/**
- * Support Ticket Detail Page (Live Chat)
- *
- * Real-time chat interface for support tickets with WebSocket support
- */
-
 "use client";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { getSupportChatById, sendSupportMessage } from "@/lib/api/support";
-import { getErrorMessage } from "@/lib/errors";
-import { logger } from "@/lib/logger";
+import {
+  closeSupportChat,
+  getSupportChatById,
+  sendSupportMessage,
+} from "@/lib/api/support";
 import { useSupportSocket } from "@/lib/socket/support";
 import { useAuthStore } from "@/stores/authStore";
-import {
-  SupportChatStatus,
-  SupportPriority,
-  type SupportMessage,
-} from "@/types/support";
+import type { SupportMessage } from "@/types/support";
+import { SupportChatStatus, SupportPriority } from "@/types/support";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
-import {
-  AlertCircle,
-  ArrowLeft,
-  CheckCircle2,
-  Clock,
-  Loader2,
-  MessageSquare,
-  Send,
-} from "lucide-react";
+import { ArrowLeft, Check, Loader2, Send } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-export default function SupportTicketDetailPage() {
-  const params = useParams();
-  const ticketId = params.id as string;
-  const { user } = useAuthStore();
-  const queryClient = useQueryClient();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const [message, setMessage] = useState("");
-  const [isTyping, setIsTyping] = useState<string | null>(null);
+const PRIORITY_LABELS = {
+  [SupportPriority.LOW]: "Low",
+  [SupportPriority.MEDIUM]: "Medium",
+  [SupportPriority.HIGH]: "High",
+  [SupportPriority.URGENT]: "Urgent",
+};
 
+const PRIORITY_COLORS = {
+  [SupportPriority.LOW]: "bg-gray-100 text-gray-800",
+  [SupportPriority.MEDIUM]: "bg-blue-100 text-blue-800",
+  [SupportPriority.HIGH]: "bg-orange-100 text-orange-800",
+  [SupportPriority.URGENT]: "bg-red-100 text-red-800",
+};
+
+const STATUS_LABELS = {
+  [SupportChatStatus.OPEN]: "Open",
+  [SupportChatStatus.IN_PROGRESS]: "In Progress",
+  [SupportChatStatus.WAITING]: "Waiting",
+  [SupportChatStatus.RESOLVED]: "Resolved",
+  [SupportChatStatus.CLOSED]: "Closed",
+};
+
+export default function SupportChatPage() {
+  const params = useParams();
+  const queryClient = useQueryClient();
+  const { user } = useAuthStore();
+  const chatId = params.id as string;
+  const [message, setMessage] = useState("");
+  const [typingAgent, setTypingAgent] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // WebSocket hooks
   const {
-    joinChat,
-    leaveChat,
-    emitTyping,
+    isConnected: isSupportConnected,
     onNewMessage,
     onUserTyping,
-    isConnected: isSupportConnected,
+    onChatAssigned,
+    onChatResolved,
+    onChatClosed,
+    emitTyping,
+    joinChat,
+    leaveChat,
   } = useSupportSocket();
 
-  // Fetch ticket details
-  const { data: ticket, isLoading } = useQuery({
-    queryKey: ["support", "chat", ticketId],
-    queryFn: () => getSupportChatById(ticketId),
-    enabled: !!ticketId,
+  const { data: chat, isLoading } = useQuery({
+    queryKey: ["support-chat", chatId],
+    queryFn: () => getSupportChatById(chatId),
+    enabled: !!chatId,
   });
 
-  // Send message mutation
-  const sendMessageMutation = useMutation({
-    mutationFn: (messageText: string) =>
-      sendSupportMessage(ticketId, { message: messageText }),
+  const sendMutation = useMutation({
+    mutationFn: (message: string) => sendSupportMessage(chatId, { message }),
     onSuccess: () => {
       setMessage("");
       queryClient.invalidateQueries({
-        queryKey: ["support", "chat", ticketId],
+        queryKey: ["support-chat", chatId],
       });
     },
-    onError: (error) => {
-      logger.apiError("POST", `/support/chats/${ticketId}/messages`, error);
-      const errorMessage = getErrorMessage(error, "Failed to send message");
-      toast.error("Failed to send message", { description: errorMessage });
+    onError: () => {
+      toast.error("Failed to send message");
     },
   });
 
-  // Join chat on mount
+  const closeChatMutation = useMutation({
+    mutationFn: () => closeSupportChat(chatId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["support-chat", chatId],
+      });
+      toast.success("Chat closed successfully");
+    },
+    onError: () => {
+      toast.error("Failed to close chat");
+    },
+  });
+
+  // Join chat room when page loads
   useEffect(() => {
-    if (ticketId && isSupportConnected) {
-      joinChat(ticketId);
+    if (chatId && isSupportConnected) {
+      joinChat(chatId);
       return () => {
-        leaveChat(ticketId);
+        leaveChat(chatId);
       };
     }
-  }, [ticketId, joinChat, leaveChat, isSupportConnected]);
+  }, [chatId, isSupportConnected, joinChat, leaveChat]);
 
-  // Listen for new messages
+  // Listen for new messages via WebSocket
   useEffect(() => {
-    if (!ticketId) return;
-
     const unsubscribe = onNewMessage((data) => {
-      if (data.chatId === ticketId) {
-        queryClient.invalidateQueries({
-          queryKey: ["support", "chat", ticketId],
-        });
+      if (data.chatId === chatId) {
+        queryClient.setQueryData<{ messages?: SupportMessage[] }>(
+          ["support-chat", chatId],
+          (old) => {
+            if (!old) return old;
+            const exists = old.messages?.some((m) => m.id === data.message.id);
+            if (exists) return old;
+            return {
+              ...old,
+              messages: [...(old.messages || []), data.message],
+            };
+          },
+        );
+        setTimeout(
+          () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+          100,
+        );
       }
     });
-
     return unsubscribe;
-  }, [ticketId, onNewMessage, queryClient]);
+  }, [chatId, onNewMessage, queryClient]);
 
   // Listen for typing indicators
   useEffect(() => {
-    if (!ticketId) return;
-
     const unsubscribe = onUserTyping((data) => {
-      if (data.chatId === ticketId) {
-        setIsTyping(data.username);
-        setTimeout(() => setIsTyping(null), 3000);
+      if (data.chatId === chatId) {
+        setTypingAgent(data.username);
+        // Clear typing after 3 seconds
+        setTimeout(() => setTypingAgent(null), 3000);
       }
     });
-
     return unsubscribe;
-  }, [ticketId, onUserTyping]);
+  }, [chatId, onUserTyping]);
 
-  // Auto-scroll to bottom when messages change
+  // Listen for chat assigned events
+  useEffect(() => {
+    const unsubscribe = onChatAssigned((data) => {
+      if (data.chatId === chatId) {
+        queryClient.invalidateQueries({ queryKey: ["support-chat", chatId] });
+        toast.success("An agent has been assigned to your chat");
+      }
+    });
+    return unsubscribe;
+  }, [chatId, onChatAssigned, queryClient]);
+
+  // Listen for chat resolved events
+  useEffect(() => {
+    const unsubscribe = onChatResolved((data) => {
+      if (data.chatId === chatId) {
+        queryClient.invalidateQueries({ queryKey: ["support-chat", chatId] });
+        toast.info("This chat has been resolved");
+      }
+    });
+    return unsubscribe;
+  }, [chatId, onChatResolved, queryClient]);
+
+  // Listen for chat closed events
+  useEffect(() => {
+    const unsubscribe = onChatClosed((data) => {
+      if (data.chatId === chatId) {
+        queryClient.invalidateQueries({ queryKey: ["support-chat", chatId] });
+        toast.info("This chat has been closed");
+      }
+    });
+    return unsubscribe;
+  }, [chatId, onChatClosed, queryClient]);
+
+  // Auto-scroll when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [ticket?.messages]);
+  }, [chat?.messages]);
 
   // Handle typing indicator
   const handleTyping = () => {
-    if (user && isSupportConnected) {
-      emitTyping(ticketId, user.username);
+    if (!chatId || !user?.username) return;
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
     }
+
+    emitTyping(chatId, user.username);
+
+    typingTimeoutRef.current = setTimeout(() => {
+      // Stop typing after 2 seconds
+    }, 2000);
   };
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim() || sendMessageMutation.isPending) return;
+    if (!message.trim()) return;
 
-    await sendMessageMutation.mutateAsync(message.trim());
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    sendMutation.mutate(message);
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex min-h-[60vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
-  if (!ticket) {
+  if (!chat) {
     return (
-      <div className="container max-w-2xl py-8">
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <AlertCircle className="h-16 w-16 text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Ticket Not Found</h2>
-            <p className="text-muted-foreground text-center mb-6">
-              This support ticket does not exist or you do not have access to
-              it.
-            </p>
-            <Link href="/support">
-              <Button>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Tickets
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h2 className="mb-2 text-2xl font-bold">Chat not found</h2>
+        <Button asChild>
+          <Link href="/support">Back to Support</Link>
+        </Button>
       </div>
     );
   }
 
-  const getStatusColor = (status: SupportChatStatus) => {
-    switch (status) {
-      case SupportChatStatus.OPEN:
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case SupportChatStatus.IN_PROGRESS:
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-      case SupportChatStatus.WAITING:
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case SupportChatStatus.RESOLVED:
-        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-      case SupportChatStatus.CLOSED:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getPriorityColor = (priority: SupportPriority) => {
-    switch (priority) {
-      case SupportPriority.LOW:
-        return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
-      case SupportPriority.MEDIUM:
-        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
-      case SupportPriority.HIGH:
-        return "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200";
-      case SupportPriority.URGENT:
-        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  const getStatusIcon = (status: SupportChatStatus) => {
-    switch (status) {
-      case SupportChatStatus.OPEN:
-        return <Clock className="h-4 w-4" />;
-      case SupportChatStatus.IN_PROGRESS:
-        return <MessageSquare className="h-4 w-4" />;
-      case SupportChatStatus.WAITING:
-        return <AlertCircle className="h-4 w-4" />;
-      case SupportChatStatus.RESOLVED:
-        return <CheckCircle2 className="h-4 w-4" />;
-      case SupportChatStatus.CLOSED:
-        return <CheckCircle2 className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
-    }
-  };
-
-  const isActive =
-    ticket.status === SupportChatStatus.OPEN ||
-    ticket.status === SupportChatStatus.IN_PROGRESS ||
-    ticket.status === SupportChatStatus.WAITING;
+  const isClosed =
+    chat.status === SupportChatStatus.CLOSED ||
+    chat.status === SupportChatStatus.RESOLVED;
+  const messages = chat.messages || [];
 
   return (
-    <div className="container max-w-4xl py-8">
-      <div className="mb-6">
-        <Link href="/support">
-          <Button variant="ghost" size="sm" className="mb-4">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Tickets
-          </Button>
-        </Link>
-      </div>
-
-      {/* Ticket Header */}
-      <Card className="mb-6">
-        <CardHeader>
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-xl mb-3">{ticket.subject}</CardTitle>
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge
-                  variant="outline"
-                  className={getStatusColor(ticket.status)}
-                >
-                  {getStatusIcon(ticket.status)}
-                  <span className="ml-1">
-                    {ticket.status.replace("_", " ")}
-                  </span>
-                </Badge>
-                <Badge
-                  variant="outline"
-                  className={getPriorityColor(ticket.priority)}
-                >
-                  {ticket.priority}
-                </Badge>
-              </div>
-            </div>
-            <div className="text-right text-sm text-muted-foreground whitespace-nowrap">
-              <div>Created</div>
-              <div>{format(new Date(ticket.createdAt), "MMM d, yyyy")}</div>
-              <div>{format(new Date(ticket.createdAt), "h:mm a")}</div>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
-
-      {/* Chat Messages */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            Conversation
-          </CardTitle>
-        </CardHeader>
-        <Separator />
-        <CardContent className="p-6">
-          <div className="space-y-4 max-h-[500px] overflow-y-auto">
-            {ticket.messages.map((msg: SupportMessage) => {
-              const isUser = msg.authorId === user?.id;
-              const isSupport = msg.author.role !== "USER";
-
-              return (
-                <div
-                  key={msg.id}
-                  className={`flex gap-3 ${isUser ? "flex-row-reverse" : ""}`}
-                >
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>
-                      {isSupport
-                        ? "S"
-                        : msg.author.username?.charAt(0).toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div
-                    className={`flex-1 max-w-[70%] ${
-                      isUser ? "text-right" : ""
+    <div className="container mx-auto flex h-[calc(100vh-4rem)] max-w-4xl flex-col px-4 py-4">
+      {/* Header */}
+      <Card className="mb-4">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 flex-1">
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/support">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+              <div className="flex-1 min-w-0">
+                <h2 className="font-semibold truncate">{chat.subject}</h2>
+                <div className="flex items-center gap-2 mt-1">
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full ${
+                      PRIORITY_COLORS[chat.priority]
                     }`}
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      {isUser ? (
-                        <>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(msg.createdAt), "h:mm a")}
-                          </span>
-                          <span className="text-sm font-medium">You</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-sm font-medium">
-                            {isSupport ? "Support Team" : msg.author.username}
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            {format(new Date(msg.createdAt), "h:mm a")}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                    <div
-                      className={`rounded-lg px-4 py-2 ${
-                        isUser
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
-                      }`}
-                    >
-                      <p className="text-sm whitespace-pre-wrap">
-                        {msg.message}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-            {isTyping && (
-              <div className="flex gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarFallback>S</AvatarFallback>
-                </Avatar>
-                <div className="bg-muted rounded-lg px-4 py-2">
-                  <p className="text-sm text-muted-foreground italic">
-                    {isTyping} is typing...
-                  </p>
+                    {PRIORITY_LABELS[chat.priority]}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    {STATUS_LABELS[chat.status]}
+                  </span>
+                  {chat.assignedTo && (
+                    <span className="text-xs text-muted-foreground">
+                      • Agent: {chat.assignedTo}
+                    </span>
+                  )}
                 </div>
               </div>
+            </div>
+            {!isClosed && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => closeChatMutation.mutate()}
+                disabled={closeChatMutation.isPending}
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Close Chat
+              </Button>
             )}
-            <div ref={messagesEndRef} />
           </div>
         </CardContent>
       </Card>
 
-      {/* Message Input */}
-      {isActive && (
-        <Card>
-          <CardContent className="pt-6">
-            <form onSubmit={handleSendMessage} className="flex gap-2">
-              <Input
-                placeholder="Type your message..."
-                value={message}
-                onChange={(e) => {
-                  setMessage(e.target.value);
-                  handleTyping();
-                }}
-                disabled={sendMessageMutation.isPending}
-                className="flex-1"
-              />
-              <Button
-                type="submit"
-                disabled={!message.trim() || sendMessageMutation.isPending}
-              >
-                <Send className="h-4 w-4" />
-              </Button>
-            </form>
-            {!isSupportConnected && (
-              <p className="text-xs text-muted-foreground mt-2">
-                <AlertCircle className="h-3 w-3 inline mr-1" />
-                Real-time chat unavailable. Messages will still be delivered.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
+      {/* Messages */}
+      <Card className="mb-4 flex-1 overflow-hidden">
+        <CardContent className="flex h-full flex-col overflow-y-auto p-4">
+          {messages.length === 0 ? (
+            <div className="flex flex-1 items-center justify-center text-center">
+              <div>
+                <p className="text-muted-foreground">No messages yet</p>
+                <p className="text-sm text-muted-foreground">
+                  A support agent will respond shortly
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((msg) => {
+                const isAgent = msg.author?.role !== "USER";
+                const isOwn = msg.authorId === user?.id;
 
-      {/* Resolution Message */}
-      {ticket.status === SupportChatStatus.RESOLVED && ticket.resolution && (
-        <Card className="mt-6 border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
-              Ticket Resolved
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">{ticket.resolution}</p>
-            <p className="text-xs text-muted-foreground mt-2">
-              Resolved on {format(new Date(ticket.resolvedAt!), "PPp")}
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex ${
+                      isOwn ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`flex max-w-[70%] gap-3 ${
+                        isOwn ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={undefined} />
+                        <AvatarFallback>
+                          {isAgent
+                            ? "SA"
+                            : msg.author?.username?.slice(0, 2).toUpperCase() ||
+                              "??"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div
+                          className={`rounded-lg p-3 ${
+                            isOwn
+                              ? "bg-primary text-primary-foreground"
+                              : isAgent
+                              ? "bg-blue-50 text-blue-900"
+                              : "bg-muted"
+                          }`}
+                        >
+                          {isAgent && !isOwn && (
+                            <p className="text-xs font-semibold mb-1">
+                              {msg.author?.username || "Support Agent"}
+                            </p>
+                          )}
+                          <p className="whitespace-pre-wrap wrap-break-word">
+                            {msg.message}
+                          </p>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {format(new Date(msg.createdAt), "h:mm a")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {/* Typing indicator */}
+              {typingAgent && (
+                <div className="flex justify-start">
+                  <div className="flex max-w-[70%] gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>SA</AvatarFallback>
+                    </Avatar>
+                    <div className="rounded-lg bg-blue-50 p-3">
+                      <div className="flex gap-1">
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-blue-600 [animation-delay:-0.3s]" />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-blue-600 [animation-delay:-0.15s]" />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-blue-600" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Input */}
+      <Card>
+        <CardContent className="p-4">
+          {isClosed ? (
+            <p className="text-center text-sm text-muted-foreground">
+              This chat has been {chat.status.toLowerCase()}. You can start a
+              new chat if you need further assistance.
             </p>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <>
+              <form onSubmit={handleSubmit} className="flex gap-2">
+                <Input
+                  value={message}
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    handleTyping();
+                  }}
+                  placeholder="Type your message..."
+                  disabled={sendMutation.isPending || !isSupportConnected}
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={
+                    sendMutation.isPending ||
+                    !message.trim() ||
+                    !isSupportConnected
+                  }
+                >
+                  {sendMutation.isPending ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                </Button>
+              </form>
+              {!isSupportConnected && (
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Connecting to support chat...
+                </p>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

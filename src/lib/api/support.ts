@@ -18,7 +18,7 @@ import { api } from "../api";
  * Get all support chats for the current user
  */
 export async function getMySupportChats(): Promise<SupportChat[]> {
-  const response = await api.get<SupportChat[]>("/support/chats/me");
+  const response = await api.get<SupportChat[]>("/support/chats");
   return response.data;
 }
 

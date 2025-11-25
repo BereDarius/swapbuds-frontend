@@ -19,6 +19,10 @@ interface AuthState {
   accessToken: string | null;
   /** Convenience flag derived from presence of user/token */
   isAuthenticated: boolean;
+  /** Flag to track if store has been hydrated from localStorage */
+  _hasHydrated: boolean;
+  /** Sets hydration complete flag */
+  _setHasHydrated: (state: boolean) => void;
   /** Sets authenticated state after login/register */
   setAuth: (user: User, accessToken: string) => void;
   /** Clears authenticated state on logout */
@@ -54,6 +58,14 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       accessToken: null,
       isAuthenticated: false,
+      _hasHydrated: false,
+      /**
+       * Sets hydration complete flag
+       * Called automatically after localStorage data is loaded
+       */
+      _setHasHydrated: (state) => {
+        set({ _hasHydrated: state });
+      },
       /**
        * Sets authentication state after successful login/register
        * Updates both Zustand store and localStorage
@@ -73,6 +85,9 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
+      onRehydrateStorage: () => (state) => {
+        state?._setHasHydrated(true);
+      },
     },
   ),
 );

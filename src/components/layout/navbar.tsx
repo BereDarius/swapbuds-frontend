@@ -1,11 +1,6 @@
-/**
- * Navbar Component
- *
- * Main navigation bar for the application
- */
-
 "use client";
 
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,116 +12,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getMessageUnreadCount } from "@/lib/api/messages";
-import { getNotificationUnreadCount } from "@/lib/api/notifications";
-import { useMessagesSocket, useNotificationsSocket } from "@/lib/socket";
 import { useAuthStore } from "@/stores/authStore";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Bell,
   Heart,
+  HelpCircle,
   LogOut,
   Menu,
   MessageSquare,
   Package,
   Plus,
-  Search,
   Settings,
+  ShieldCheck,
   User,
   X,
 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-export function Navbar() {
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const { user, clearAuth } = useAuthStore();
+interface NavbarProps {
+  unreadMessagesCount?: number;
+  unreadNotificationsCount?: number;
+  onLogout: () => void;
+}
+
+export function Navbar({
+  unreadMessagesCount = 0,
+  unreadNotificationsCount = 0,
+  onLogout,
+}: NavbarProps) {
+  const { user } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { onMessage, onMessageRead, onConversationRead, onMessageDeleted } =
-    useMessagesSocket();
-  const { onNotification } = useNotificationsSocket();
 
-  // Get unread messages count
-  const { data: unreadMessagesCount = 0 } = useQuery({
-    queryKey: ["messages", "unread-count"],
-    queryFn: getMessageUnreadCount,
-    enabled: !!user,
-    refetchInterval: 5000, // Refetch every 5 seconds to ensure it stays updated
-  });
-
-  // Get unread notifications count
-  const { data: unreadNotificationsCount = 0 } = useQuery({
-    queryKey: ["notifications", "unread-count"],
-    queryFn: getNotificationUnreadCount,
-    enabled: !!user,
-    refetchInterval: 5000, // Refetch every 5 seconds to ensure it stays updated
-  });
-
-  // Real-time updates for unread message count
-  useEffect(() => {
-    if (!user) return;
-
-    const cleanup1 = onMessage(() => {
-      queryClient.invalidateQueries({
-        queryKey: ["messages", "unread-count"],
-      });
-    });
-
-    const cleanup2 = onMessageRead(() => {
-      queryClient.invalidateQueries({
-        queryKey: ["messages", "unread-count"],
-      });
-    });
-
-    const cleanup3 = onConversationRead(() => {
-      queryClient.invalidateQueries({
-        queryKey: ["messages", "unread-count"],
-      });
-    });
-
-    const cleanup4 = onMessageDeleted(() => {
-      queryClient.invalidateQueries({
-        queryKey: ["messages", "unread-count"],
-      });
-    });
-
-    return () => {
-      cleanup1();
-      cleanup2();
-      cleanup3();
-      cleanup4();
-    };
-  }, [
-    user,
-    onMessage,
-    onMessageRead,
-    onConversationRead,
-    onMessageDeleted,
-    queryClient,
-  ]);
-
-  // Real-time updates for unread notification count
-  useEffect(() => {
-    if (!user) return;
-
-    const cleanup = onNotification(() => {
-      queryClient.invalidateQueries({
-        queryKey: ["notifications", "unread-count"],
-      });
-    });
-
-    return cleanup;
-  }, [user, onNotification, queryClient]);
-
-  const handleLogout = () => {
-    clearAuth();
-    router.push("/login");
-  };
+  if (!user) return null;
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+    <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
@@ -144,125 +65,146 @@ export function Navbar() {
               Browse Items
             </Link>
             <Link
-              href="/items/new"
+              href="/trades"
               className="text-sm font-medium transition-colors hover:text-primary"
             >
-              <Button size="sm" className="gap-2">
+              My Trades
+            </Link>
+            {user.role === "ADMIN" && (
+              <Link
+                href="/admin"
+                className="text-sm font-medium transition-colors hover:text-primary"
+              >
+                Admin
+              </Link>
+            )}
+            <Button size="sm" className="gap-2" asChild>
+              <Link href="/items/new">
                 <Plus className="h-4 w-4" />
                 List Item
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
 
           {/* Desktop User Menu */}
-          {user ? (
-            <div className="hidden items-center gap-4 md:flex">
-              <Button variant="ghost" size="icon" asChild>
-                <Link href="/search">
-                  <Search className="h-5 w-5" />
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon" asChild className="relative">
-                <Link href="/messages">
-                  <MessageSquare className="h-5 w-5" />
-                  {unreadMessagesCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                    >
-                      {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
-                    </Badge>
-                  )}
-                </Link>
-              </Button>
-              <Button variant="ghost" size="icon" asChild className="relative">
-                <Link href="/notifications">
-                  <Bell className="h-5 w-5" />
-                  {unreadNotificationsCount > 0 && (
-                    <Badge
-                      variant="destructive"
-                      className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs"
-                    >
-                      {unreadNotificationsCount > 9
-                        ? "9+"
-                        : unreadNotificationsCount}
-                    </Badge>
-                  )}
-                </Link>
-              </Button>
-
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="relative h-9 w-9 rounded-full"
+          <div className="hidden items-center gap-4 md:flex">
+            <Button variant="ghost" size="icon" asChild className="relative">
+              <Link href="/messages">
+                <MessageSquare className="h-5 w-5" />
+                {unreadMessagesCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
                   >
-                    <Avatar className="h-9 w-9">
-                      <AvatarImage
-                        src={user.avatarUrl || undefined}
-                        alt={user.username}
-                      />
-                      <AvatarFallback>
-                        {user.username.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {user.username}
-                      </p>
-                      <p className="text-xs leading-none text-muted-foreground">
-                        {user.email}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href={`/profile/${user.username}`}>
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/items?userId=me">
-                      <Package className="mr-2 h-4 w-4" />
-                      My Items
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/favorites">
-                      <Heart className="mr-2 h-4 w-4" />
-                      Favorites
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">
-                      <Settings className="mr-2 h-4 w-4" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : (
-            <div className="hidden items-center gap-2 md:flex">
-              <Button variant="ghost" asChild>
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/register">Sign up</Link>
-              </Button>
-            </div>
-          )}
+                    {unreadMessagesCount > 9 ? "9+" : unreadMessagesCount}
+                  </Badge>
+                )}
+              </Link>
+            </Button>
+            <Button variant="ghost" size="icon" asChild className="relative">
+              <Link href="/notifications">
+                <Bell className="h-5 w-5" />
+                {unreadNotificationsCount > 0 && (
+                  <Badge
+                    variant="destructive"
+                    className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center p-0 text-xs"
+                  >
+                    {unreadNotificationsCount > 9
+                      ? "9+"
+                      : unreadNotificationsCount}
+                  </Badge>
+                )}
+              </Link>
+            </Button>
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/support">
+                <HelpCircle className="h-5 w-5" />
+              </Link>
+            </Button>
+
+            <ThemeToggle />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="relative h-9 w-9 rounded-full"
+                >
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage
+                      src={user.avatarUrl || undefined}
+                      alt={user.username}
+                    />
+                    <AvatarFallback>
+                      {user.username.slice(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {user.username}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={`/profile/${user.username}`}>
+                    <User className="mr-2 h-4 w-4" />
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/items?userId=me">
+                    <Package className="mr-2 h-4 w-4" />
+                    My Items
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/favorites">
+                    <Heart className="mr-2 h-4 w-4" />
+                    Favorites
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href="/support">
+                    <HelpCircle className="mr-2 h-4 w-4" />
+                    Support
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                {(user.role === "ADMIN" ||
+                  user.role === "MODERATOR" ||
+                  user.role === "SUPPORT") && (
+                  <>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={onLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
 
           {/* Mobile Menu Button */}
           <Button
@@ -291,78 +233,95 @@ export function Navbar() {
                 Browse Items
               </Link>
               <Link
+                href="/trades"
+                className="text-sm font-medium transition-colors hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                My Trades
+              </Link>
+              <Link
                 href="/items/new"
                 className="text-sm font-medium transition-colors hover:text-primary"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 List Item
               </Link>
-
-              {user ? (
+              <hr className="my-2" />
+              <Link
+                href={`/profile/${user.username}`}
+                className="text-sm font-medium transition-colors hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Profile
+              </Link>
+              <Link
+                href="/messages"
+                className="text-sm font-medium transition-colors hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Messages
+                {unreadMessagesCount > 0 && ` (${unreadMessagesCount})`}
+              </Link>
+              <Link
+                href="/notifications"
+                className="text-sm font-medium transition-colors hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Notifications
+                {unreadNotificationsCount > 0 &&
+                  ` (${unreadNotificationsCount})`}
+              </Link>
+              <Link
+                href="/favorites"
+                className="text-sm font-medium transition-colors hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Favorites
+              </Link>
+              <Link
+                href="/support"
+                className="text-sm font-medium transition-colors hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Support
+              </Link>
+              <Link
+                href="/settings"
+                className="text-sm font-medium transition-colors hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Settings
+              </Link>
+              <hr className="my-2" />
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Theme</span>
+                <ThemeToggle />
+              </div>
+              {(user.role === "ADMIN" ||
+                user.role === "MODERATOR" ||
+                user.role === "SUPPORT") && (
                 <>
                   <hr className="my-2" />
                   <Link
-                    href={`/profile/${user.username}`}
+                    href="/admin/dashboard"
                     className="text-sm font-medium transition-colors hover:text-primary"
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    Profile
-                  </Link>
-                  <Link
-                    href="/messages"
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Messages
-                  </Link>
-                  <Link
-                    href="/notifications"
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Notifications
-                  </Link>
-                  <Link
-                    href="/favorites"
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Favorites
-                  </Link>
-                  <Link
-                    href="/settings"
-                    className="text-sm font-medium transition-colors hover:text-primary"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    Settings
-                  </Link>
-                  <Button
-                    variant="ghost"
-                    className="justify-start"
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      handleLogout();
-                    }}
-                  >
-                    Log out
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <hr className="my-2" />
-                  <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
-                    <Button variant="ghost" className="w-full justify-start">
-                      Log in
-                    </Button>
-                  </Link>
-                  <Link
-                    href="/register"
-                    onClick={() => setMobileMenuOpen(false)}
-                  >
-                    <Button className="w-full">Sign up</Button>
+                    Admin Dashboard
                   </Link>
                 </>
               )}
+              <hr className="my-2" />
+              <Button
+                variant="ghost"
+                className="justify-start"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onLogout();
+                }}
+              >
+                Log out
+              </Button>
             </div>
           </div>
         )}

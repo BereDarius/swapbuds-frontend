@@ -33,6 +33,7 @@ export async function createMultiItemTrade(
 
 /**
  * Get all trades for the current user
+ * Note: Direction filtering is handled client-side in the component since backend doesn't support it
  */
 export async function getTrades(
   filters?: TradeFilters,
@@ -40,7 +41,7 @@ export async function getTrades(
   const params = new URLSearchParams();
 
   if (filters?.status) params.append("status", filters.status);
-  if (filters?.direction) params.append("direction", filters.direction);
+  // direction is filtered client-side, not sent to backend
   if (filters?.startDate) params.append("startDate", filters.startDate);
   if (filters?.endDate) params.append("endDate", filters.endDate);
   if (filters?.category) params.append("category", filters.category);

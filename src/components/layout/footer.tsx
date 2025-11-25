@@ -1,29 +1,22 @@
-/**
- * Footer Component
- *
- * Site footer with links and information
- */
-
 "use client";
 
 import { Package } from "lucide-react";
 import Link from "next/link";
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="border-t bg-muted/40">
-      <div className="container mx-auto px-4 py-8 md:py-12">
+    <footer className="border-t bg-muted/30">
+      <div className="container mx-auto px-4 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
-          <div className="space-y-3">
+          <div>
             <Link href="/" className="flex items-center gap-2">
-              <Package className="h-5 w-5 text-primary" />
-              <span className="text-lg font-bold">SwapBuds</span>
+              <Package className="h-6 w-6 text-primary" />
+              <span className="text-xl font-bold">SwapBuds</span>
             </Link>
-            <p className="text-sm text-muted-foreground">
-              Trade items with your community. Safe, simple, and sustainable.
+            <p className="mt-4 text-sm text-muted-foreground">
+              Peer-to-peer trading platform for collectors, gamers, and
+              enthusiasts.
             </p>
           </div>
 
@@ -41,26 +34,18 @@ export function Footer() {
               </li>
               <li>
                 <Link
+                  href="/trades"
+                  className="text-muted-foreground transition-colors hover:text-primary"
+                >
+                  My Trades
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/items/new"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
-                  List an Item
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/how-it-works"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  How It Works
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/safety"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Safety Tips
+                  List Item
                 </Link>
               </li>
             </ul>
@@ -72,15 +57,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  href="/help"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Help Center
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
+                  href="/support"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   Contact Us
@@ -111,7 +88,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
-                  href="/legal/terms"
+                  href="/terms"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   Terms of Service
@@ -119,7 +96,7 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/legal/privacy"
+                  href="/privacy"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   Privacy Policy
@@ -127,28 +104,19 @@ export function Footer() {
               </li>
               <li>
                 <Link
-                  href="/legal/cookies"
+                  href="/cookies"
                   className="text-muted-foreground transition-colors hover:text-primary"
                 >
                   Cookie Policy
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/legal/community-guidelines"
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                >
-                  Community Guidelines
                 </Link>
               </li>
             </ul>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-8 border-t pt-6">
-          <p className="text-center text-sm text-muted-foreground">
-            © {currentYear} SwapBuds. All rights reserved.
+        <div className="mt-8 border-t pt-8 text-center text-sm text-muted-foreground">
+          <p>
+            &copy; {new Date().getFullYear()} SwapBuds. All rights reserved.
           </p>
         </div>
       </div>

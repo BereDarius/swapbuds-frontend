@@ -1,253 +1,230 @@
 "use client";
 
-import { MessageBubble } from "@/components/messages/message-bubble";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import {
-  getConversations,
+  getConversation,
   getMessages,
   markConversationAsRead,
   sendMessage,
 } from "@/lib/api/messages";
-import { useMessagesSocket } from "@/lib/socket";
+import { useMessagesSocket } from "@/lib/socket/messages";
 import { useAuthStore } from "@/stores/authStore";
 import type { Message } from "@/types/message";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Send } from "lucide-react";
+import { format } from "date-fns";
+import { ArrowLeft, Loader2, Send } from "lucide-react";
 import Link from "next/link";
-import { notFound, useRouter } from "next/navigation";
-import { use, useEffect, useRef, useState } from "react";
+import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-interface ConversationDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
-}
-
-export default function ConversationDetailPage({
-  params,
-}: ConversationDetailPageProps) {
-  const { id } = use(params);
-  const conversationId = id;
-  const router = useRouter();
+export default function ConversationPage() {
+  const params = useParams();
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
+  const conversationId = params.id as string;
+  const [message, setMessage] = useState("");
+  const [typingUser, setTypingUser] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // WebSocket hooks
   const {
+    isConnected,
     onMessage,
     onMessageRead,
     onTyping,
     emitTyping,
-    isConnected,
     joinConversation,
     leaveConversation,
   } = useMessagesSocket();
-  const [messageText, setMessageText] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [typerUsername, setTyperUsername] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Get conversation details
-  const {
-    data: conversations,
-    isLoading: conversationsLoading,
-    error: conversationsError,
-  } = useQuery({
-    queryKey: ["conversations"],
-    queryFn: getConversations,
+  const { data: conversation, isLoading: conversationLoading } = useQuery({
+    queryKey: ["conversation", conversationId],
+    queryFn: () => getConversation(conversationId),
+    enabled: !!conversationId,
   });
 
-  const conversation = conversations?.find((c) => c.id === conversationId);
-
-  // Get messages (no polling - WebSocket will handle updates)
-  const {
-    data: messagesData,
-    isLoading: messagesLoading,
-    error: messagesError,
-  } = useQuery({
+  const { data: messagesData, isLoading: messagesLoading } = useQuery({
     queryKey: ["messages", conversationId],
     queryFn: () => getMessages(conversationId),
-    enabled: !!conversation,
+    enabled: !!conversationId,
+    // Remove polling - using WebSocket for real-time updates
   });
 
-  // Join conversation room on mount for typing indicators
-  useEffect(() => {
-    joinConversation(conversationId);
-    return () => {
-      leaveConversation(conversationId);
-    };
-  }, [conversationId, joinConversation, leaveConversation]);
+  const sendMutation = useMutation({
+    mutationFn: (data: { recipientId: string; content: string }) =>
+      sendMessage(data),
+    onSuccess: () => {
+      setMessage("");
+      queryClient.invalidateQueries({
+        queryKey: ["messages", conversationId],
+      });
+    },
+    onError: () => {
+      toast.error("Failed to send message");
+    },
+  });
 
-  // Mark messages as read
+  // Join conversation room when page loads
   useEffect(() => {
-    if (conversation && messagesData?.messages) {
-      markConversationAsRead(conversationId);
+    if (conversationId && isConnected) {
+      joinConversation(conversationId);
+      return () => {
+        leaveConversation(conversationId);
+      };
     }
-  }, [conversation, conversationId, messagesData?.messages]);
+  }, [conversationId, isConnected, joinConversation, leaveConversation]);
 
-  // Scroll to bottom when messages change
+  // Listen for new messages via WebSocket
+  useEffect(() => {
+    const unsubscribe = onMessage((newMessage) => {
+      // Only add messages for this conversation
+      if (newMessage.conversationId === conversationId) {
+        queryClient.setQueryData<{ messages: Message[] }>(
+          ["messages", conversationId],
+          (old) => {
+            if (!old) return { messages: [newMessage] };
+            // Avoid duplicates
+            const exists = old.messages.some((m) => m.id === newMessage.id);
+            if (exists) return old;
+            return {
+              messages: [...old.messages, newMessage],
+            };
+          },
+        );
+        // Scroll to bottom
+        setTimeout(
+          () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }),
+          100,
+        );
+      }
+    });
+    return unsubscribe;
+  }, [conversationId, onMessage, queryClient]);
+
+  // Listen for typing indicators
+  useEffect(() => {
+    const unsubscribe = onTyping((data) => {
+      if (data.conversationId === conversationId) {
+        if (data.isTyping) {
+          setTypingUser(data.typerUsername);
+        } else {
+          setTypingUser(null);
+        }
+      }
+    });
+    return unsubscribe;
+  }, [conversationId, onTyping]);
+
+  // Listen for message read events
+  useEffect(() => {
+    const unsubscribe = onMessageRead((data) => {
+      if (data.conversationId === conversationId) {
+        // Update message read status in cache
+        queryClient.setQueryData<{ messages: Message[] }>(
+          ["messages", conversationId],
+          (old) => {
+            if (!old) return old;
+            return {
+              messages: old.messages.map((m) =>
+                m.id === data.messageId
+                  ? { ...m, isRead: true, readAt: new Date() }
+                  : m,
+              ),
+            };
+          },
+        );
+      }
+    });
+    return unsubscribe;
+  }, [conversationId, onMessageRead, queryClient]);
+
+  // Mark messages as read when conversation opens
+  useEffect(() => {
+    if (conversationId && messagesData?.messages) {
+      // Check if there are unread messages from other user
+      const hasUnreadMessages = messagesData.messages.some(
+        (msg) => !msg.isRead && msg.sender?.id !== user?.id,
+      );
+
+      if (hasUnreadMessages) {
+        // Mark all messages in conversation as read
+        markConversationAsRead(conversationId).catch(() => {
+          // Silently fail - not critical
+        });
+      }
+    }
+  }, [conversationId, messagesData?.messages, user?.id]);
+
+  // Auto-scroll when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messagesData?.messages]);
 
-  // WebSocket: Listen for new messages
-  useEffect(() => {
-    const cleanup = onMessage((message: Message) => {
-      // Only update if message is for this conversation
-      if (message.conversationId === conversationId) {
-        queryClient.invalidateQueries({
-          queryKey: ["messages", conversationId],
-        });
-        queryClient.invalidateQueries({ queryKey: ["conversations"] });
-      }
-    });
+  // Handle typing indicator with debounce
+  const handleTyping = () => {
+    if (!conversationId || !user?.username) return;
 
-    return cleanup;
-  }, [conversationId, onMessage, queryClient]);
+    // Clear previous timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
 
-  // WebSocket: Listen for message read status updates
-  useEffect(() => {
-    const cleanup = onMessageRead(
-      (data: { messageId: string; conversationId: string }) => {
-        if (data.conversationId === conversationId) {
-          queryClient.invalidateQueries({
-            queryKey: ["messages", conversationId],
-          });
-        }
-      },
-    );
+    // Emit typing started
+    emitTyping(conversationId, true, user.username);
 
-    return cleanup;
-  }, [conversationId, onMessageRead, queryClient]);
+    // Stop typing after 2 seconds of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      emitTyping(conversationId, false, user.username);
+    }, 2000);
+  };
 
-  // WebSocket: Listen for typing indicators
-  useEffect(() => {
-    const cleanup = onTyping(
-      (data: {
-        conversationId: string;
-        isTyping: boolean;
-        typerUsername: string;
-      }) => {
-        if (data.conversationId === conversationId) {
-          setIsTyping(data.isTyping);
-          setTyperUsername(data.typerUsername);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!message.trim() || !conversation?.otherUser?.id) return;
 
-          // Clear typing indicator after 3 seconds
-          if (data.isTyping && typingTimeoutRef.current) {
-            clearTimeout(typingTimeoutRef.current);
-          }
-          if (data.isTyping) {
-            typingTimeoutRef.current = setTimeout(() => {
-              setIsTyping(false);
-            }, 3000);
-          }
-        }
-      },
-    );
-
-    return () => {
-      cleanup();
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, [conversationId, onTyping]);
-
-  // Send message mutation
-  const sendMessageMutation = useMutation({
-    mutationFn: sendMessage,
-    onSuccess: () => {
-      setMessageText("");
-      queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
-      queryClient.invalidateQueries({ queryKey: ["conversations"] });
-    },
-    onError: (error: Error) => {
-      toast.error("Failed to send message", {
-        description: error.message,
-      });
-    },
-  });
-
-  const handleSendMessage = () => {
-    if (!messageText.trim() || !conversation?.otherUser) return;
-
-    // Stop typing indicator when sending
+    // Stop typing indicator
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
     emitTyping(conversationId, false, user?.username || "");
 
-    sendMessageMutation.mutate({
+    sendMutation.mutate({
       recipientId: conversation.otherUser.id,
-      content: messageText.trim(),
-      tradeId: conversation.tradeId || undefined,
+      content: message,
     });
   };
 
-  const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessageText(e.target.value);
+  const isLoading = conversationLoading || messagesLoading;
 
-    // Emit typing indicator
-    if (e.target.value && !isTyping) {
-      emitTyping(conversationId, true, user?.username || "");
-    } else if (!e.target.value && isTyping) {
-      emitTyping(conversationId, false, user?.username || "");
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-
-  if (conversationsLoading || messagesLoading) {
+  if (isLoading) {
     return (
-      <div className="container max-w-4xl py-8">
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-            <p className="text-muted-foreground">Loading conversation...</p>
-          </div>
-        </div>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
-  if (conversationsError || messagesError || !conversation) {
-    if (!conversation) {
-      notFound();
-    }
+  if (!conversation) {
     return (
-      <div className="container max-w-4xl py-8">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <h3 className="text-lg font-semibold mb-2">
-              Failed to load conversation
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              {conversationsError instanceof Error
-                ? conversationsError.message
-                : messagesError instanceof Error
-                ? messagesError.message
-                : "An error occurred"}
-            </p>
-            <Button onClick={() => router.push("/messages")}>
-              Back to Messages
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h2 className="mb-2 text-2xl font-bold">Conversation not found</h2>
+        <Button asChild>
+          <Link href="/messages">Back to Messages</Link>
+        </Button>
       </div>
     );
   }
 
-  const { otherUser, trade } = conversation;
+  const otherUser = conversation?.otherUser;
   const messages = messagesData?.messages || [];
 
   return (
-    <div className="container max-w-4xl py-8">
+    <div className="container mx-auto flex h-[calc(100vh-4rem)] max-w-4xl flex-col px-4 py-4">
       {/* Header */}
       <Card className="mb-4">
         <CardContent className="p-4">
@@ -257,131 +234,155 @@ export default function ConversationDetailPage({
                 <ArrowLeft className="h-5 w-5" />
               </Link>
             </Button>
-
-            <Avatar className="h-10 w-10">
+            <Avatar>
               <AvatarImage src={otherUser?.avatarUrl || undefined} />
               <AvatarFallback>
-                {otherUser?.username.substring(0, 2).toUpperCase()}
+                {otherUser?.username.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-
             <div className="flex-1">
-              <h2 className="font-semibold">{otherUser?.username}</h2>
-              {!otherUser?.isActive && (
-                <Badge variant="secondary" className="text-xs">
-                  Inactive
-                </Badge>
+              <Link
+                href={`/profile/${otherUser?.username}`}
+                className="font-semibold hover:underline"
+              >
+                {otherUser?.username}
+              </Link>
+              {conversation.trade && (
+                <p className="text-xs text-muted-foreground">
+                  Trade: {conversation.trade.itemOffered.title}
+                </p>
               )}
             </div>
-
-            {otherUser && (
-              <Button variant="outline" asChild>
-                <Link href={`/profile/${otherUser.username}`}>
-                  View Profile
-                </Link>
-              </Button>
-            )}
           </div>
-
-          {/* Trade Context */}
-          {trade && (
-            <div className="mt-4 p-3 bg-muted rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="outline">Trade Context</Badge>
-                <Badge>{trade.status}</Badge>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-muted-foreground">
-                  {trade.itemOffered.title} ⇄ {trade.itemRequested.title}
-                </span>
-                <Link
-                  href={`/trades/${trade.id}`}
-                  className="text-primary hover:underline ml-auto"
-                >
-                  View Trade
-                </Link>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
 
-      {/* Messages Area */}
-      <Card className="mb-4">
-        <CardContent className="p-4 min-h-[400px] max-h-[600px] overflow-y-auto">
+      {/* Messages */}
+      <Card className="mb-4 flex-1 overflow-hidden">
+        <CardContent className="flex h-full flex-col overflow-y-auto p-4">
           {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-center">
+            <div className="flex flex-1 items-center justify-center text-center">
               <div>
-                <p className="text-muted-foreground mb-2">No messages yet</p>
+                <p className="text-muted-foreground">No messages yet</p>
                 <p className="text-sm text-muted-foreground">
-                  Start the conversation by sending a message below
+                  Start the conversation below
                 </p>
               </div>
             </div>
           ) : (
             <div className="space-y-4">
-              {messages
-                .slice()
-                .reverse()
-                .map((message: Message, index: number, arr: Message[]) => {
-                  const isOwnMessage = message.senderId === user?.id;
-                  const prevMessage = arr[index - 1];
-                  const showAvatar =
-                    !prevMessage || prevMessage.senderId !== message.senderId;
-
-                  return (
-                    <MessageBubble
-                      key={message.id}
-                      message={message}
-                      isOwnMessage={isOwnMessage}
-                      showAvatar={showAvatar}
-                    />
-                  );
-                })}
+              {messages.map((msg: Message) => {
+                const isOwn = msg.sender?.id === user?.id;
+                return (
+                  <div
+                    key={msg.id}
+                    className={`flex ${
+                      isOwn ? "justify-end" : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`flex max-w-[70%] gap-3 ${
+                        isOwn ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={msg.sender?.avatarUrl || undefined} />
+                        <AvatarFallback>
+                          {msg.sender?.username.slice(0, 2).toUpperCase() ||
+                            "??"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div
+                          className={`rounded-lg p-3 ${
+                            isOwn
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-muted"
+                          }`}
+                        >
+                          <p className="whitespace-pre-wrap wrap-break-word">
+                            {msg.content}
+                          </p>
+                        </div>
+                        <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                          <span>
+                            {format(new Date(msg.createdAt), "h:mm a")}
+                          </span>
+                          {isOwn && (
+                            <span className="ml-1">
+                              {msg.isRead ? (
+                                <span className="text-blue-500" title="Read">
+                                  ✓✓
+                                </span>
+                              ) : (
+                                <span title="Sent">✓</span>
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {/* Typing indicator */}
+              {typingUser && (
+                <div className="flex justify-start">
+                  <div className="flex max-w-[70%] gap-3">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={otherUser?.avatarUrl || undefined} />
+                      <AvatarFallback>
+                        {otherUser?.username.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="rounded-lg bg-muted p-3">
+                      <div className="flex gap-1">
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.3s]" />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground [animation-delay:-0.15s]" />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div ref={messagesEndRef} />
-            </div>
-          )}
-
-          {/* Typing Indicator */}
-          {isTyping && typerUsername && (
-            <div className="text-sm text-muted-foreground italic px-4 pb-2">
-              {typerUsername} is typing...
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Message Input */}
+      {/* Input */}
       <Card>
         <CardContent className="p-4">
-          {isConnected ? (
-            <div className="flex gap-2">
-              <Textarea
-                placeholder="Type your message... (Press Enter to send, Shift+Enter for new line)"
-                value={messageText}
-                onChange={handleMessageChange}
-                onKeyDown={handleKeyDown}
-                className="min-h-20 resize-none"
-                maxLength={5000}
-                disabled={sendMessageMutation.isPending}
-              />
-              <Button
-                onClick={handleSendMessage}
-                disabled={!messageText.trim() || sendMessageMutation.isPending}
-                size="icon"
-                className="shrink-0"
-              >
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <Input
+              value={message}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                handleTyping();
+              }}
+              placeholder="Type a message..."
+              disabled={sendMutation.isPending || !isConnected}
+            />
+            <Button
+              type="submit"
+              size="icon"
+              disabled={
+                sendMutation.isPending || !message.trim() || !isConnected
+              }
+            >
+              {sendMutation.isPending ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
                 <Send className="h-5 w-5" />
-              </Button>
-            </div>
-          ) : (
-            <div className="text-center text-sm text-muted-foreground py-4">
-              Connecting to real-time messaging...
-            </div>
+              )}
+            </Button>
+          </form>
+          {!isConnected && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Connecting to chat...
+            </p>
           )}
-          <p className="text-xs text-muted-foreground mt-2">
-            {messageText.length}/5000 characters
-          </p>
         </CardContent>
       </Card>
     </div>

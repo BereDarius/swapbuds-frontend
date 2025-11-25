@@ -1,0 +1,28 @@
+# SwapBuds - Robots.txt
+# Allow search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Disallow admin and private pages
+Disallow: /admin/
+Disallow: /settings/
+Disallow: /verification/
+Disallow: /support/
+Disallow: /disputes/
+Disallow: /moderation/
+
+# Disallow authentication pages (no need to index)
+Disallow: /login
+Disallow: /register
+
+# Allow public pages
+Allow: /items
+Allow: /profile
+Allow: /legal/
+
+# Sitemap location (update when sitemap is generated)
+Sitemap: https://swapbuds.com/sitemap.xml
+
+# Crawl delay (optional - be nice to servers)
+Crawl-delay: 1

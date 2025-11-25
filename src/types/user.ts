@@ -11,11 +11,16 @@
 export interface UserProfile {
   id: string;
   username: string;
+  email?: string;
+  firstName?: string | null;
+  lastName?: string | null;
   avatarUrl: string | null;
   bio: string | null;
   location: string | null;
   reputationScore: number;
   isVerified: boolean;
+  isBanned: boolean;
+  role: string;
   createdAt: string;
   itemsCount: number;
   tradesCount: number;

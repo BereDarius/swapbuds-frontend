@@ -1,14 +1,5 @@
 "use client";
 
-import { logger } from "@/lib/logger";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,179 +9,134 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useRecaptcha } from "@/hooks/useRecaptcha";
 import { api } from "@/lib/api";
 import { getErrorMessage } from "@/lib/errors";
 import { useAuthStore } from "@/stores/authStore";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
-/**
- * Login form validation schema
- * Enforces email format and minimum password length
- */
-const loginSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
-
-/**
- * Login page component
- * Provides authentication form with validation and error handling
- */
 export default function LoginPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const { executeRecaptcha, isRecaptchaLoaded } = useRecaptcha();
 
-  const form = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
   });
 
-  /**
-   * Handles login form submission
-   * Authenticates user and redirects to home on success
-   */
-  async function onSubmit(data: LoginFormValues) {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
 
     try {
-      // Generate reCAPTCHA token
       const recaptchaToken = await executeRecaptcha("login");
       if (!recaptchaToken) {
-        toast.error("Verification failed", {
-          description:
-            "Please try again or contact support if the issue persists.",
-        });
+        toast.error("Verification failed. Please try again.");
         setIsLoading(false);
         return;
       }
 
       const response = await api.post("/auth/login", {
-        ...data,
+        ...formData,
         recaptchaToken,
       });
-      const { user, accessToken } = response.data;
 
-      // Update auth store and localStorage
+      const { user, accessToken } = response.data;
       setAuth(user, accessToken);
 
-      toast.success("Welcome back!", {
-        description: `Logged in as ${user.username}`,
-      });
-
-      // Redirect to home page
-      router.push("/");
+      toast.success(`Welcome back, ${user.username}!`);
+      router.push("/items");
     } catch (error) {
-      // Log the error with full details for debugging
-      logger.apiError("POST", "/auth/login", error);
-
-      const message = getErrorMessage(
-        error,
-        "Failed to login. Please try again.",
-      );
-      toast.error("Login failed", {
-        description: message,
-      });
+      const message = getErrorMessage(error, "Invalid email or password");
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
-          <CardDescription>
-            Enter your credentials to access your account
-          </CardDescription>
+          <CardDescription>Sign in to your SwapBuds account</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="you@example.com"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                required
+                disabled={isLoading}
               />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                required
+                disabled={isLoading}
               />
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading || !isRecaptchaLoaded}
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="remember"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) =>
+                    setRememberMe(checked as boolean)
+                  }
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="remember"
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  Remember me
+                </label>
+              </div>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-primary hover:underline"
               >
-                {isLoading ? "Signing in..." : "Sign in"}
-              </Button>
-
-              {/* reCAPTCHA Notice */}
-              <p className="text-xs text-muted-foreground">
-                This site is protected by reCAPTCHA and the Google{" "}
-                <Link
-                  href="https://policies.google.com/privacy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-foreground"
-                >
-                  Privacy Policy
-                </Link>{" "}
-                and{" "}
-                <Link
-                  href="https://policies.google.com/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-foreground"
-                >
-                  Terms of Service
-                </Link>{" "}
-                apply.
+                Forgot password?
+              </Link>
+            </div>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !isRecaptchaLoaded}
+            >
+              {isLoading ? "Signing in..." : "Sign in"}
+            </Button>
+            {!isRecaptchaLoaded && (
+              <p className="text-center text-xs text-muted-foreground">
+                Loading security verification...
               </p>
-            </form>
-          </Form>
+            )}
+          </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-muted-foreground">

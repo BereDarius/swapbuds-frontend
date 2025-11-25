@@ -1,18 +1,7 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { differenceInYears } from "date-fns";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import * as z from "zod";
-
-import { AgeVerificationCheckbox } from "@/components/auth/age-verification-checkbox";
-import { DateOfBirthInput } from "@/components/auth/date-of-birth-input";
-import { LegalConsentCheckboxes } from "@/components/auth/legal-consent-checkboxes";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
   CardContent,
@@ -21,152 +10,151 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useRecaptcha } from "@/hooks/useRecaptcha";
 import { api } from "@/lib/api";
 import { getErrorMessage } from "@/lib/errors";
-import { logger } from "@/lib/logger";
+import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
+import { differenceInYears, format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
-/**
- * Registration form validation schema
- * Enforces username, email, password, age verification, and legal consent requirements
- */
-const registerSchema = z
-  .object({
-    username: z
-      .string()
-      .min(3, "Username must be at least 3 characters")
-      .max(20, "Username must be at most 20 characters")
-      .regex(
-        /^[a-zA-Z0-9_]+$/,
-        "Username can only contain letters, numbers, and underscores",
-      ),
-    email: z.string().email("Invalid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters")
-      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-      .regex(/[0-9]/, "Password must contain at least one number"),
-    dateOfBirth: z.date({
-      message: "Date of birth is required",
-    }),
-    selfDeclaredAge18: z.boolean().refine((val) => val === true, {
-      message: "You must confirm you are 18 years or older",
-    }),
-    tosAccepted: z.boolean().refine((val) => val === true, {
-      message: "You must accept the Terms of Service",
-    }),
-    privacyAccepted: z.boolean().refine((val) => val === true, {
-      message: "You must accept the Privacy Policy",
-    }),
-    marketingConsent: z.boolean().optional(),
-  })
-  .refine(
-    (data) => {
-      // Calculate age from dateOfBirth
-      const age = differenceInYears(new Date(), data.dateOfBirth);
-      return age >= 18;
-    },
-    {
-      message: "You must be at least 18 years old to register",
-      path: ["dateOfBirth"],
-    },
-  );
-
-type RegisterFormValues = z.infer<typeof registerSchema>;
-
-/**
- * Register page component
- * Provides registration form with validation and error handling
- */
 export default function RegisterPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const { executeRecaptcha, isRecaptchaLoaded } = useRecaptcha();
 
-  const form = useForm<RegisterFormValues>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    dateOfBirth: undefined as Date | undefined,
+    selfDeclaredAge18: false,
+    tosAccepted: false,
+    privacyAccepted: false,
+  });
+
+  const [errors, setErrors] = useState({
+    username: "",
+    email: "",
+    password: "",
+    dateOfBirth: "",
+    selfDeclaredAge18: "",
+    tosAccepted: "",
+    privacyAccepted: "",
+  });
+
+  const validateForm = () => {
+    const newErrors = {
       username: "",
       email: "",
       password: "",
-      dateOfBirth: undefined,
-      selfDeclaredAge18: false,
-      tosAccepted: false,
-      privacyAccepted: false,
-      marketingConsent: false,
-    },
-  });
+      dateOfBirth: "",
+      selfDeclaredAge18: "",
+      tosAccepted: "",
+      privacyAccepted: "",
+    };
 
-  /**
-   * Handles registration form submission
-   * Creates new account with legal compliance and redirects to home on success
-   */
-  async function onSubmit(data: RegisterFormValues) {
+    // Username validation
+    if (formData.username.length < 3) {
+      newErrors.username = "Username must be at least 3 characters";
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
+      newErrors.username =
+        "Username can only contain letters, numbers, and underscores";
+    }
+
+    // Email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Invalid email address";
+    }
+
+    // Password validation
+    if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
+    } else if (!/[A-Z]/.test(formData.password)) {
+      newErrors.password = "Password must contain an uppercase letter";
+    } else if (!/[a-z]/.test(formData.password)) {
+      newErrors.password = "Password must contain a lowercase letter";
+    } else if (!/[0-9]/.test(formData.password)) {
+      newErrors.password = "Password must contain a number";
+    }
+
+    // Date of birth validation
+    if (!formData.dateOfBirth) {
+      newErrors.dateOfBirth = "Date of birth is required";
+    } else if (differenceInYears(new Date(), formData.dateOfBirth) < 18) {
+      newErrors.dateOfBirth = "You must be at least 18 years old";
+    }
+
+    // Age verification
+    if (!formData.selfDeclaredAge18) {
+      newErrors.selfDeclaredAge18 = "You must confirm you are 18 or older";
+    }
+
+    // Legal checkboxes
+    if (!formData.tosAccepted) {
+      newErrors.tosAccepted = "You must accept the Terms of Service";
+    }
+    if (!formData.privacyAccepted) {
+      newErrors.privacyAccepted = "You must accept the Privacy Policy";
+    }
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every((error) => error === "");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      // Generate reCAPTCHA token
       const recaptchaToken = await executeRecaptcha("register");
       if (!recaptchaToken) {
-        toast.error("Verification failed", {
-          description:
-            "Please try again or contact support if the issue persists.",
-        });
+        toast.error("Verification failed. Please try again.");
         setIsLoading(false);
         return;
       }
 
-      // Prepare registration data with legal fields
-      const registrationData = {
-        username: data.username,
-        email: data.email,
-        password: data.password,
-        dateOfBirth: data.dateOfBirth.toISOString(),
-        selfDeclaredAge18: data.selfDeclaredAge18,
-        tosVersion: "1.0.0", // Current Terms of Service version
-        privacyVersion: "1.0.0", // Current Privacy Policy version
+      const response = await api.post("/auth/register", {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        dateOfBirth: formData.dateOfBirth?.toISOString(),
+        selfDeclaredAge18: formData.selfDeclaredAge18,
+        tosVersion: "1.0.0",
+        privacyVersion: "1.0.0",
         recaptchaToken,
-      };
+      });
 
-      const response = await api.post("/auth/register", registrationData);
       const { user, accessToken } = response.data;
-
-      // Update auth store and localStorage
       setAuth(user, accessToken);
 
-      toast.success("Account created!", {
-        description: `Welcome to SwapBuds, ${user.username}!`,
-      });
-
-      // Redirect to home page
-      router.push("/");
+      toast.success(`Welcome to SwapBuds, ${user.username}!`);
+      router.push("/items");
     } catch (error) {
-      // Log the error with full details for debugging
-      logger.apiError("POST", "/auth/register", error);
-
-      const message = getErrorMessage(
-        error,
-        "Failed to create account. Please try again.",
-      );
-      toast.error("Registration failed", {
-        description: message,
-      });
+      const message = getErrorMessage(error, "Failed to create account");
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -180,143 +168,209 @@ export default function RegisterPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        placeholder="johndoe"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="you@example.com"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="••••••••"
-                        disabled={isLoading}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="dateOfBirth"
-                render={({ field }) => (
-                  <DateOfBirthInput
-                    value={field.value}
-                    onChange={field.onChange}
-                    disabled={isLoading}
-                    error={form.formState.errors.dateOfBirth?.message}
-                  />
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="selfDeclaredAge18"
-                render={({ field }) => (
-                  <AgeVerificationCheckbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={isLoading}
-                    error={form.formState.errors.selfDeclaredAge18?.message}
-                  />
-                )}
-              />
-
-              <LegalConsentCheckboxes
-                tosAccepted={form.watch("tosAccepted")}
-                onTosChange={(checked) => form.setValue("tosAccepted", checked)}
-                privacyAccepted={form.watch("privacyAccepted")}
-                onPrivacyChange={(checked) =>
-                  form.setValue("privacyAccepted", checked)
-                }
-                marketingConsent={form.watch("marketingConsent")}
-                onMarketingChange={(checked) =>
-                  form.setValue("marketingConsent", checked)
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Username */}
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                type="text"
+                placeholder="johndoe"
+                value={formData.username}
+                onChange={(e) =>
+                  setFormData({ ...formData, username: e.target.value })
                 }
                 disabled={isLoading}
-                tosError={form.formState.errors.tosAccepted?.message}
-                privacyError={form.formState.errors.privacyAccepted?.message}
               />
+              {errors.username && (
+                <p className="text-sm text-destructive">{errors.username}</p>
+              )}
+            </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading || !isRecaptchaLoaded}
-              >
-                {isLoading ? "Creating account..." : "Create account"}
-              </Button>
+            {/* Email */}
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={formData.email}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
+                disabled={isLoading}
+              />
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email}</p>
+              )}
+            </div>
 
-              {/* reCAPTCHA Notice */}
-              <p className="text-xs text-muted-foreground">
-                This site is protected by reCAPTCHA and the Google{" "}
-                <Link
-                  href="https://policies.google.com/privacy"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-foreground"
+            {/* Password */}
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={formData.password}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
+                disabled={isLoading}
+              />
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password}</p>
+              )}
+            </div>
+
+            {/* Date of Birth */}
+            <div className="space-y-2">
+              <Label>Date of Birth</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formData.dateOfBirth && "text-muted-foreground",
+                    )}
+                    disabled={isLoading}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formData.dateOfBirth
+                      ? format(formData.dateOfBirth, "PPP")
+                      : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={formData.dateOfBirth}
+                    onSelect={(date) =>
+                      setFormData({ ...formData, dateOfBirth: date })
+                    }
+                    disabled={(date) =>
+                      date > new Date() || date < new Date("1900-01-01")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              {errors.dateOfBirth && (
+                <p className="text-sm text-destructive">{errors.dateOfBirth}</p>
+              )}
+            </div>
+
+            {/* Age Verification Checkbox */}
+            <div className="space-y-2">
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="age18"
+                  checked={formData.selfDeclaredAge18}
+                  onCheckedChange={(checked) =>
+                    setFormData({
+                      ...formData,
+                      selfDeclaredAge18: checked as boolean,
+                    })
+                  }
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="age18"
+                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
-                  Privacy Policy
-                </Link>{" "}
-                and{" "}
-                <Link
-                  href="https://policies.google.com/terms"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline hover:text-foreground"
-                >
-                  Terms of Service
-                </Link>{" "}
-                apply.
-              </p>
-
-              {!isRecaptchaLoaded && (
-                <p className="text-center text-xs text-muted-foreground">
-                  Loading security verification...
+                  I confirm that I am 18 years of age or older
+                </label>
+              </div>
+              {errors.selfDeclaredAge18 && (
+                <p className="text-sm text-destructive">
+                  {errors.selfDeclaredAge18}
                 </p>
               )}
-            </form>
-          </Form>
+            </div>
+
+            {/* Terms of Service */}
+            <div className="space-y-2">
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="tos"
+                  checked={formData.tosAccepted}
+                  onCheckedChange={(checked) =>
+                    setFormData({
+                      ...formData,
+                      tosAccepted: checked as boolean,
+                    })
+                  }
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="tos"
+                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  I accept the{" "}
+                  <Link
+                    href="/legal/terms"
+                    target="_blank"
+                    className="text-primary hover:underline"
+                  >
+                    Terms of Service
+                  </Link>
+                </label>
+              </div>
+              {errors.tosAccepted && (
+                <p className="text-sm text-destructive">{errors.tosAccepted}</p>
+              )}
+            </div>
+
+            {/* Privacy Policy */}
+            <div className="space-y-2">
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="privacy"
+                  checked={formData.privacyAccepted}
+                  onCheckedChange={(checked) =>
+                    setFormData({
+                      ...formData,
+                      privacyAccepted: checked as boolean,
+                    })
+                  }
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="privacy"
+                  className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                >
+                  I accept the{" "}
+                  <Link
+                    href="/legal/privacy"
+                    target="_blank"
+                    className="text-primary hover:underline"
+                  >
+                    Privacy Policy
+                  </Link>
+                </label>
+              </div>
+              {errors.privacyAccepted && (
+                <p className="text-sm text-destructive">
+                  {errors.privacyAccepted}
+                </p>
+              )}
+            </div>
+
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isLoading || !isRecaptchaLoaded}
+            >
+              {isLoading ? "Creating account..." : "Create account"}
+            </Button>
+
+            {!isRecaptchaLoaded && (
+              <p className="text-center text-xs text-muted-foreground">
+                Loading security verification...
+              </p>
+            )}
+          </form>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-muted-foreground">

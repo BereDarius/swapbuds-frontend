@@ -1,443 +1,213 @@
 "use client";
 
-import { ItemCard } from "@/components/items/item-card";
-import { ReviewCard } from "@/components/reviews/review-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getItems } from "@/lib/api/items";
-import { getConversations } from "@/lib/api/messages";
-import { getUserReviews } from "@/lib/api/reviews";
-import { getUserProfile, getUserStatistics } from "@/lib/api/users";
+import { getUserItems } from "@/lib/api/items";
+import { getUserProfile } from "@/lib/api/users";
 import { useAuthStore } from "@/stores/authStore";
-import { ItemStatus } from "@/types/item";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import {
   Calendar,
-  CheckCircle2,
-  Edit,
+  Loader2,
   MapPin,
   MessageSquare,
   Package,
   Star,
-  TrendingUp,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
-export default function ProfilePage() {
+export default function UserProfilePage() {
   const params = useParams();
   const router = useRouter();
-  const username = params.username as string;
   const { user: currentUser } = useAuthStore();
+  const username = params.username as string;
 
-  // Fetch user profile
-  const {
-    data: profile,
-    isLoading: profileLoading,
-    error: profileError,
-  } = useQuery({
-    queryKey: ["profile", username],
+  const { data: user, isLoading: userLoading } = useQuery({
+    queryKey: ["user", username],
     queryFn: () => getUserProfile(username),
+    enabled: !!username,
   });
 
-  // Check if viewing own profile
-  const isOwnProfile = currentUser?.id === profile?.id;
-
-  // Fetch user statistics
-  const { data: stats } = useQuery({
-    queryKey: ["userStats", profile?.id],
-    queryFn: () => getUserStatistics(profile!.id),
-    enabled: !!profile?.id,
-  });
-
-  // Fetch conversations to check if one exists with this user
-  const { data: conversations } = useQuery({
-    queryKey: ["conversations"],
-    queryFn: getConversations,
-    enabled: !!profile && !isOwnProfile,
-  });
-
-  // Fetch user's items
   const { data: itemsData } = useQuery({
-    queryKey: ["userItems", profile?.id],
-    queryFn: () =>
-      getItems({
-        userId: profile!.id,
-        status: ItemStatus.AVAILABLE,
-        page: 1,
-        limit: 12,
-      }),
-    enabled: !!profile?.id,
+    queryKey: ["user-items", user?.id],
+    queryFn: () => getUserItems(user!.id),
+    enabled: !!user?.id,
   });
 
-  // Fetch user's reviews
-  const { data: reviews } = useQuery({
-    queryKey: ["reviews", "user", profile?.id],
-    queryFn: () => getUserReviews(profile!.id),
-    enabled: !!profile?.id,
-  });
+  const isOwnProfile = currentUser?.username === username;
 
-  // Calculate average rating from reviews
-  const averageRating =
-    reviews && reviews.length > 0
-      ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
-      : 0;
-
-  // Handle messaging this user
-  const handleMessageUser = () => {
-    if (!profile) return;
-
-    // Check if conversation exists
-    const existingConv = conversations?.find(
-      (conv) =>
-        (conv.user1Id === currentUser?.id && conv.user2Id === profile.id) ||
-        (conv.user2Id === currentUser?.id && conv.user1Id === profile.id),
-    );
-
-    if (existingConv) {
-      router.push(`/messages/${existingConv.id}`);
-    } else {
-      // Navigate to messages page with recipient info to compose new message
-      router.push(
-        `/messages?compose=true&recipientId=${profile.id}&recipientUsername=${profile.username}`,
-      );
-    }
-  };
-
-  if (profileLoading) {
+  if (userLoading) {
     return (
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        <div className="space-y-6">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-start gap-6">
-                <Skeleton className="h-24 w-24 rounded-full" />
-                <div className="flex-1 space-y-3">
-                  <Skeleton className="h-8 w-48" />
-                  <Skeleton className="h-4 w-full max-w-md" />
-                  <div className="flex gap-2">
-                    <Skeleton className="h-6 w-24" />
-                    <Skeleton className="h-6 w-24" />
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <div className="grid gap-4 md:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-32" />
-            ))}
-          </div>
-        </div>
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
   }
 
-  if (profileError || !profile) {
+  if (!user) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Card className="border-destructive">
-          <CardContent className="p-8 text-center">
-            <p className="text-destructive mb-4">User not found</p>
-            <Button onClick={() => router.back()}>Go Back</Button>
-          </CardContent>
-        </Card>
+      <div className="container mx-auto px-4 py-16 text-center">
+        <h2 className="mb-2 text-2xl font-bold">User not found</h2>
+        <Button onClick={() => router.push("/")}>Go Home</Button>
       </div>
     );
   }
+
+  const items = itemsData?.items || [];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-5xl">
+    <div className="container mx-auto px-4 py-8">
       {/* Profile Header */}
-      <Card className="mb-6">
+      <Card className="mb-8">
         <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row items-start gap-6">
-            {/* Avatar */}
+          <div className="flex flex-col items-center gap-6 sm:flex-row">
             <Avatar className="h-24 w-24">
-              <AvatarImage src={profile.avatarUrl || undefined} />
+              <AvatarImage src={user.avatarUrl || undefined} />
               <AvatarFallback className="text-2xl">
-                {profile.username[0]?.toUpperCase()}
+                {user.username.slice(0, 2).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-
-            {/* Info */}
-            <div className="flex-1 space-y-3">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-3xl font-bold">{profile.username}</h1>
-                {profile.isVerified && (
-                  <Badge variant="default" className="gap-1">
-                    <CheckCircle2 className="h-3 w-3" />
-                    Verified
-                  </Badge>
-                )}
+            <div className="flex-1 text-center sm:text-left">
+              <div className="mb-2 flex items-center justify-center gap-2 sm:justify-start">
+                <h1 className="text-2xl font-bold">{user.username}</h1>
+                {user.isVerified && <Badge variant="default">✓ Verified</Badge>}
               </div>
-
-              {profile.bio && (
-                <p className="text-muted-foreground">{profile.bio}</p>
+              {user.bio && (
+                <p className="text-muted-foreground mb-3">{user.bio}</p>
               )}
-
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                {profile.location && (
+              <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground sm:justify-start">
+                {user.location && (
                   <div className="flex items-center gap-1">
                     <MapPin className="h-4 w-4" />
-                    {profile.location}
+                    <span>{user.location}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
-                  Joined {format(new Date(profile.createdAt), "MMMM yyyy")}
+                  <span>
+                    Joined {format(new Date(user.createdAt), "MMM yyyy")}
+                  </span>
                 </div>
-              </div>
-
-              <div className="flex gap-2 mt-2">
-                {isOwnProfile ? (
-                  <Button asChild variant="outline">
-                    <Link href="/settings/profile">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
-                    </Link>
-                  </Button>
-                ) : (
-                  <Button onClick={handleMessageUser} variant="outline">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    Message User
-                  </Button>
+                {user.reputationScore !== undefined && (
+                  <div className="flex items-center gap-1">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span>{user.reputationScore.toFixed(1)} reputation</span>
+                  </div>
                 )}
               </div>
+            </div>
+            <div className="flex gap-2">
+              {isOwnProfile ? (
+                <Button asChild>
+                  <Link href="/settings/profile">Edit Profile</Link>
+                </Button>
+              ) : (
+                <>
+                  <Button>
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Message
+                  </Button>
+                  <Button variant="outline">Report</Button>
+                </>
+              )}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-3 mb-6">
+      {/* Stats */}
+      <div className="mb-8 grid gap-4 sm:grid-cols-3">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reputation</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {averageRating > 0 ? averageRating.toFixed(1) : "N/A"}
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {reviews && reviews.length > 0
-                ? `Based on ${reviews.length} ${
-                    reviews.length === 1 ? "review" : "reviews"
-                  }`
-                : "No reviews yet"}
-            </p>
+          <CardContent className="p-6 text-center">
+            <Package className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+            <p className="text-2xl font-bold">{items.length}</p>
+            <p className="text-sm text-muted-foreground">Items Listed</p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Items Listed</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{profile.itemsCount}</div>
-            <p className="text-xs text-muted-foreground">
-              {profile.itemsCount === 1 ? "Active item" : "Active items"}
-            </p>
+          <CardContent className="p-6 text-center">
+            <Star className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+            <p className="text-2xl font-bold">0</p>
+            <p className="text-sm text-muted-foreground">Reviews</p>
           </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Trades Completed
-            </CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{profile.tradesCount}</div>
-            {stats && stats.totalTrades > 0 && (
-              <p className="text-xs text-muted-foreground">
-                {stats.successRate.toFixed(0)}% success rate
-              </p>
-            )}
+          <CardContent className="p-6 text-center">
+            <Calendar className="mx-auto mb-2 h-8 w-8 text-muted-foreground" />
+            <p className="text-2xl font-bold">{user.tradesCount || 0}</p>
+            <p className="text-sm text-muted-foreground">Trades</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Detailed Stats (if available) */}
-      {stats && stats.totalTrades > 0 && (
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Trade Statistics</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total Trades:</span>
-                  <span className="font-medium">{stats.totalTrades}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Completed:</span>
-                  <span className="font-medium text-green-600">
-                    {stats.completedTrades}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Cancelled:</span>
-                  <span className="font-medium text-red-600">
-                    {stats.cancelledTrades}
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Success Rate:</span>
-                  <span className="font-medium">
-                    {stats.successRate.toFixed(1)}%
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    Avg Response Time:
-                  </span>
-                  <span className="font-medium">
-                    {(stats.averageResponseTime / 3600).toFixed(1)}h
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Pending:</span>
-                  <span className="font-medium">
-                    {stats.pendingAsProposer + stats.pendingAsResponder}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <Separator className="my-6" />
-
-      {/* Tabs */}
-      <Tabs defaultValue="items" className="space-y-6">
+      {/* Content Tabs */}
+      <Tabs defaultValue="items">
         <TabsList>
-          <TabsTrigger value="items">Items ({profile.itemsCount})</TabsTrigger>
-          <TabsTrigger value="reviews">
-            Reviews ({reviews?.length || 0})
-          </TabsTrigger>
+          <TabsTrigger value="items">Items</TabsTrigger>
+          <TabsTrigger value="reviews">Reviews</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="items" className="space-y-4">
-          {itemsData && itemsData.items.length > 0 ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {itemsData.items.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
+        <TabsContent value="items" className="mt-6">
+          {items.length === 0 ? (
+            <div className="text-center py-12">
+              <Package className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                {isOwnProfile
+                  ? "You haven't listed any items yet"
+                  : "No items listed"}
+              </p>
             </div>
           ) : (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">
-                  {isOwnProfile
-                    ? "You haven't listed any items yet"
-                    : "This user hasn't listed any items yet"}
-                </p>
-                {isOwnProfile && (
-                  <Button asChild>
-                    <Link href="/items/new">List Your First Item</Link>
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map((item) => (
+                <Link key={item.id} href={`/items/${item.id}`}>
+                  <Card className="cursor-pointer transition-all hover:shadow-lg">
+                    <div className="relative aspect-square overflow-hidden rounded-t-lg bg-muted">
+                      {item.images && item.images.length > 0 ? (
+                        <Image
+                          src={item.images[0]}
+                          alt={item.title}
+                          fill
+                          className="object-cover"
+                          sizes="33vw"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <Package className="h-12 w-12 text-muted-foreground" />
+                        </div>
+                      )}
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold line-clamp-1">
+                        {item.title}
+                      </h3>
+                      {item.estimatedValue && (
+                        <p className="text-sm font-medium text-primary">
+                          €{item.estimatedValue}
+                        </p>
+                      )}
+                      <Badge variant="outline" className="mt-2">
+                        {item.condition}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
           )}
         </TabsContent>
 
-        <TabsContent value="reviews" className="space-y-4">
-          {reviews && reviews.length > 0 ? (
-            <div className="space-y-4">
-              {/* Average Rating Summary */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-4">
-                    <div className="text-center">
-                      <div className="text-4xl font-bold">
-                        {averageRating.toFixed(1)}
-                      </div>
-                      <div className="flex items-center justify-center gap-1 mt-1">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <Star
-                            key={star}
-                            className={`h-4 w-4 ${
-                              star <= Math.round(averageRating)
-                                ? "fill-yellow-400 text-yellow-400"
-                                : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {reviews.length}{" "}
-                        {reviews.length === 1 ? "review" : "reviews"}
-                      </p>
-                    </div>
-                    <Separator orientation="vertical" className="h-20" />
-                    <div className="flex-1 space-y-2">
-                      {[5, 4, 3, 2, 1].map((rating) => {
-                        const count = reviews.filter(
-                          (r) => r.rating === rating,
-                        ).length;
-                        const percentage =
-                          reviews.length > 0
-                            ? (count / reviews.length) * 100
-                            : 0;
-                        return (
-                          <div
-                            key={rating}
-                            className="flex items-center gap-2 text-sm"
-                          >
-                            <span className="w-8">{rating}★</span>
-                            <div className="flex-1 bg-muted rounded-full h-2">
-                              <div
-                                className="bg-yellow-400 h-2 rounded-full"
-                                style={{ width: `${percentage}%` }}
-                              />
-                            </div>
-                            <span className="w-8 text-muted-foreground">
-                              {count}
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Review List */}
-              {reviews.map((review) => (
-                <ReviewCard key={review.id} review={review} />
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Star className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-muted-foreground mb-4">
-                  {isOwnProfile
-                    ? "You haven't received any reviews yet"
-                    : "This user hasn't received any reviews yet"}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Reviews are given after completing trades
-                </p>
-              </CardContent>
-            </Card>
-          )}
+        <TabsContent value="reviews" className="mt-6">
+          <div className="text-center py-12">
+            <Star className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No reviews yet</p>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

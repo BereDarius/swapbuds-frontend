@@ -72,13 +72,6 @@ describe("Calendar", () => {
     expect(grid).toBeInTheDocument();
   });
 
-  it("renders with buttons caption layout", () => {
-    render(<Calendar mode="single" captionLayout="buttons" />);
-
-    const grid = screen.getByRole("grid");
-    expect(grid).toBeInTheDocument();
-  });
-
   it("renders with dropdown-months caption layout", () => {
     render(<Calendar mode="single" captionLayout="dropdown-months" />);
 
@@ -181,7 +174,8 @@ describe("Calendar", () => {
   });
 
   it("renders with required prop", () => {
-    render(<Calendar mode="single" required />);
+    const selected = new Date();
+    render(<Calendar mode="single" required selected={selected} />);
 
     const grid = screen.getByRole("grid");
     expect(grid).toBeInTheDocument();

@@ -1,52 +1,58 @@
 "use client";
 
-import { TradeCard } from "@/components/trades/trade-card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getTrades } from "@/lib/api/trades";
-import { TradeStatus, type Trade } from "@/types/trade";
+import { useAuthStore } from "@/stores/authStore";
+import { TRADE_STATUS_INFO, TradeStatus } from "@/types/trade";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeftRight, Loader2, Package } from "lucide-react";
+import { format } from "date-fns";
+import { ArrowLeftRight, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-
-type DirectionFilter = "all" | "sent" | "received";
-type StatusFilter = "all" | TradeStatus;
+import { useMemo, useState } from "react";
 
 export default function TradesPage() {
-  const [direction, setDirection] = useState<DirectionFilter>("all");
-  const [status, setStatus] = useState<StatusFilter>("all");
+  const { user } = useAuthStore();
+  const [direction, setDirection] = useState<"all" | "sent" | "received">(
+    "all",
+  );
+  const [status, setStatus] = useState<"all" | TradeStatus>("all");
   const [page, setPage] = useState(1);
   const limit = 12;
 
-  // Fetch trades with filters
-  const {
-    data: tradesData,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["trades", { direction, status, page, limit }],
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["trades", { status, page, limit }],
     queryFn: () =>
       getTrades({
-        direction: direction === "all" ? undefined : direction,
         status: status === "all" ? undefined : status,
         page,
         limit,
       }),
   });
 
-  const trades = tradesData?.trades || [];
-  const pagination = tradesData
-    ? {
-        currentPage: tradesData.page,
-        totalPages: tradesData.totalPages,
-        total: tradesData.total,
+  // Filter trades by direction client-side
+  const filteredTrades = useMemo(() => {
+    if (!data?.trades || !user) return [];
+
+    if (direction === "all") return data.trades;
+
+    return data.trades.filter((trade) => {
+      if (direction === "sent") {
+        return trade.proposer.id === user.id;
+      } else if (direction === "received") {
+        return trade.responder.id === user.id;
       }
-    : undefined;
+      return true;
+    });
+  }, [data, direction, user]);
+
+  const trades = filteredTrades;
+  const totalPages = data?.totalPages || 1;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">My Trades</h1>
         <p className="text-muted-foreground">
@@ -56,10 +62,9 @@ export default function TradesPage() {
 
       {/* Filters */}
       <div className="mb-6 space-y-4">
-        {/* Direction Filter */}
         <Tabs
           value={direction}
-          onValueChange={(v) => setDirection(v as DirectionFilter)}
+          onValueChange={(v) => setDirection(v as typeof direction)}
         >
           <TabsList>
             <TabsTrigger value="all">All Trades</TabsTrigger>
@@ -68,10 +73,9 @@ export default function TradesPage() {
           </TabsList>
         </Tabs>
 
-        {/* Status Filter */}
         <Tabs
           value={status}
-          onValueChange={(v) => setStatus(v as StatusFilter)}
+          onValueChange={(v) => setStatus(v as typeof status)}
         >
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="all">All Status</TabsTrigger>
@@ -80,53 +84,32 @@ export default function TradesPage() {
             <TabsTrigger value={TradeStatus.COMPLETED}>Completed</TabsTrigger>
             <TabsTrigger value={TradeStatus.REJECTED}>Rejected</TabsTrigger>
             <TabsTrigger value={TradeStatus.CANCELLED}>Cancelled</TabsTrigger>
-            <TabsTrigger value={TradeStatus.EXPIRED}>Expired</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
-      {/* Loading State */}
+      {/* Loading */}
       {isLoading && (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       )}
 
-      {/* Error State */}
+      {/* Error */}
       {error && (
         <div className="text-center py-12">
-          <p className="text-destructive mb-4">
-            Failed to load trades. Please try again.
-          </p>
+          <p className="text-destructive mb-4">Failed to load trades</p>
           <Button onClick={() => window.location.reload()}>Retry</Button>
         </div>
       )}
 
-      {/* Empty State */}
+      {/* Empty */}
       {!isLoading && !error && trades.length === 0 && (
         <div className="text-center py-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
-            {direction === "sent" ? (
-              <ArrowLeftRight className="h-8 w-8 text-muted-foreground" />
-            ) : direction === "received" ? (
-              <Package className="h-8 w-8 text-muted-foreground" />
-            ) : (
-              <ArrowLeftRight className="h-8 w-8 text-muted-foreground" />
-            )}
-          </div>
-          <h3 className="text-lg font-semibold mb-2">
-            {direction === "sent"
-              ? "No trades sent yet"
-              : direction === "received"
-              ? "No trades received yet"
-              : "No trades yet"}
-          </h3>
+          <ArrowLeftRight className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No trades yet</h3>
           <p className="text-muted-foreground mb-6">
-            {direction === "sent"
-              ? "Browse items and propose your first trade"
-              : direction === "received"
-              ? "Share your items to receive trade offers"
-              : "Start trading by browsing available items"}
+            Start trading by browsing items
           </p>
           <Button asChild>
             <Link href="/items">Browse Items</Link>
@@ -137,15 +120,61 @@ export default function TradesPage() {
       {/* Trades Grid */}
       {!isLoading && !error && trades.length > 0 && (
         <>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
-            {trades.map((trade: Trade) => (
-              <TradeCard key={trade.id} trade={trade} />
-            ))}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {trades.map((trade) => {
+              const statusInfo = TRADE_STATUS_INFO[trade.status];
+
+              return (
+                <Link key={trade.id} href={`/trades/${trade.id}`}>
+                  <Card className="cursor-pointer transition-all hover:shadow-lg">
+                    <CardContent className="p-4">
+                      <div className="mb-3 flex items-center justify-between">
+                        <Badge
+                          variant={
+                            statusInfo.color === "yellow"
+                              ? "default"
+                              : statusInfo.color === "green"
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {statusInfo.label}
+                        </Badge>
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(trade.createdAt), "MMM d")}
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        <div>
+                          <p className="text-xs text-muted-foreground">
+                            You offer:
+                          </p>
+                          <p className="font-medium line-clamp-1">
+                            {trade.itemOffered?.title || "Item"}
+                          </p>
+                        </div>
+                        <div className="flex justify-center">
+                          <ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">
+                            You request:
+                          </p>
+                          <p className="font-medium line-clamp-1">
+                            {trade.itemRequested?.title || "Item"}
+                          </p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Pagination */}
-          {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
+          {totalPages > 1 && (
+            <div className="mt-8 flex items-center justify-center gap-2">
               <Button
                 variant="outline"
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
@@ -154,12 +183,12 @@ export default function TradesPage() {
                 Previous
               </Button>
               <span className="text-sm text-muted-foreground">
-                Page {pagination.currentPage} of {pagination.totalPages}
+                Page {page} of {totalPages}
               </span>
               <Button
                 variant="outline"
                 onClick={() => setPage((p) => p + 1)}
-                disabled={page === pagination.totalPages}
+                disabled={page === totalPages}
               >
                 Next
               </Button>
