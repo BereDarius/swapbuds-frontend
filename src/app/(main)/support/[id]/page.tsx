@@ -51,6 +51,7 @@ export default function SupportChatPage() {
   const [message, setMessage] = useState("");
   const [typingAgent, setTypingAgent] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // WebSocket hooks
@@ -124,10 +125,12 @@ export default function SupportChatPage() {
             };
           },
         );
-        setTimeout(
-          () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }),
-          100,
-        );
+        setTimeout(() => {
+          if (messagesContainerRef.current) {
+            messagesContainerRef.current.scrollTop =
+              messagesContainerRef.current.scrollHeight;
+          }
+        }, 100);
       }
     });
     return unsubscribe;
@@ -180,8 +183,27 @@ export default function SupportChatPage() {
 
   // Auto-scroll when messages change
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [chat?.messages]);
+
+  // Initial scroll to bottom when messages first load
+  useEffect(() => {
+    if (
+      chat?.messages &&
+      chat.messages.length > 0 &&
+      messagesContainerRef.current
+    ) {
+      // Use instant scroll for initial load
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chat?.messages?.length]);
 
   // Handle typing indicator
   const handleTyping = () => {
@@ -283,7 +305,10 @@ export default function SupportChatPage() {
 
       {/* Messages */}
       <Card className="mb-4 flex-1 overflow-hidden">
-        <CardContent className="flex h-full flex-col overflow-y-auto p-4">
+        <CardContent
+          ref={messagesContainerRef}
+          className="flex h-full flex-col overflow-y-auto p-4"
+        >
           {messages.length === 0 ? (
             <div className="flex flex-1 items-center justify-center text-center">
               <div>
@@ -387,17 +412,27 @@ export default function SupportChatPage() {
                     setMessage(e.target.value);
                     handleTyping();
                   }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      if (message.trim() && !sendMutation.isPending) {
+                        // Stop typing indicator
+                        if (typingTimeoutRef.current) {
+                          clearTimeout(typingTimeoutRef.current);
+                        }
+
+                        // Send message
+                        sendMutation.mutate(message);
+                      }
+                    }
+                  }}
                   placeholder="Type your message..."
-                  disabled={sendMutation.isPending || !isSupportConnected}
+                  disabled={sendMutation.isPending}
                 />
                 <Button
                   type="submit"
                   size="icon"
-                  disabled={
-                    sendMutation.isPending ||
-                    !message.trim() ||
-                    !isSupportConnected
-                  }
+                  disabled={sendMutation.isPending || !message.trim()}
                 >
                   {sendMutation.isPending ? (
                     <Loader2 className="h-5 w-5 animate-spin" />

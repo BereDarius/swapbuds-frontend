@@ -23,11 +23,13 @@ import { io, type Socket } from "socket.io-client";
 
 /**
  * Base URL for all socket connections
- * Falls back to localhost:4000 in development if env var not set
+ * Uses NEXT_PUBLIC_WS_URL if available, otherwise falls back to API URL
+ * Falls back to localhost:3001 in development if env var not set
  */
 const SOCKET_URL =
+  process.env.NEXT_PUBLIC_WS_URL ||
   process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") ||
-  "http://localhost:4000";
+  "http://localhost:3001";
 
 /**
  * Singleton socket instances
@@ -74,7 +76,7 @@ function createSocket(config: SocketConfig = {}): Socket {
  * @returns Main socket instance
  */
 export function getSocket(token?: string): Socket {
-  if (!mainSocket || !mainSocket.connected) {
+  if (!mainSocket) {
     mainSocket = createSocket({ token });
   }
   return mainSocket;
@@ -87,7 +89,7 @@ export function getSocket(token?: string): Socket {
  * @returns Notifications socket instance
  */
 export function getNotificationsSocket(token?: string): Socket {
-  if (!notificationsSocket || !notificationsSocket.connected) {
+  if (!notificationsSocket) {
     notificationsSocket = createSocket({ namespace: "/notifications", token });
   }
   return notificationsSocket;
@@ -100,7 +102,7 @@ export function getNotificationsSocket(token?: string): Socket {
  * @returns Support socket instance
  */
 export function getSupportSocket(token?: string): Socket {
-  if (!supportSocket || !supportSocket.connected) {
+  if (!supportSocket) {
     supportSocket = createSocket({ namespace: "/support", token });
   }
   return supportSocket;

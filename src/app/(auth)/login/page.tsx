@@ -22,7 +22,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const { user } = useAuthStore();
+  const { user, _hasHydrated } = useAuthStore();
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -35,11 +35,13 @@ export default function LoginPage() {
     password: "",
   });
 
+  // Only redirect if user is logged in AND hydration is complete
+  // This prevents redirect loops when API interceptor clears tokens
   useEffect(() => {
-    if (user) {
+    if (_hasHydrated && user) {
       router.push("/");
     }
-  }, [user, router]);
+  }, [_hasHydrated, user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

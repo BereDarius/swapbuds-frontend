@@ -20,6 +20,20 @@ export async function getNotificationUnreadCount(): Promise<number> {
   return response.data.count;
 }
 
+// Get unread notification count (excluding NEW_MESSAGE notifications)
+// NEW_MESSAGE notifications are shown in the messages badge, not notifications bell
+export async function getNotificationUnreadCountExcludingMessages(): Promise<number> {
+  const response = await api.get("/notifications", {
+    params: { unreadOnly: true },
+  });
+  const notifications = response.data as Array<{ type: string }>;
+  // Filter out NEW_MESSAGE notifications
+  const nonMessageNotifications = notifications.filter(
+    (n) => n.type !== "NEW_MESSAGE",
+  );
+  return nonMessageNotifications.length;
+}
+
 // Mark a notification as read
 export async function markNotificationAsRead(
   notificationId: string,

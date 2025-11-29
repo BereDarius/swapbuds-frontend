@@ -33,7 +33,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
-  const { user } = useAuthStore();
+  const { user, _hasHydrated } = useAuthStore();
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -63,12 +63,13 @@ export default function RegisterPage() {
     privacyAccepted: "",
   });
 
-  // Redirect if already logged in
+  // Redirect if already logged in (only after hydration completes)
+  // This prevents redirect loops when API interceptor clears tokens
   useEffect(() => {
-    if (user) {
+    if (_hasHydrated && user) {
       router.push("/");
     }
-  }, [user, router]);
+  }, [_hasHydrated, user, router]);
 
   // Fetch legal document versions on mount
   useEffect(() => {

@@ -17,8 +17,13 @@ export async function getConversations(): Promise<Conversation[]> {
 export async function getConversation(
   conversationId: string,
 ): Promise<Conversation> {
-  const response = await api.get(`/messages/conversations/${conversationId}`);
-  return response.data;
+  // Fetch from the conversations list and find the matching one
+  const conversations = await getConversations();
+  const conversation = conversations.find((c) => c.id === conversationId);
+  if (!conversation) {
+    throw new Error("Conversation not found");
+  }
+  return conversation;
 }
 
 // Get messages in a conversation

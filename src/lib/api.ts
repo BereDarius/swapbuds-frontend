@@ -111,11 +111,12 @@ api.interceptors.response.use(
         error.config?.url?.includes("/auth/register");
 
       if (!isAuthEndpoint) {
-        // Clear token and redirect to login only for authenticated endpoints
+        // Clear ALL auth-related storage including Zustand persist storage
         localStorage.removeItem("accessToken");
         sessionStorage.removeItem("accessToken");
         localStorage.removeItem("user");
         localStorage.removeItem("rememberMe");
+        localStorage.removeItem("auth-storage"); // Clear Zustand persist storage
         window.location.href = "/login";
       }
     }

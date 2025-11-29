@@ -47,18 +47,28 @@ export function SocketProvider({ children }: SocketProviderProps) {
     useState(false);
   const [isSupportConnected, setIsSupportConnected] = useState(false);
 
-  const { user, accessToken } = useAuthStore();
+  const { user, accessToken: storeToken } = useAuthStore();
 
   useEffect(() => {
-    // Only connect if user is authenticated
-    if (!user || !accessToken) {
-      // Cleanup existing connections (state will update via disconnect events)
-      disconnectAllSockets();
+    // Get token from store or fallback to localStorage/sessionStorage
+    const token =
+      storeToken ||
+      localStorage.getItem("accessToken") ||
+      sessionStorage.getItem("accessToken");
+
+    // Only connect if user is authenticated and we have a token
+    if (!user || !token) {
+      // Cleanup existing connections if any (silently)
+      try {
+        disconnectAllSockets();
+      } catch {
+        // Ignore errors during cleanup when not authenticated
+      }
       return;
     }
 
     // Create main socket connection using helper (default namespace - messages)
-    const mainSocket = getSocket(accessToken);
+    const mainSocket = getSocket(token);
 
     mainSocket.on("connect", () => {
       logger.debug("Messages WebSocket connected", { socketId: mainSocket.id });
@@ -81,7 +91,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     });
 
     // Create notifications socket connection using helper
-    const notifSocket = getNotificationsSocket(accessToken);
+    const notifSocket = getNotificationsSocket(token);
 
     notifSocket.on("connect", () => {
       logger.debug("Notifications WebSocket connected", {
@@ -106,7 +116,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     });
 
     // Create support socket connection using helper
-    const suppSocket = getSupportSocket(accessToken);
+    const suppSocket = getSupportSocket(token);
 
     suppSocket.on("connect", () => {
       logger.debug("Support WebSocket connected", { socketId: suppSocket.id });
@@ -132,7 +142,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     return () => {
       disconnectAllSockets();
     };
-  }, [user, accessToken]);
+  }, [user, storeToken]);
 
   // Context value - use getter functions to access singleton instances
   const value: SocketContextType = {

@@ -1,7 +1,5 @@
 "use client";
 
-import { Footer } from "@/components/layout/footer";
-import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,46 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { getMessageUnreadCount } from "@/lib/api/messages";
-import { getNotificationUnreadCount } from "@/lib/api/notifications";
 import { joinWaitlist } from "@/lib/api/waitlist";
-import { useAuthStore } from "@/stores/authStore";
-import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowRight,
-  Package,
-  Repeat2,
-  Shield,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Repeat2, Shield, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 export default function Home() {
-  const router = useRouter();
-  const { user, clearAuth } = useAuthStore();
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { data: unreadMessagesCount = 0 } = useQuery({
-    queryKey: ["messages", "unread-count"],
-    queryFn: getMessageUnreadCount,
-    enabled: !!user,
-  });
-
-  const { data: unreadNotificationsCount = 0 } = useQuery({
-    queryKey: ["notifications", "unread-count"],
-    queryFn: getNotificationUnreadCount,
-    enabled: !!user,
-  });
-
-  const handleLogout = () => {
-    clearAuth();
-    router.push("/login");
-  };
 
   const handleWaitlistSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,33 +45,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header - Show Navbar if logged in, otherwise show landing header */}
-      {user ? (
-        <Navbar
-          unreadMessagesCount={unreadMessagesCount}
-          unreadNotificationsCount={unreadNotificationsCount}
-          onLogout={handleLogout}
-        />
-      ) : (
-        <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
-          <div className="container mx-auto flex h-16 items-center justify-between px-4">
-            <Link href="/" className="flex items-center gap-2">
-              <Package className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">SwapBuds</span>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" asChild>
-                <Link href="/login">Log in</Link>
-              </Button>
-              <Button asChild>
-                <Link href="/register">Sign up</Link>
-              </Button>
-            </div>
-          </div>
-        </header>
-      )}
-
+    <>
       {/* Hero Section */}
       <section className="flex-1 px-4 py-20 text-center">
         <div className="container mx-auto max-w-4xl">
@@ -267,9 +208,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+    </>
   );
 }

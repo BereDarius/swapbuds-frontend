@@ -1,3 +1,6 @@
+import { Footer } from "@/components/layout/footer";
+import { LayoutContent } from "@/components/layout/layout-content";
+import { Navbar } from "@/components/layout/navbar";
 import { Providers } from "@/components/providers";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -31,7 +34,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          <LayoutContent>
+            <div className="flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </LayoutContent>
+        </Providers>
       </body>
     </html>
   );

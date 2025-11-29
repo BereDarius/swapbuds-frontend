@@ -18,6 +18,8 @@ export default function MessagesPage() {
   const { data: conversations = [], isLoading } = useQuery({
     queryKey: ["conversations"],
     queryFn: getConversations,
+    staleTime: 0, // Always consider data stale to ensure fresh data when navigating to this page
+    refetchOnMount: "always", // Always refetch when page mounts
   });
 
   const filteredConversations = conversations.filter((conv) =>
