@@ -67,7 +67,7 @@ export default function ConversationPage() {
   } = useInfiniteQuery({
     queryKey: ["messages", conversationId],
     queryFn: ({ pageParam = 1 }) =>
-      getMessages(conversationId, { page: pageParam, limit: 50 }),
+      getMessages(conversationId, { page: pageParam, limit: 20 }),
     enabled: !!conversationId,
     getNextPageParam: (lastPage, allPages) => {
       const totalFetched = allPages.reduce(
