@@ -72,6 +72,8 @@ export default function SupportPage() {
   const { data: chats = [], isLoading } = useQuery({
     queryKey: ["support-chats"],
     queryFn: getMySupportChats,
+    staleTime: 0, // Always consider stale
+    refetchOnMount: "always", // Always refetch
   });
 
   const createChatMutation = useMutation({

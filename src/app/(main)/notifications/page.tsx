@@ -28,6 +28,8 @@ export default function NotificationsPage() {
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: () => getNotifications(),
+    staleTime: 0, // Always consider stale
+    refetchOnMount: "always", // Always refetch
   });
 
   const markReadMutation = useMutation({

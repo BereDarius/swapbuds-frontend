@@ -71,6 +71,8 @@ export default function SupportChatPage() {
     queryKey: ["support-chat", chatId],
     queryFn: () => getSupportChatById(chatId),
     enabled: !!chatId,
+    staleTime: 0, // Always consider stale
+    refetchOnMount: "always", // Always refetch
   });
 
   const sendMutation = useMutation({
