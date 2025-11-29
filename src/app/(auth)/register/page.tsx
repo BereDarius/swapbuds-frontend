@@ -76,7 +76,10 @@ export default function RegisterPage() {
     const fetchLegalVersions = async () => {
       try {
         const [tos, privacy] = await Promise.all([
-          getActiveLegalDocument(LegalDocumentType.TOS, Language.EN),
+          getActiveLegalDocument(
+            LegalDocumentType.TERMS_OF_SERVICE,
+            Language.EN,
+          ),
           getActiveLegalDocument(LegalDocumentType.PRIVACY_POLICY, Language.EN),
         ]);
         setTosVersion(tos.version);

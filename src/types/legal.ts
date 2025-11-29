@@ -9,7 +9,7 @@
  * Type of legal document
  */
 export enum LegalDocumentType {
-  TOS = "TOS",
+  TERMS_OF_SERVICE = "TERMS_OF_SERVICE",
   PRIVACY_POLICY = "PRIVACY_POLICY",
   COOKIE_POLICY = "COOKIE_POLICY",
   COMMUNITY_GUIDELINES = "COMMUNITY_GUIDELINES",
@@ -24,16 +24,16 @@ export enum Language {
 }
 
 /**
- * Legal document entity
+ * Legal document entity (as returned by API)
  */
 export interface LegalDocument {
   id: string;
   type: LegalDocumentType;
   version: string;
-  contentEn: string;
-  contentRo: string;
-  isActive: boolean;
-  effectiveFrom: string;
+  content: string; // Backend returns only the requested language as 'content'
+  title: string;
+  summary?: string;
+  effectiveAt: string;
   createdAt: string;
   updatedAt: string;
 }

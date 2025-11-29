@@ -6,16 +6,16 @@ import { getActiveLegalDocument } from "@/lib/api/legal";
 import { Language, LegalDocumentType } from "@/types/legal";
 import { useQuery } from "@tanstack/react-query";
 
-export default function PrivacyPage() {
+export default function CookiePolicyPage() {
   const { data: document, isLoading } = useQuery({
-    queryKey: ["legal-document", LegalDocumentType.PRIVACY_POLICY],
+    queryKey: ["legal-document", LegalDocumentType.COOKIE_POLICY],
     queryFn: () =>
-      getActiveLegalDocument(LegalDocumentType.PRIVACY_POLICY, Language.EN),
+      getActiveLegalDocument(LegalDocumentType.COOKIE_POLICY, Language.EN),
   });
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8">
-      <h1 className="mb-8 text-4xl font-bold">Privacy Policy</h1>
+      <h1 className="mb-8 text-4xl font-bold">Cookie Policy</h1>
 
       {isLoading ? (
         <div className="space-y-4">
@@ -29,7 +29,6 @@ export default function PrivacyPage() {
       ) : document ? (
         <>
           <MarkdownContent content={document.content} />
-
           <p className="mt-8 text-center text-sm text-muted-foreground">
             Version {document.version} • Effective from{" "}
             {new Date(document.effectiveAt).toLocaleDateString()}
@@ -38,7 +37,7 @@ export default function PrivacyPage() {
       ) : (
         <div className="rounded-lg border border-destructive bg-destructive/10 p-4 text-center">
           <p className="text-destructive">
-            Privacy Policy not available. Please try again later.
+            Cookie Policy not available. Please try again later.
           </p>
         </div>
       )}

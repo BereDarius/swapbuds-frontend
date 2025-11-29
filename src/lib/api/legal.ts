@@ -29,7 +29,7 @@ import { api } from "../api";
  *
  * @example
  * ```typescript
- * const tos = await getActiveLegalDocument(LegalDocumentType.TOS, Language.EN);
+ * const tos = await getActiveLegalDocument(LegalDocumentType.TERMS_OF_SERVICE, Language.EN);
  * ```
  */
 export const getActiveLegalDocument = async (
@@ -53,7 +53,7 @@ export const getActiveLegalDocument = async (
  * @example
  * ```typescript
  * const oldTos = await getLegalDocumentByVersion(
- *   LegalDocumentType.TOS,
+ *   LegalDocumentType.TERMS_OF_SERVICE,
  *   "1.0.0",
  *   Language.EN
  * );
@@ -78,7 +78,7 @@ export const getLegalDocumentByVersion = async (
  *
  * @example
  * ```typescript
- * const allVersions = await listLegalDocumentVersions(LegalDocumentType.TOS);
+ * const allVersions = await listLegalDocumentVersions(LegalDocumentType.TERMS_OF_SERVICE);
  * ```
  */
 export const listLegalDocumentVersions = async (
@@ -101,7 +101,7 @@ export const listLegalDocumentVersions = async (
  * @example
  * ```typescript
  * await acceptLegalDocument({
- *   documentType: LegalDocumentType.TOS,
+ *   documentType: LegalDocumentType.TERMS_OF_SERVICE,
  *   version: "1.0.0"
  * });
  * ```
