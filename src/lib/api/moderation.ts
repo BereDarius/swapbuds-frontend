@@ -56,6 +56,23 @@ export async function flagContent(data: {
 }
 
 /**
+ * Flag an item for moderation
+ */
+export async function flagItem(
+  itemId: string,
+  data: {
+    reason: FlagReason;
+    description?: string;
+  },
+): Promise<ContentFlag> {
+  const response = await api.post<ContentFlag>(
+    `/moderation/items/${itemId}/flag`,
+    data,
+  );
+  return response.data;
+}
+
+/**
  * Approve a flag (take action on flagged content)
  */
 export async function approveFlag(
@@ -118,4 +135,80 @@ export async function bulkRejectFlags(data: BulkRejectFlagsDto): Promise<void> {
  */
 export async function bulkRemoveFlags(data: BulkRemoveFlagsDto): Promise<void> {
   await api.post("/moderation/flags/bulk-remove", data);
+}
+
+// ========== COMMENT MODERATION ==========
+
+export interface FlaggedComment {
+  id: string;
+  commentId: string;
+  comment: {
+    id: string;
+    content: string;
+    itemId: string;
+    userId: string;
+    username: string;
+    createdAt: string;
+  };
+  reason: FlagReason;
+  description?: string;
+  status: "PENDING" | "APPROVED" | "REMOVED";
+  reportedBy: string;
+  reportedAt: string;
+  reviewedBy?: string;
+  reviewedAt?: string;
+  notes?: string;
+}
+
+export interface FlaggedCommentsResponse {
+  items: FlaggedComment[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+/**
+ * Get flagged comments with pagination and filters
+ */
+export async function getFlaggedComments(params?: {
+  page?: number;
+  limit?: number;
+  status?: "PENDING" | "APPROVED" | "REMOVED";
+  reason?: FlagReason;
+}): Promise<FlaggedCommentsResponse> {
+  const response = await api.get<FlaggedCommentsResponse>(
+    "/moderation/comments/flagged",
+    { params },
+  );
+  return response.data;
+}
+
+/**
+ * Approve a flagged comment (dismiss the flag)
+ */
+export async function approveFlaggedComment(
+  flagId: string,
+  notes?: string,
+): Promise<{ message: string }> {
+  const response = await api.patch<{ message: string }>(
+    `/moderation/comments/flagged/${flagId}/approve`,
+    { notes },
+  );
+  return response.data;
+}
+
+/**
+ * Remove a flagged comment (soft delete)
+ */
+export async function removeFlaggedComment(
+  flagId: string,
+  reason: string,
+  notifyUser?: boolean,
+): Promise<{ message: string }> {
+  const response = await api.delete<{ message: string }>(
+    `/moderation/comments/flagged/${flagId}/remove`,
+    { data: { reason, notifyUser } },
+  );
+  return response.data;
 }

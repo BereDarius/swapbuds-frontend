@@ -105,7 +105,7 @@ export default function UserProfilePage() {
             <div className="flex gap-2">
               {isOwnProfile ? (
                 <Button asChild>
-                  <Link href="/settings/profile">Edit Profile</Link>
+                  <Link href="/settings">Edit Profile</Link>
                 </Button>
               ) : (
                 <>

@@ -6,6 +6,13 @@ export interface MessageSender {
   avatarUrl: string | null;
 }
 
+export interface MessageVersion {
+  id: string;
+  content: string;
+  editedBy: string;
+  createdAt: Date;
+}
+
 export interface Message {
   id: string;
   content: string;
@@ -14,9 +21,23 @@ export interface Message {
   conversationId: string;
   isRead: boolean;
   readAt: Date | null;
+
+  // Edit tracking
+  isEdited: boolean;
+  editedAt: Date | null;
+
+  // Soft delete tracking
+  isDeleted: boolean;
+  deletedAt: Date | null;
+  deletedBy: string | null;
+  deleteReason: string | null;
+
   createdAt: Date;
   updatedAt: Date;
   sender?: MessageSender;
+
+  // Version history (for admins)
+  versions?: MessageVersion[];
 }
 
 export interface ConversationUser {
@@ -62,6 +83,10 @@ export interface SendMessageDto {
   content: string;
   tradeId?: string;
   type?: string;
+}
+
+export interface UpdateMessageDto {
+  content: string;
 }
 
 export interface GetMessagesDto {

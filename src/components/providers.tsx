@@ -2,6 +2,7 @@
 
 import { RecaptchaProvider } from "@/components/recaptcha/recaptcha-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { SocketProvider } from "@/lib/socket";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import dynamic from "next/dynamic";
@@ -61,13 +62,15 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <RecaptchaProvider>
-          <SocketProvider>
-            {children}
-            {/* Development-only devtools panel for inspecting queries/cache */}
-            <ReactQueryDevtools initialIsOpen={false} />
-          </SocketProvider>
-        </RecaptchaProvider>
+        <TooltipProvider>
+          <RecaptchaProvider>
+            <SocketProvider>
+              {children}
+              {/* Development-only devtools panel for inspecting queries/cache */}
+              <ReactQueryDevtools initialIsOpen={false} />
+            </SocketProvider>
+          </RecaptchaProvider>
+        </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

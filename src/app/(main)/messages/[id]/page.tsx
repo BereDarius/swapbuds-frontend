@@ -1,5 +1,6 @@
 "use client";
 
+import { MessageBubble } from "@/components/messages";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,7 +21,6 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { format } from "date-fns";
 import { ArrowLeft, Loader2, Send } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -45,6 +45,8 @@ export default function ConversationPage() {
     onMessage,
     onMessageRead,
     onConversationRead,
+    onMessageUpdated,
+    onMessageDeleted,
     onTyping,
     emitTyping,
     joinConversation,
@@ -253,6 +255,59 @@ export default function ConversationPage() {
     });
     return unsubscribe;
   }, [conversationId, onConversationRead, queryClient]);
+
+  // Listen for message updated events
+  useEffect(() => {
+    const unsubscribe = onMessageUpdated((updatedMessage) => {
+      if (updatedMessage.conversationId === conversationId) {
+        // Update the message in cache
+        queryClient.setQueryData<InfiniteData<MessagesResponse>>(
+          ["messages", conversationId],
+          (old) => {
+            if (!old) return old;
+            const pages = old.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((m: Message) =>
+                m.id === updatedMessage.id ? { ...m, ...updatedMessage } : m,
+              ),
+            }));
+            return { ...old, pages };
+          },
+        );
+      }
+    });
+    return unsubscribe;
+  }, [conversationId, onMessageUpdated, queryClient]);
+
+  // Listen for message deleted events
+  useEffect(() => {
+    const unsubscribe = onMessageDeleted((data) => {
+      if (data.conversationId === conversationId) {
+        // Mark message as deleted in cache
+        queryClient.setQueryData<InfiniteData<MessagesResponse>>(
+          ["messages", conversationId],
+          (old) => {
+            if (!old) return old;
+            const pages = old.pages.map((page) => ({
+              ...page,
+              messages: page.messages.map((m: Message) =>
+                m.id === data.messageId
+                  ? {
+                      ...m,
+                      isDeleted: true,
+                      deletedAt: new Date(),
+                      content: "[deleted]",
+                    }
+                  : m,
+              ),
+            }));
+            return { ...old, pages };
+          },
+        );
+      }
+    });
+    return unsubscribe;
+  }, [conversationId, onMessageDeleted, queryClient]);
 
   // Mark messages as read when conversation opens
   // Only mark messages that were SENT TO the current user (recipient is current user)
@@ -481,55 +536,12 @@ export default function ConversationPage() {
               {allMessages.map((msg: Message) => {
                 const isOwn = msg.sender?.id === user?.id;
                 return (
-                  <div
+                  <MessageBubble
                     key={msg.id}
-                    className={`flex ${
-                      isOwn ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <div
-                      className={`flex max-w-[70%] gap-3 ${
-                        isOwn ? "flex-row-reverse" : ""
-                      }`}
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={msg.sender?.avatarUrl || undefined} />
-                        <AvatarFallback>
-                          {msg.sender?.username.slice(0, 2).toUpperCase() ||
-                            "??"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div
-                          className={`rounded-lg p-3 ${
-                            isOwn
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-muted"
-                          }`}
-                        >
-                          <p className="whitespace-pre-wrap wrap-break-word">
-                            {msg.content}
-                          </p>
-                        </div>
-                        <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                          <span>
-                            {format(new Date(msg.createdAt), "h:mm a")}
-                          </span>
-                          {isOwn && (
-                            <span className="ml-1">
-                              {msg.isRead ? (
-                                <span className="text-blue-500" title="Read">
-                                  ✓✓
-                                </span>
-                              ) : (
-                                <span title="Sent">✓</span>
-                              )}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                    message={msg}
+                    isOwn={isOwn}
+                    conversationId={conversationId}
+                  />
                 );
               })}
               {/* Typing indicator */}

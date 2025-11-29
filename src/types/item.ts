@@ -25,6 +25,7 @@ export enum ItemCategory {
 export enum ItemCondition {
   NEW = "NEW",
   LIKE_NEW = "LIKE_NEW",
+  EXCELLENT = "EXCELLENT",
   GOOD = "GOOD",
   FAIR = "FAIR",
   POOR = "POOR",
@@ -243,6 +244,11 @@ export const CONDITION_INFO: Record<
     label: "Like New",
     description: "Barely used, excellent condition",
     color: "blue",
+  },
+  [ItemCondition.EXCELLENT]: {
+    label: "Excellent",
+    description: "Great condition with minimal wear",
+    color: "cyan",
   },
   [ItemCondition.GOOD]: {
     label: "Good",

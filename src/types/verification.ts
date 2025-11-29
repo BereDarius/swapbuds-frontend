@@ -28,15 +28,18 @@ export enum VerificationStatus {
  */
 export interface SubmitVerificationDto {
   documentType: DocumentType;
-  documentImageUrl: string; // Cloudinary URL
+  documentUrlFront: string; // Cloudinary URL (front of document)
+  documentUrlBack?: string; // Cloudinary URL (back of document, optional)
+  selfieUrl: string; // Cloudinary URL (live selfie)
 }
 
 /**
  * Review verification DTO (admin use)
  */
 export interface ReviewVerificationDto {
-  expiryDate: string; // Date string
+  dateOfBirth?: string; // Date string
   rejectionReason?: string;
+  notes?: string;
 }
 
 /**
@@ -47,9 +50,11 @@ export interface VerificationRequest {
   userId: string;
   status: VerificationStatus;
   documentType: DocumentType;
-  documentImageUrl: string;
-  expiryDate?: string;
+  documentUrlFront: string;
+  documentUrlBack?: string;
+  selfieUrl: string;
   rejectionReason?: string;
+  notes?: string;
   submittedAt: string;
   reviewedAt?: string;
 }

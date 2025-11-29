@@ -21,26 +21,50 @@ export interface UpdateCommentDto {
 }
 
 /**
- * Comment author (minimal user data)
+ * Comment version (edit history)
  */
-export interface CommentAuthor {
+export interface CommentVersion {
   id: string;
-  username: string;
-  avatarUrl: string | null;
-  isVerified: boolean;
+  content: string;
+  editedBy: string;
+  createdAt: string;
 }
 
 /**
  * Comment entity
+ * Matches backend CommentDto structure
  */
 export interface Comment {
   id: string;
   content: string;
   itemId: string;
-  authorId: string;
-  author: CommentAuthor;
+
+  // Author fields (flat structure from backend)
+  userId: string;
+  username: string;
+  avatarUrl: string | null;
+  isVerified?: boolean;
+
   parentId: string | null;
   replies?: Comment[]; // Nested replies
+
+  // Edit tracking
+  isEdited: boolean;
+  editedAt: string | null;
+
+  // Soft delete tracking
+  isDeleted: boolean;
+  deletedAt: string | null;
+  deletedBy: string | null;
+  deleteReason: string | null;
+
+  // Engagement
+  likesCount: number;
+  hasLiked?: boolean;
+
+  // Version history (for moderators)
+  versions?: CommentVersion[];
+
   createdAt: string;
   updatedAt: string;
 }
@@ -50,4 +74,11 @@ export interface Comment {
  */
 export interface CommentCountResponse {
   count: number;
+}
+
+/**
+ * Create comment response (includes updated count)
+ */
+export interface CreateCommentResponse extends Comment {
+  commentsCount: number;
 }

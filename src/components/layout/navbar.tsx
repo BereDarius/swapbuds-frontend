@@ -58,7 +58,6 @@ export function Navbar() {
       queryKey: ["messages", "unread-count"],
       queryFn: async () => {
         const count = await getMessageUnreadCount();
-        console.log("[Navbar] Fetched unread message count:", count);
         return count;
       },
       enabled: !!user,
@@ -68,8 +67,6 @@ export function Navbar() {
       refetchOnReconnect: true, // Refetch on reconnect to catch missed updates
       retry: 1,
     });
-
-  console.log("[Navbar] Current badge count:", unreadMessagesCount);
 
   const { data: unreadNotificationsCount = 0 } = useQuery({
     queryKey: ["notifications", "unread-count"],
@@ -188,60 +185,41 @@ export function Navbar() {
     const messageSocket = getSocket(token);
     const notificationSocket = getNotificationsSocket(token);
 
-    console.log("[Navbar] Socket connected:", messageSocket.connected);
-    console.log("[Navbar] Socket ID:", messageSocket.id);
-    console.log("[Navbar] Socket auth:", messageSocket.auth);
-
-    // Debug: Listen for connection events FIRST (before connecting)
+    // Listen for connection events FIRST (before connecting)
     messageSocket.on("connect", () => {
-      console.log("[Navbar] Message socket CONNECTED");
       // Subscribe to user room to receive messages
-      console.log("[Navbar] Subscribing to user room:", user.id);
       messageSocket.emit("subscribe", user.id);
     });
 
     // If socket exists but not connected, reconnect with token
     if (!messageSocket.connected) {
-      console.log("[Navbar] Reconnecting message socket with token...");
       messageSocket.auth = { token };
       messageSocket.connect();
     } else {
       // Already connected, subscribe immediately
-      console.log("[Navbar] Socket already connected, subscribing now");
       messageSocket.emit("subscribe", user.id);
     }
 
     if (!notificationSocket.connected) {
-      console.log("[Navbar] Reconnecting notification socket with token...");
       notificationSocket.auth = { token };
       notificationSocket.connect();
     } else {
       // Already connected, subscribe immediately
-      console.log(
-        "[Navbar] Notification socket already connected, subscribing now",
-      );
       notificationSocket.emit("subscribe", user.id);
     }
 
-    messageSocket.on("disconnect", (reason) => {
-      console.log("[Navbar] Message socket DISCONNECTED:", reason);
-    });
-
-    // Debug: Listen for all events
-    messageSocket.onAny((event, ...args) => {
-      console.log("[Navbar] Message socket event:", event, args);
+    messageSocket.on("disconnect", () => {
+      // Socket disconnected
     });
 
     // Notification socket connection events FIRST (before connecting)
     notificationSocket.on("connect", () => {
-      console.log("[Navbar] Notification socket CONNECTED");
       // Subscribe to user room to receive notifications
-      console.log("[Navbar] Subscribing to notification room:", user.id);
       notificationSocket.emit("subscribe", user.id);
     });
 
-    notificationSocket.on("disconnect", (reason) => {
-      console.log("[Navbar] Notification socket DISCONNECTED:", reason);
+    notificationSocket.on("disconnect", () => {
+      // Socket disconnected
     });
 
     // Listen for message read events
@@ -258,14 +236,9 @@ export function Navbar() {
 
     // Listen for new messages - backend emits "message" not "newMessage"
     // Invalidate both unread count and conversations list
-    const handleNewMessageWithList = (message: unknown) => {
-      console.log("[Navbar] Received message event:", message);
-      console.log("[Navbar] Refetching message count...");
-
+    const handleNewMessageWithList = () => {
       // Force refetch immediately
-      refetchMessagesCount().then((result) => {
-        console.log("[Navbar] New unread count:", result.data);
-      });
+      refetchMessagesCount();
 
       // Also invalidate conversations list
       queryClient.invalidateQueries({
@@ -572,6 +545,12 @@ export function Navbar() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link href="/verification">
+                        <ShieldCheck className="mr-2 h-4 w-4" />
+                        ID Verification
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link href="/support">
                         <HelpCircle className="mr-2 h-4 w-4" />
                         Support
@@ -691,6 +670,13 @@ export function Navbar() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Favorites
+              </Link>
+              <Link
+                href="/verification"
+                className="text-sm font-medium transition-colors hover:text-primary"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                ID Verification
               </Link>
               <Link
                 href="/support"

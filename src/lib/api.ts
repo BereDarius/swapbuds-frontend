@@ -97,12 +97,19 @@ api.interceptors.response.use(
     return response;
   },
   async (error: AxiosError) => {
-    // Log API error with full details
-    logger.apiError(
-      error.config?.method?.toUpperCase() || "UNKNOWN",
-      error.config?.url || "UNKNOWN",
-      error,
-    );
+    // Skip logging 404 for verification endpoint (expected when no verification exists)
+    const isVerificationNotFound =
+      error.response?.status === 404 &&
+      error.config?.url?.includes("/verification/me");
+
+    if (!isVerificationNotFound) {
+      // Log API error with full details
+      logger.apiError(
+        error.config?.method?.toUpperCase() || "UNKNOWN",
+        error.config?.url || "UNKNOWN",
+        error,
+      );
+    }
 
     if (error.response?.status === 401) {
       // Don't redirect if it's a login or register request failure

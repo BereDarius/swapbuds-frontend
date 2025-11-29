@@ -1,19 +1,19 @@
 "use client";
 
+import { CommentsList } from "@/components/comments";
+import { FlagDialog } from "@/components/moderation/flag-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { createComment, getItemComments } from "@/lib/api/comments";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { getItemById } from "@/lib/api/items";
 import { checkIfLiked, likeItem, unlikeItem } from "@/lib/api/likes";
+import { useVerification } from "@/lib/hooks/useVerification";
 import { useAuthStore } from "@/stores/authStore";
 import { CATEGORY_INFO, CONDITION_INFO, DeliveryMethod } from "@/types/item";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,15 +23,29 @@ import {
   Loader2,
   MessageSquare,
   Package,
-  Send,
   Share2,
-  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+
+// Format large numbers (0-999, 1k, 1.1k, 1m, 1.1m, etc.)
+function formatCount(count: number): string {
+  if (count < 1000) return count.toString();
+  if (count < 1000000) {
+    const k = count / 1000;
+    return k % 1 === 0 ? `${k}k` : `${k.toFixed(1)}k`;
+  }
+  const m = count / 1000000;
+  return m % 1 === 0 ? `${m}m` : `${m.toFixed(1)}m`;
+}
+
+// Get singular or plural form based on count
+function pluralize(count: number, singular: string, plural: string): string {
+  return count === 1 ? singular : plural;
+}
 
 export default function ItemDetailPage() {
   const params = useParams();
@@ -40,9 +54,11 @@ export default function ItemDetailPage() {
   const queryClient = useQueryClient();
   const itemId = params.id as string;
 
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [showComments, setShowComments] = useState(false);
-  const [commentText, setCommentText] = useState("");
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [optimisticLikesCount, setOptimisticLikesCount] = useState<
+    number | null
+  >(null);
+  const [showFlagDialog, setShowFlagDialog] = useState(false);
 
   const {
     data: item,
@@ -60,34 +76,29 @@ export default function ItemDetailPage() {
     enabled: !!itemId && !!user,
   });
 
-  const { data: comments = [] } = useQuery({
-    queryKey: ["item", itemId, "comments"],
-    queryFn: () => getItemComments(itemId),
-    enabled: !!itemId && showComments,
-  });
-
   const likeMutation = useMutation({
     mutationFn: () => (isLiked ? unlikeItem(itemId) : likeItem(itemId)),
-    onSuccess: () => {
+    onMutate: () => {
+      // Optimistic update
+      const currentCount = item?.likesCount || 0;
+      const newCount = isLiked ? currentCount - 1 : currentCount + 1;
+      setOptimisticLikesCount(newCount);
+    },
+    onSuccess: (data) => {
+      // Use the count returned from the backend
+      queryClient.setQueryData(["item", itemId], (oldData) => {
+        if (oldData && typeof oldData === "object") {
+          return { ...oldData, likesCount: data.likesCount };
+        }
+        return oldData;
+      });
       queryClient.invalidateQueries({ queryKey: ["item", itemId, "liked"] });
-      queryClient.invalidateQueries({ queryKey: ["item", itemId] });
+      setOptimisticLikesCount(null);
       toast.success(isLiked ? "Removed from likes" : "Added to likes");
     },
     onError: () => {
+      setOptimisticLikesCount(null);
       toast.error("Failed to update like");
-    },
-  });
-
-  const commentMutation = useMutation({
-    mutationFn: (content: string) => createComment(itemId, { content }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["item", itemId, "comments"] });
-      queryClient.invalidateQueries({ queryKey: ["item", itemId] });
-      setCommentText("");
-      toast.success("Comment added");
-    },
-    onError: () => {
-      toast.error("Failed to add comment");
     },
   });
 
@@ -99,9 +110,33 @@ export default function ItemDetailPage() {
     likeMutation.mutate();
   };
 
-  const handleComment = () => {
-    if (!commentText.trim()) return;
-    commentMutation.mutate(commentText);
+  const { isVerified } = useVerification();
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/items/${itemId}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: item?.title,
+          text: item?.description,
+          url: url,
+        });
+      } catch (error) {
+        // User cancelled or error occurred
+        if ((error as Error).name !== "AbortError") {
+          toast.error("Failed to share");
+        }
+      }
+    } else {
+      // Fallback to clipboard
+      try {
+        await navigator.clipboard.writeText(url);
+        toast.success("Link copied to clipboard");
+      } catch {
+        toast.error("Failed to copy link");
+      }
+    }
   };
 
   if (isLoading) {
@@ -129,26 +164,25 @@ export default function ItemDetailPage() {
   const conditionInfo = CONDITION_INFO[item.condition];
   const isOwner = user?.id === item.owner?.id;
 
+  // Display counts with optimistic updates
+  const displayLikesCount = optimisticLikesCount ?? item.likesCount ?? 0;
+  const displayCommentsCount = item.commentsCount ?? 0;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid gap-8 lg:grid-cols-2">
-        {/* Images */}
+        {/* Images Carousel */}
         <div className="space-y-4">
-          <div
-            className="relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-muted transition-opacity hover:opacity-90"
-            onClick={() =>
-              item.images &&
-              item.images.length > 0 &&
-              setSelectedImage(item.images[0])
-            }
-          >
+          {/* Main Image Display */}
+          <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
             {item.images && item.images.length > 0 ? (
               <Image
-                src={item.images[0]}
+                src={item.images[selectedImageIndex]}
                 alt={item.title}
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
+                priority
               />
             ) : (
               <div className="flex h-full items-center justify-center">
@@ -156,22 +190,29 @@ export default function ItemDetailPage() {
               </div>
             )}
           </div>
+
+          {/* Thumbnail Navigation */}
           {item.images && item.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-2">
-              {item.images.slice(1).map((img, idx) => (
-                <div
+            <div className="grid grid-cols-5 gap-2">
+              {item.images.map((img, idx) => (
+                <button
                   key={idx}
-                  className="relative aspect-square cursor-pointer overflow-hidden rounded-md bg-muted transition-opacity hover:opacity-90"
-                  onClick={() => setSelectedImage(img)}
+                  className={`relative aspect-square overflow-hidden rounded-md bg-muted transition-all cursor-pointer ${
+                    idx === selectedImageIndex
+                      ? "ring-2 ring-primary opacity-60"
+                      : "hover:opacity-80"
+                  }`}
+                  onClick={() => setSelectedImageIndex(idx)}
+                  type="button"
                 >
                   <Image
                     src={img}
-                    alt={`${item.title} ${idx + 2}`}
+                    alt={`${item.title} ${idx + 1}`}
                     fill
                     className="object-cover"
-                    sizes="25vw"
+                    sizes="20vw"
                   />
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -262,9 +303,24 @@ export default function ItemDetailPage() {
           {/* Actions */}
           <div className="flex flex-wrap gap-3">
             {!isOwner && item.status === "AVAILABLE" && (
-              <Button size="lg" className="flex-1">
-                Propose Trade
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span
+                    className={`flex-1 ${
+                      !isVerified ? "cursor-not-allowed" : ""
+                    }`}
+                  >
+                    <Button size="lg" className="w-full" disabled={!isVerified}>
+                      Propose Trade
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {!isVerified && (
+                  <TooltipContent>
+                    <p>Verify your identity to propose trades</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
             )}
             {isOwner && (
               <>
@@ -282,32 +338,71 @@ export default function ItemDetailPage() {
             )}
             {!isOwner && (
               <>
-                <Button
-                  size="icon"
-                  variant={isLiked ? "default" : "outline"}
-                  onClick={handleLike}
-                  disabled={likeMutation.isPending}
-                >
-                  <Heart
-                    className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`}
-                  />
-                </Button>
-                <Button
-                  size="icon"
-                  variant="outline"
-                  onClick={() => setShowComments(true)}
-                >
-                  <MessageSquare className="h-5 w-5" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span className={!isVerified ? "cursor-not-allowed" : ""}>
+                      <Button
+                        size="icon"
+                        variant={isLiked ? "default" : "outline"}
+                        onClick={handleLike}
+                        disabled={likeMutation.isPending || !isVerified}
+                      >
+                        <Heart
+                          className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`}
+                        />
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  {!isVerified && (
+                    <TooltipContent>
+                      <p>Verify your identity to like items</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => {
+                          const commentsSection =
+                            document.getElementById("comments-section");
+                          commentsSection?.scrollIntoView({
+                            behavior: "smooth",
+                          });
+                        }}
+                      >
+                        <MessageSquare className="h-5 w-5" />
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                </Tooltip>
               </>
             )}
-            <Button size="icon" variant="outline">
+            <Button size="icon" variant="outline" onClick={handleShare}>
               <Share2 className="h-5 w-5" />
             </Button>
             {!isOwner && (
-              <Button size="icon" variant="outline">
-                <Flag className="h-5 w-5" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className={!isVerified ? "cursor-not-allowed" : ""}>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      disabled={!isVerified}
+                      onClick={() => setShowFlagDialog(true)}
+                    >
+                      <Flag className="h-5 w-5" />
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {!isVerified && (
+                  <TooltipContent>
+                    <p>Verify your identity to report items</p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
             )}
           </div>
 
@@ -320,109 +415,45 @@ export default function ItemDetailPage() {
               onClick={() => !isOwner && handleLike()}
             >
               <Heart className="h-4 w-4" />
-              <span>{item.likesCount || 0} likes</span>
+              <span>
+                {formatCount(displayLikesCount)}{" "}
+                {pluralize(displayLikesCount, "like", "likes")}
+              </span>
             </div>
             <div
               className={`flex items-center gap-1 ${
                 !isOwner ? "cursor-pointer hover:text-foreground" : ""
               }`}
-              onClick={() => !isOwner && setShowComments(true)}
+              onClick={() => {
+                const commentsSection =
+                  document.getElementById("comments-section");
+                commentsSection?.scrollIntoView({ behavior: "smooth" });
+              }}
             >
               <MessageSquare className="h-4 w-4" />
-              <span>{item.commentsCount || 0} comments</span>
+              <span>
+                {formatCount(displayCommentsCount)}{" "}
+                {pluralize(displayCommentsCount, "comment", "comments")}
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Image Modal */}
-      <Dialog
-        open={!!selectedImage}
-        onOpenChange={() => setSelectedImage(null)}
-      >
-        <DialogContent className="max-w-4xl">
-          <div className="relative aspect-square w-full overflow-hidden rounded-lg">
-            {selectedImage && (
-              <Image
-                src={selectedImage}
-                alt={item.title}
-                fill
-                className="object-contain"
-                sizes="100vw"
-              />
-            )}
-          </div>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="absolute right-4 top-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            <X className="h-5 w-5" />
-          </Button>
-        </DialogContent>
-      </Dialog>
+      {/* Comments Section */}
+      <div id="comments-section" className="mt-12">
+        <CommentsList itemId={itemId} />
+      </div>
 
-      {/* Comments Dialog */}
-      <Dialog open={showComments} onOpenChange={setShowComments}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Comments ({item.commentsCount || 0})</DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[60vh] space-y-4 overflow-y-auto">
-            {comments.length === 0 ? (
-              <p className="py-8 text-center text-muted-foreground">
-                No comments yet. Be the first to comment!
-              </p>
-            ) : (
-              comments.map((comment) => (
-                <div key={comment.id} className="flex gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={comment.author?.avatarUrl || undefined} />
-                    <AvatarFallback>
-                      {comment.author?.username?.slice(0, 2).toUpperCase() ||
-                        "??"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="rounded-lg bg-muted p-3">
-                      <p className="text-sm font-semibold">
-                        {comment.author?.username}
-                      </p>
-                      <p className="mt-1 text-sm">{comment.content}</p>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {new Date(comment.createdAt).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-          {!isOwner && (
-            <div className="flex gap-2 border-t pt-4">
-              <Textarea
-                placeholder="Write a comment..."
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                rows={2}
-                disabled={commentMutation.isPending}
-              />
-              <Button
-                size="icon"
-                onClick={handleComment}
-                disabled={commentMutation.isPending || !commentText.trim()}
-              >
-                {commentMutation.isPending ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <Send className="h-5 w-5" />
-                )}
-              </Button>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Flag Dialog */}
+      {item && (
+        <FlagDialog
+          open={showFlagDialog}
+          onOpenChange={setShowFlagDialog}
+          itemId={item.id}
+          itemTitle={item.title}
+        />
+      )}
     </div>
   );
 }

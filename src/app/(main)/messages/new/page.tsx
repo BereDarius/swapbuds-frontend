@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { getConversations, sendMessage } from "@/lib/api/messages";
+import { useVerification } from "@/lib/hooks/useVerification";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, Send } from "lucide-react";
 import Link from "next/link";
@@ -18,6 +19,7 @@ export default function NewMessagePage() {
   const userId = searchParams.get("userId");
   const username = searchParams.get("username");
   const [message, setMessage] = useState("");
+  const { requireVerification } = useVerification();
 
   // Check if conversation already exists
   const { data: conversations = [] } = useQuery({
@@ -36,7 +38,7 @@ export default function NewMessagePage() {
         content,
         type: "text",
       }),
-    onSuccess: (messageData) => {
+    onSuccess: () => {
       toast.success("Message sent!");
       // Navigate to the conversation
       router.push(`/messages`);
@@ -49,6 +51,12 @@ export default function NewMessagePage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
+
+    // Check verification before sending message
+    if (!requireVerification("send messages")) {
+      return;
+    }
+
     sendMessageMutation.mutate(message);
   };
 

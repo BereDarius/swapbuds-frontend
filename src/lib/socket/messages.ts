@@ -59,6 +59,20 @@ export function useMessagesSocket() {
   );
 
   /**
+   * Subscribe to message updated events
+   */
+  const onMessageUpdated = useCallback(
+    (callback: (message: Message) => void) => {
+      if (!socket) return () => {};
+      socket.on("messageUpdated", callback);
+      return () => {
+        socket.off("messageUpdated", callback);
+      };
+    },
+    [socket],
+  );
+
+  /**
    * Subscribe to message deleted events
    */
   const onMessageDeleted = useCallback(
@@ -139,6 +153,7 @@ export function useMessagesSocket() {
     onMessage,
     onMessageRead,
     onConversationRead,
+    onMessageUpdated,
     onMessageDeleted,
     onTyping,
     emitTyping,

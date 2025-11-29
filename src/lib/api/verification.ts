@@ -79,7 +79,7 @@ export async function approveVerification(
   data: ReviewVerificationDto,
 ): Promise<VerificationRequest> {
   const response = await api.patch<VerificationRequest>(
-    `/verification/${verificationId}/approve`,
+    `/verification/admin/${verificationId}/approve`,
     data,
   );
   return response.data;
@@ -93,8 +93,22 @@ export async function rejectVerification(
   data: ReviewVerificationDto,
 ): Promise<VerificationRequest> {
   const response = await api.patch<VerificationRequest>(
-    `/verification/${verificationId}/reject`,
+    `/verification/admin/${verificationId}/reject`,
     data,
+  );
+  return response.data;
+}
+
+/**
+ * Update internal notes for a verification (admin only)
+ */
+export async function updateVerificationNotes(
+  verificationId: string,
+  notes: string,
+): Promise<VerificationRequest> {
+  const response = await api.patch<VerificationRequest>(
+    `/verification/admin/${verificationId}/notes`,
+    { notes },
   );
   return response.data;
 }

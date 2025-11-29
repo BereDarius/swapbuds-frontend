@@ -10,20 +10,35 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { joinWaitlist } from "@/lib/api/waitlist";
+import { getErrorMessage } from "@/lib/errors";
 import { ArrowRight, Repeat2, Shield, Sparkles, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
+
+const waitlistSchema = z.object({
+  email: z
+    .email({ message: "Please enter a valid email address" })
+    .min(1, { message: "Please enter your email address" }),
+});
 
 export default function Home() {
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const handleWaitlistSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setEmailError("");
 
-    if (!email.trim()) {
-      toast.error("Please enter your email address");
+    const trimmedEmail = email.trim();
+
+    // Validate with Zod
+    const validation = waitlistSchema.safeParse({ email: trimmedEmail });
+
+    if (!validation.success) {
+      setEmailError(validation.error.issues[0].message);
       return;
     }
 
@@ -31,14 +46,26 @@ export default function Home() {
 
     try {
       await joinWaitlist({
-        email: email.trim(),
+        email: trimmedEmail,
         source: "landing_page",
       });
 
       toast.success("Thanks for joining! We'll notify you when we launch.");
       setEmail("");
-    } catch {
-      toast.error("Failed to join waitlist. Please try again.");
+      setEmailError("");
+    } catch (error) {
+      const message = getErrorMessage(error);
+
+      // Check if it's an email validation error
+      if (message.toLowerCase().includes("email")) {
+        setEmailError("Please enter a valid email address");
+      } else if (message.toLowerCase().includes("already")) {
+        setEmailError("This email is already on the waitlist");
+      } else {
+        setEmailError(message);
+      }
+
+      toast.error("Failed to join waitlist. Please check your email.");
     } finally {
       setIsSubmitting(false);
     }
@@ -81,17 +108,26 @@ export default function Home() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleWaitlistSignup} className="flex gap-2">
-                <Input
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={isSubmitting}
-                />
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Joining..." : "Join"}
-                </Button>
+              <form onSubmit={handleWaitlistSignup} className="space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setEmailError("");
+                    }}
+                    disabled={isSubmitting}
+                    className={emailError ? "border-destructive" : ""}
+                  />
+                  <Button type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Joining..." : "Join"}
+                  </Button>
+                </div>
+                {emailError && (
+                  <p className="text-sm text-destructive">{emailError}</p>
+                )}
               </form>
             </CardContent>
           </Card>

@@ -1,5 +1,6 @@
 "use client";
 
+import { VerificationBanner } from "@/components/verification/verification-banner";
 import { useAuthStore } from "@/stores/authStore";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -30,5 +31,12 @@ export default function MainLayout({
     return null;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <div className="container mx-auto px-4 py-4">
+        <VerificationBanner />
+      </div>
+      {children}
+    </>
+  );
 }

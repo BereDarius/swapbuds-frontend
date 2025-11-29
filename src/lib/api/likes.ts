@@ -8,16 +8,28 @@ import { api } from "../api";
 
 /**
  * Like an item
+ * @returns Object containing the updated likes count
  */
-export async function likeItem(itemId: string): Promise<void> {
-  await api.post(`/items/${itemId}/like`);
+export async function likeItem(
+  itemId: string,
+): Promise<{ likesCount: number }> {
+  const response = await api.post<{ message: string; likesCount: number }>(
+    `/items/${itemId}/like`,
+  );
+  return { likesCount: response.data.likesCount };
 }
 
 /**
  * Unlike an item
+ * @returns Object containing the updated likes count
  */
-export async function unlikeItem(itemId: string): Promise<void> {
-  await api.delete(`/items/${itemId}/like`);
+export async function unlikeItem(
+  itemId: string,
+): Promise<{ likesCount: number }> {
+  const response = await api.delete<{ likesCount: number }>(
+    `/items/${itemId}/like`,
+  );
+  return { likesCount: response.data.likesCount };
 }
 
 /**

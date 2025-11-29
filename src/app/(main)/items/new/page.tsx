@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { createItem } from "@/lib/api/items";
+import { useVerification } from "@/lib/hooks/useVerification";
 import {
   CATEGORY_INFO,
   CONDITION_INFO,
@@ -29,6 +30,7 @@ import { toast } from "sonner";
 
 export default function NewItemPage() {
   const router = useRouter();
+  const { requireVerification } = useVerification();
   const [images, setImages] = useState<File[]>([]);
   const [formData, setFormData] = useState({
     title: "",
@@ -63,6 +65,11 @@ export default function NewItemPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Check verification before creating item
+    if (!requireVerification("create items")) {
+      return;
+    }
 
     if (!formData.title || !formData.category || !formData.condition) {
       toast.error("Please fill in all required fields");

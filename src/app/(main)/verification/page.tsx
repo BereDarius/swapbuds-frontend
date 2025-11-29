@@ -14,7 +14,7 @@ import {
 import { getMyVerification, submitVerification } from "@/lib/api/verification";
 import { DocumentType } from "@/types/verification";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle, Clock, Loader2, Upload, XCircle } from "lucide-react";
+import { Clock, Loader2, Upload, XCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -25,8 +25,10 @@ export default function VerificationPage() {
   );
   const [frontImage, setFrontImage] = useState<File | null>(null);
   const [backImage, setBackImage] = useState<File | null>(null);
+  const [selfieImage, setSelfieImage] = useState<File | null>(null);
   const [frontPreview, setFrontPreview] = useState<string>("");
   const [backPreview, setBackPreview] = useState<string>("");
+  const [selfiePreview, setSelfiePreview] = useState<string>("");
 
   const { data: verification, isLoading } = useQuery({
     queryKey: ["my-verification"],
@@ -40,37 +42,93 @@ export default function VerificationPage() {
       queryClient.invalidateQueries({ queryKey: ["my-verification"] });
       setFrontImage(null);
       setBackImage(null);
+      setSelfieImage(null);
       setFrontPreview("");
       setBackPreview("");
+      setSelfiePreview("");
     },
     onError: () => {
       toast.error("Failed to submit verification");
     },
   });
 
-  const handleFileChange = (
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          let width = img.width;
+          let height = img.height;
+
+          // Resize if image is too large (max 1920px width)
+          const maxWidth = 1920;
+          if (width > maxWidth) {
+            height = (height * maxWidth) / width;
+            width = maxWidth;
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG with 85% quality
+          const compressed = canvas.toDataURL("image/jpeg", 0.85);
+          resolve(compressed);
+        };
+        img.onerror = reject;
+        img.src = e.target?.result as string;
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    side: "front" | "back",
+    side: "front" | "back" | "selfie",
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size must be less than 5MB");
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("File size must be less than 10MB");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    try {
+      const compressed = await compressImage(file);
+
+      // Check compressed size (base64 strings are ~33% larger than binary)
+      const sizeInBytes = (compressed.length * 3) / 4;
+      if (sizeInBytes > 8 * 1024 * 1024) {
+        toast.error(
+          "Compressed image is still too large. Please use a smaller image.",
+        );
+        return;
+      }
+
       if (side === "front") {
         setFrontImage(file);
-        setFrontPreview(reader.result as string);
-      } else {
+        setFrontPreview(compressed);
+      } else if (side === "back") {
         setBackImage(file);
-        setBackPreview(reader.result as string);
+        setBackPreview(compressed);
+      } else {
+        setSelfieImage(file);
+        setSelfiePreview(compressed);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch {
+      toast.error("Failed to process image");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,12 +141,18 @@ export default function VerificationPage() {
       toast.error("Please upload back image of your ID card");
       return;
     }
+    if (!selfieImage) {
+      toast.error("Please upload a live selfie photo");
+      return;
+    }
 
     // TODO: Upload images to Cloudinary first and get URLs
     // For now, use preview URLs as placeholders
     submitMutation.mutate({
       documentType,
-      documentImageUrl: frontPreview, // This should be Cloudinary URL
+      documentUrlFront: frontPreview, // This should be Cloudinary URL
+      documentUrlBack: backPreview || undefined, // This should be Cloudinary URL
+      selfieUrl: selfiePreview, // This should be Cloudinary URL
     });
   };
 
@@ -102,6 +166,12 @@ export default function VerificationPage() {
 
   // Show verification status if exists
   if (verification) {
+    // Only show status card for PENDING, REJECTED, or UNDERAGE
+    // APPROVED users don't see this page (they get notification instead)
+    if (verification.status === "APPROVED") {
+      return null; // User is verified, no need to show this page
+    }
+
     return (
       <div className="container mx-auto max-w-2xl px-4 py-8">
         <Card>
@@ -120,19 +190,6 @@ export default function VerificationPage() {
                   Submitted:{" "}
                   {new Date(verification.submittedAt).toLocaleDateString()}
                 </Badge>
-              </>
-            )}
-            {verification.status === "APPROVED" && (
-              <>
-                <CheckCircle className="mx-auto mb-4 h-16 w-16 text-green-500" />
-                <h2 className="mb-2 text-2xl font-bold">
-                  Verification Approved
-                </h2>
-                <p className="mb-4 text-muted-foreground">
-                  Your identity has been verified. You now have a verified badge
-                  on your profile!
-                </p>
-                <Badge>✓ Verified</Badge>
               </>
             )}
             {verification.status === "REJECTED" && (
@@ -287,6 +344,51 @@ export default function VerificationPage() {
                 </div>
               </div>
             )}
+
+            <div>
+              <Label>Live Selfie Photo</Label>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Take a live selfie holding your ID document next to your face
+              </p>
+              <div className="mt-2">
+                {selfiePreview ? (
+                  <div className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={selfiePreview}
+                      alt="Selfie"
+                      className="w-full rounded-lg border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-2 right-2"
+                      onClick={() => {
+                        setSelfieImage(null);
+                        setSelfiePreview("");
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors hover:border-primary">
+                    <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">
+                      Click to upload selfie photo
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="user"
+                      className="hidden"
+                      onChange={(e) => handleFileChange(e, "selfie")}
+                    />
+                  </label>
+                )}
+              </div>
+            </div>
 
             <div className="rounded-lg bg-muted p-4 text-sm text-muted-foreground">
               <p className="mb-2 font-medium">Important:</p>

@@ -232,4 +232,68 @@ describe("Form", () => {
     render(<TestComponent />);
     expect(screen.getByText("Custom message content")).toBeInTheDocument();
   });
+
+  it("sets correct aria-describedby when no error", () => {
+    function TestComponent() {
+      const form = useForm({ defaultValues: { field: "" } });
+
+      return (
+        <Form {...form}>
+          <FormField
+            control={form.control}
+            name="field"
+            render={() => (
+              <FormItem>
+                <FormLabel>Field</FormLabel>
+                <FormControl>
+                  <Input data-testid="form-input" />
+                </FormControl>
+                <FormDescription>Description</FormDescription>
+              </FormItem>
+            )}
+          />
+        </Form>
+      );
+    }
+
+    render(<TestComponent />);
+    const input = screen.getByTestId("form-input");
+    const describedBy = input.getAttribute("aria-describedby");
+    expect(describedBy).not.toContain("message");
+  });
+
+  it("sets correct aria-describedby when error exists", () => {
+    function TestComponent() {
+      const form = useForm({ defaultValues: { field: "" } });
+
+      form.setError("field", {
+        type: "manual",
+        message: "Error occurred",
+      });
+
+      return (
+        <Form {...form}>
+          <FormField
+            control={form.control}
+            name="field"
+            render={() => (
+              <FormItem>
+                <FormLabel>Field</FormLabel>
+                <FormControl>
+                  <Input data-testid="form-input" />
+                </FormControl>
+                <FormDescription>Description</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </Form>
+      );
+    }
+
+    render(<TestComponent />);
+    const input = screen.getByTestId("form-input");
+    const describedBy = input.getAttribute("aria-describedby");
+    expect(describedBy).toContain("message");
+  });
 });

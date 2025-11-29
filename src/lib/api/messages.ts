@@ -65,10 +65,25 @@ export async function getMessageUnreadCount(): Promise<number> {
   return response.data.count;
 }
 
+// Update a message
+export async function updateMessage(
+  messageId: string,
+  data: { content: string },
+): Promise<Message> {
+  const response = await api.patch(`/messages/${messageId}`, data);
+  return response.data;
+}
+
 // Delete a message (soft delete)
 export async function deleteMessage(
   messageId: string,
 ): Promise<{ message: string }> {
   const response = await api.delete(`/messages/${messageId}`);
+  return response.data;
+}
+
+// Get message version history (admins only)
+export async function getMessageVersions(messageId: string): Promise<any[]> {
+  const response = await api.get(`/messages/${messageId}/versions`);
   return response.data;
 }
