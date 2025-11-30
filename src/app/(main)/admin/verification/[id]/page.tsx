@@ -415,7 +415,6 @@ export default function VerificationDetailPage() {
                     captionLayout="dropdown"
                     startMonth={new Date(1900, 0)}
                     endMonth={new Date()}
-                    initialFocus
                   />
                 </PopoverContent>
               </Popover>

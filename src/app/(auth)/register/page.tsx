@@ -41,6 +41,8 @@ export default function RegisterPage() {
   const [tosVersion, setTosVersion] = useState<string>("");
   const [privacyVersion, setPrivacyVersion] = useState<string>("");
   const [isLoadingLegal, setIsLoadingLegal] = useState(true);
+  const [registeredEmail, setRegisteredEmail] = useState<string>("");
+  const [isResendingEmail, setIsResendingEmail] = useState(false);
   const { executeRecaptcha, isRecaptchaLoaded } = useRecaptcha();
 
   const [formData, setFormData] = useState({
@@ -188,8 +190,9 @@ export default function RegisterPage() {
       const { user, accessToken } = response.data;
       setAuth(user, accessToken);
 
+      // Show email verification message instead of redirecting
+      setRegisteredEmail(formData.email);
       toast.success(`Welcome to SwapBuds, ${user.username}!`);
-      router.push("/items");
     } catch (error) {
       const message = getErrorMessage(error, "Failed to create account");
       setAuthError(message);
@@ -198,6 +201,92 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   };
+
+  const handleResendVerification = async () => {
+    setIsResendingEmail(true);
+    try {
+      await api.post("/auth/resend-verification");
+      toast.success("Verification email sent! Please check your inbox.");
+    } catch (error) {
+      const message = getErrorMessage(
+        error,
+        "Failed to resend verification email",
+      );
+      toast.error(message);
+    } finally {
+      setIsResendingEmail(false);
+    }
+  };
+
+  // Show email verification message after successful registration
+  if (registeredEmail) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+              <svg
+                className="h-8 w-8 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+            <CardTitle className="text-2xl font-bold">
+              Check your email
+            </CardTitle>
+            <CardDescription>
+              We&apos;ve sent a verification link to{" "}
+              <strong>{registeredEmail}</strong>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-md bg-blue-50 p-4 text-sm text-blue-900">
+              <p className="font-medium">
+                Please verify your email to continue
+              </p>
+              <p className="mt-2">
+                Click the link in the email we sent you. If you don&apos;t see
+                it, check your spam folder.
+              </p>
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={handleResendVerification}
+              disabled={isResendingEmail}
+            >
+              {isResendingEmail ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                "Resend verification email"
+              )}
+            </Button>
+
+            <div className="text-center">
+              <Link
+                href="/login"
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                Back to login
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -300,7 +389,9 @@ export default function RegisterPage() {
                     disabled={(date) =>
                       date > new Date() || date < new Date("1900-01-01")
                     }
-                    initialFocus
+                    captionLayout="dropdown"
+                    startMonth={new Date(1900, 0)}
+                    endMonth={new Date()}
                   />
                 </PopoverContent>
               </Popover>
