@@ -18,6 +18,9 @@
 /playwright-report/
 /playwright/.cache/
 
+# lighthouse
+/lighthouse-reports/
+
 # next.js
 /.next/
 /out/
