@@ -8305,10 +8305,10 @@ range-parser@^1.2.1:
   resolved "https://registry.npmjs.org/range-parser/-/range-parser-1.2.1.tgz"
   integrity sha512-Hrgsx+orqoygnmhFbKaHE6c296J+HTAQXoxEF6gNupROmmGJRoyzfG3ccAveqCBrwr/2yxQ5BVd/GTl5agOwSg==
 
-react-day-picker@^9.11.2:
-  version "9.11.2"
-  resolved "https://registry.npmjs.org/react-day-picker/-/react-day-picker-9.11.2.tgz"
-  integrity sha512-TD/xMUGg2oiKX8jUR21MST5pj+7Y36097YtnDHQFlIcZOu3mbLLw2B2JqEByEGrR3HHveWYnKlyls6WqJgohAg==
+react-day-picker@^9.11.3:
+  version "9.11.3"
+  resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-9.11.3.tgz#ef88cece2512c3e3c9ca0ce067871f62072cd943"
+  integrity sha512-7lD12UvGbkyXqgzbYIGQTbl+x29B9bAf+k0pP5Dcs1evfpKk6zv4EdH/edNc8NxcmCiTNXr2HIYPrSZ3XvmVBg==
   dependencies:
     "@date-fns/tz" "^1.4.1"
     date-fns "^4.1.0"
