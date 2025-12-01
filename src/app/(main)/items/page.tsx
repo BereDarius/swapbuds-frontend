@@ -23,7 +23,7 @@ import { Loader2, Package, Plus, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export default function ItemsPage() {
   const searchParams = useSearchParams();
@@ -33,21 +33,10 @@ export default function ItemsPage() {
   const [page, setPage] = useState(() => {
     // Initialize page from URL query param
     const pageParam = searchParams.get("page");
-    return pageParam ? parseInt(pageParam, 10) : 1;
+    const pageNum = pageParam ? parseInt(pageParam, 10) : 1;
+    return !isNaN(pageNum) && pageNum > 0 ? pageNum : 1;
   });
   const limit = 12;
-
-  // Derive page from URL query params
-  useEffect(() => {
-    const pageParam = searchParams.get("page");
-    if (pageParam) {
-      const pageNum = parseInt(pageParam, 10);
-      if (!isNaN(pageNum) && pageNum > 0 && pageNum !== page) {
-        setPage(pageNum);
-      }
-    }
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-  }, [searchParams, page]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["items", { search, category, condition, page, limit }],
