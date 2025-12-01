@@ -71,7 +71,7 @@
   "devDependencies": {
     "@chromatic-com/storybook": "^4.1.3",
     "@next/bundle-analyzer": "^16.0.4",
-    "@playwright/test": "^1.56.1",
+    "@playwright/test": "^1.57.0",
     "@storybook/addon-docs": "10.0.8",
     "@storybook/addon-onboarding": "10.0.8",
     "@storybook/nextjs": "10.0.8",
