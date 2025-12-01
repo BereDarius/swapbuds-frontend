@@ -39,8 +39,19 @@ jobs:
           urls: |
             http://localhost:3000
             http://localhost:3000/items
+            http://localhost:3000/items/new
+            http://localhost:3000/trades
+            http://localhost:3000/messages
+            http://localhost:3000/notifications
+            http://localhost:3000/settings
+            http://localhost:3000/support
+            http://localhost:3000/verification
             http://localhost:3000/login
             http://localhost:3000/register
+            http://localhost:3000/terms
+            http://localhost:3000/privacy
+            http://localhost:3000/guidelines
+            http://localhost:3000/cookies
           uploadArtifacts: true
           temporaryPublicStorage: true
           configPath: "./.lighthouserc.json"
