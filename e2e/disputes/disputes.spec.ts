@@ -14,7 +14,7 @@ test.describe("Trade Disputes", () => {
 
     // Verify dispute form appears
     await expect(
-      page.getByRole("heading", { name: /open dispute/i }),
+      page.getByRole("heading", { name: /open dispute/i })
     ).toBeVisible();
   });
 
@@ -41,7 +41,7 @@ test.describe("Trade Disputes", () => {
 
     // Verify text entered
     await expect(page.getByPlaceholder(/describe the issue/i)).toHaveValue(
-      description,
+      description
     );
   });
 
@@ -86,10 +86,10 @@ test.describe("Trade Disputes", () => {
 
     // Verify disputes list
     await expect(
-      page.getByRole("heading", { name: /my disputes/i }),
+      page.getByRole("heading", { name: /my disputes/i })
     ).toBeVisible();
     await expect(
-      page.locator('[data-testid="dispute-card"]').first(),
+      page.locator('[data-testid="dispute-card"]').first()
     ).toBeVisible();
   });
 
@@ -136,7 +136,7 @@ test.describe("Trade Disputes", () => {
 
     // Verify admin resolution notes
     await expect(
-      page.getByText(/admin decision/i).or(page.getByText(/resolution notes/i)),
+      page.getByText(/admin decision/i).or(page.getByText(/resolution notes/i))
     ).toBeVisible();
   });
 });

@@ -18,11 +18,11 @@ import { api } from "../api";
  */
 export async function createComment(
   itemId: string,
-  data: CreateCommentDto,
+  data: CreateCommentDto
 ): Promise<CreateCommentResponse> {
   const response = await api.post<CreateCommentResponse>(
     `/items/${itemId}/comments`,
-    data,
+    data
   );
   return response.data;
 }
@@ -40,7 +40,7 @@ export async function getItemComments(itemId: string): Promise<Comment[]> {
  */
 export async function getCommentsCount(itemId: string): Promise<number> {
   const response = await api.get<{ count: number }>(
-    `/items/${itemId}/comments/count`,
+    `/items/${itemId}/comments/count`
   );
   return response.data.count;
 }
@@ -50,7 +50,7 @@ export async function getCommentsCount(itemId: string): Promise<number> {
  */
 export async function updateComment(
   commentId: string,
-  data: UpdateCommentDto,
+  data: UpdateCommentDto
 ): Promise<Comment> {
   const response = await api.patch(`/items/comments/${commentId}`, data);
   return response.data;
@@ -68,7 +68,7 @@ export async function deleteComment(commentId: string): Promise<void> {
  * @returns Object containing the updated likes count and hasLiked status
  */
 export async function likeComment(
-  commentId: string,
+  commentId: string
 ): Promise<{ likesCount: number; hasLiked: boolean }> {
   const response = await api.post<{
     message: string;
@@ -86,10 +86,10 @@ export async function likeComment(
  * @returns Object containing the updated likes count and hasLiked status
  */
 export async function unlikeComment(
-  commentId: string,
+  commentId: string
 ): Promise<{ likesCount: number; hasLiked: boolean }> {
   const response = await api.delete<{ likesCount: number; hasLiked: boolean }>(
-    `/items/comments/${commentId}/like`,
+    `/items/comments/${commentId}/like`
   );
   return {
     likesCount: response.data.likesCount,
@@ -103,7 +103,7 @@ export async function unlikeComment(
 export async function checkCommentLiked(commentId: string): Promise<boolean> {
   try {
     const response = await api.get<{ liked: boolean }>(
-      `/items/comments/${commentId}/liked`,
+      `/items/comments/${commentId}/liked`
     );
     return response.data.liked;
   } catch {
@@ -116,11 +116,11 @@ export async function checkCommentLiked(commentId: string): Promise<boolean> {
  */
 export async function flagComment(
   commentId: string,
-  data: { reason: string; description?: string },
+  data: { reason: string; description?: string }
 ): Promise<{ message: string }> {
   const response = await api.post<{ message: string }>(
     `/moderation/comments/${commentId}/flag`,
-    data,
+    data
   );
   return response.data;
 }
@@ -129,7 +129,7 @@ export async function flagComment(
  * Get comment version history (moderators only)
  */
 export async function getCommentVersions(
-  commentId: string,
+  commentId: string
 ): Promise<
   Array<{ id: string; content: string; editedBy: string; createdAt: string }>
 > {

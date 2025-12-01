@@ -86,7 +86,7 @@ export default function VerificationDetailPage() {
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       toast.error(
-        error?.response?.data?.message || "Failed to approve verification",
+        error?.response?.data?.message || "Failed to approve verification"
       );
     },
   });
@@ -114,7 +114,7 @@ export default function VerificationDetailPage() {
     },
     onError: (error: AxiosError<{ message?: string }>) => {
       toast.error(
-        error?.response?.data?.message || "Failed to reject verification",
+        error?.response?.data?.message || "Failed to reject verification"
       );
     },
   });

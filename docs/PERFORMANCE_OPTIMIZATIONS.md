@@ -108,7 +108,6 @@ headers: [
 **Solution**:
 
 1. **Enhanced root metadata** in `app/layout.tsx`:
-
    - Added OpenGraph tags
    - Added Twitter Card metadata
    - Added structured keywords

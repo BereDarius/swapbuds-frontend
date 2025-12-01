@@ -39,7 +39,7 @@ class Logger {
         formatted += `\nResponse: ${JSON.stringify(
           err.response.data,
           null,
-          2,
+          2
         )}`;
       }
     }

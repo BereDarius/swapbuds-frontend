@@ -59,7 +59,7 @@ describe("Reviews API Client", () => {
 
       expect(api.post).toHaveBeenCalledWith(
         "/reviews/trades/trade-1",
-        createDto,
+        createDto
       );
       expect(result).toEqual(mockReview);
     });

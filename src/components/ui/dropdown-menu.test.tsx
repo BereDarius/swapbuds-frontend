@@ -30,7 +30,7 @@ describe("DropdownMenu", () => {
         <DropdownMenuContent>
           <DropdownMenuItem>Item 1</DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     expect(screen.getByRole("button", { name: "Open" })).toBeInTheDocument();
@@ -48,16 +48,16 @@ describe("DropdownMenu", () => {
           <DropdownMenuItem>Item 1</DropdownMenuItem>
           <DropdownMenuItem>Item 2</DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Menu" }));
 
     expect(
-      screen.getByRole("menuitem", { name: "Item 1" }),
+      screen.getByRole("menuitem", { name: "Item 1" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("menuitem", { name: "Item 2" }),
+      screen.getByRole("menuitem", { name: "Item 2" })
     ).toBeInTheDocument();
   });
 
@@ -74,7 +74,7 @@ describe("DropdownMenu", () => {
           <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
           <DropdownMenuItem inset>Archive</DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Actions" }));
@@ -98,7 +98,7 @@ describe("DropdownMenu", () => {
             <DropdownMenuItem>Settings</DropdownMenuItem>
           </DropdownMenuGroup>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Menu" }));
@@ -122,13 +122,13 @@ describe("DropdownMenu", () => {
             Show preview
           </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Options" }));
 
     expect(
-      screen.getByRole("menuitemcheckbox", { name: "Show notifications" }),
+      screen.getByRole("menuitemcheckbox", { name: "Show notifications" })
     ).toBeInTheDocument();
   });
 
@@ -146,13 +146,13 @@ describe("DropdownMenu", () => {
             <DropdownMenuRadioItem value="2">Option 2</DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Select" }));
 
     expect(
-      screen.getByRole("menuitemradio", { name: "Option 1" }),
+      screen.getByRole("menuitemradio", { name: "Option 1" })
     ).toBeInTheDocument();
   });
 
@@ -168,7 +168,7 @@ describe("DropdownMenu", () => {
           <DropdownMenuItem disabled>Disabled Item</DropdownMenuItem>
           <DropdownMenuItem>Enabled Item</DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Menu" }));
@@ -190,7 +190,7 @@ describe("DropdownMenu", () => {
         <DropdownMenuContent className="custom-content">
           <DropdownMenuItem>Item</DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Menu" }));
@@ -217,7 +217,7 @@ describe("DropdownMenu", () => {
             <DropdownMenuShortcut>⌘C</DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Menu" }));
@@ -244,7 +244,7 @@ describe("DropdownMenu", () => {
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Menu" }));
@@ -264,7 +264,7 @@ describe("DropdownMenu", () => {
           <DropdownMenuLabel inset>Inset Label</DropdownMenuLabel>
           <DropdownMenuItem>Item</DropdownMenuItem>
         </DropdownMenuContent>
-      </DropdownMenu>,
+      </DropdownMenu>
     );
 
     await user.click(screen.getByRole("button", { name: "Menu" }));

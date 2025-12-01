@@ -25,11 +25,11 @@ describe("Dialog", () => {
             <DialogTitle>Title</DialogTitle>
           </DialogHeader>
         </DialogContent>
-      </Dialog>,
+      </Dialog>
     );
 
     expect(
-      screen.getByRole("button", { name: "Open Dialog" }),
+      screen.getByRole("button", { name: "Open Dialog" })
     ).toBeInTheDocument();
   });
 
@@ -46,7 +46,7 @@ describe("Dialog", () => {
             <DialogDescription>Dialog Description</DialogDescription>
           </DialogHeader>
         </DialogContent>
-      </Dialog>,
+      </Dialog>
     );
 
     await user.click(screen.getByRole("button", { name: "Open" }));
@@ -68,7 +68,7 @@ describe("Dialog", () => {
             <DialogTitle>Test Dialog</DialogTitle>
           </DialogHeader>
         </DialogContent>
-      </Dialog>,
+      </Dialog>
     );
 
     await user.click(screen.getByRole("button", { name: "Open" }));
@@ -92,7 +92,7 @@ describe("Dialog", () => {
             <DialogTitle>Title</DialogTitle>
           </DialogHeader>
         </DialogContent>
-      </Dialog>,
+      </Dialog>
     );
 
     await user.click(screen.getByRole("button", { name: "Open" }));
@@ -117,7 +117,7 @@ describe("Dialog", () => {
             <Button>Confirm</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>,
+      </Dialog>
     );
 
     await user.click(screen.getByRole("button", { name: "Open" }));

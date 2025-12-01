@@ -34,7 +34,7 @@ export async function getSupportChatById(chatId: string): Promise<SupportChat> {
  * Create a new support chat/ticket
  */
 export async function createSupportChat(
-  data: CreateChatDto,
+  data: CreateChatDto
 ): Promise<SupportChat> {
   const response = await api.post<SupportChat>("/support/chat", data);
   return response.data;
@@ -45,11 +45,11 @@ export async function createSupportChat(
  */
 export async function sendSupportMessage(
   chatId: string,
-  data: SendSupportMessageDto,
+  data: SendSupportMessageDto
 ): Promise<SupportMessage> {
   const response = await api.post<SupportMessage>(
     `/support/chats/${chatId}/messages`,
-    data,
+    data
   );
   return response.data;
 }
@@ -59,11 +59,11 @@ export async function sendSupportMessage(
  */
 export async function resolveSupportChat(
   chatId: string,
-  data: ResolveChatDto,
+  data: ResolveChatDto
 ): Promise<SupportChat> {
   const response = await api.patch<SupportChat>(
     `/support/chats/${chatId}/resolve`,
-    data,
+    data
   );
   return response.data;
 }
@@ -73,7 +73,7 @@ export async function resolveSupportChat(
  */
 export async function closeSupportChat(chatId: string): Promise<SupportChat> {
   const response = await api.patch<SupportChat>(
-    `/support/chats/${chatId}/close`,
+    `/support/chats/${chatId}/close`
   );
   return response.data;
 }
@@ -83,7 +83,7 @@ export async function closeSupportChat(chatId: string): Promise<SupportChat> {
  */
 export async function reopenSupportChat(chatId: string): Promise<SupportChat> {
   const response = await api.patch<SupportChat>(
-    `/support/chats/${chatId}/reopen`,
+    `/support/chats/${chatId}/reopen`
   );
   return response.data;
 }
@@ -114,11 +114,11 @@ export async function getAllSupportChats(params?: {
  */
 export async function assignSupportChat(
   chatId: string,
-  staffId: string,
+  staffId: string
 ): Promise<SupportChat> {
   const response = await api.patch<SupportChat>(
     `/support/chats/${chatId}/assign`,
-    { staffId },
+    { staffId }
   );
   return response.data;
 }

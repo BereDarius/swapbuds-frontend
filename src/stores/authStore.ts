@@ -99,6 +99,6 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => (state) => {
         state?._setHasHydrated(true);
       },
-    },
-  ),
+    }
+  )
 );

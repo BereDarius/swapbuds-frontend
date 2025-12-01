@@ -49,11 +49,11 @@ export async function getTradeDisputes(tradeId: string): Promise<Dispute[]> {
  */
 export async function resolveDispute(
   disputeId: string,
-  data: ResolveDisputeDto,
+  data: ResolveDisputeDto
 ): Promise<Dispute> {
   const response = await api.patch<Dispute>(
     `/disputes/${disputeId}/resolve`,
-    data,
+    data
   );
   return response.data;
 }

@@ -12,7 +12,7 @@ test.describe("User Reviews", () => {
     // Verify review prompt appears
     await expect(page.getByText(/leave a review/i)).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /write review/i }),
+      page.getByRole("button", { name: /write review/i })
     ).toBeVisible();
   });
 
@@ -46,7 +46,7 @@ test.describe("User Reviews", () => {
 
     // Verify text entered
     await expect(page.getByPlaceholder(/share your experience/i)).toHaveValue(
-      reviewText,
+      reviewText
     );
   });
 
@@ -74,7 +74,7 @@ test.describe("User Reviews", () => {
 
     // Verify reviews are displayed
     await expect(
-      page.locator('[data-testid="review-card"]').first(),
+      page.locator('[data-testid="review-card"]').first()
     ).toBeVisible();
   });
 
@@ -120,7 +120,7 @@ test.describe("User Reviews", () => {
 
     // Verify edit form appears
     await expect(
-      page.getByRole("heading", { name: /edit review/i }),
+      page.getByRole("heading", { name: /edit review/i })
     ).toBeVisible();
   });
 
@@ -150,7 +150,7 @@ test.describe("User Reviews", () => {
 
     // Verify reviews are shown
     await expect(
-      page.locator('[data-testid="review-card"]').first(),
+      page.locator('[data-testid="review-card"]').first()
     ).toBeVisible();
   });
 

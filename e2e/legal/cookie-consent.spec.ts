@@ -11,18 +11,18 @@ test.describe("Cookie Consent", () => {
 
     // Cookie banner should be visible
     await expect(
-      page.getByText(/we use cookies to enhance your experience/i),
+      page.getByText(/we use cookies to enhance your experience/i)
     ).toBeVisible({ timeout: 5000 });
 
     // Should have action buttons
     await expect(
-      page.getByRole("button", { name: /accept all/i }),
+      page.getByRole("button", { name: /accept all/i })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /reject all/i }),
+      page.getByRole("button", { name: /reject all/i })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /customize/i }),
+      page.getByRole("button", { name: /customize/i })
     ).toBeVisible();
   });
 
@@ -36,7 +36,7 @@ test.describe("Cookie Consent", () => {
 
     // Banner should disappear
     await expect(
-      page.getByText(/we use cookies to enhance your experience/i),
+      page.getByText(/we use cookies to enhance your experience/i)
     ).not.toBeVisible();
 
     // Reload page
@@ -44,7 +44,7 @@ test.describe("Cookie Consent", () => {
 
     // Banner should not appear again
     await expect(
-      page.getByText(/we use cookies to enhance your experience/i),
+      page.getByText(/we use cookies to enhance your experience/i)
     ).not.toBeVisible();
   });
 
@@ -58,7 +58,7 @@ test.describe("Cookie Consent", () => {
 
     // Banner should disappear
     await expect(
-      page.getByText(/we use cookies to enhance your experience/i),
+      page.getByText(/we use cookies to enhance your experience/i)
     ).not.toBeVisible();
 
     // Reload page
@@ -66,7 +66,7 @@ test.describe("Cookie Consent", () => {
 
     // Banner should not appear again
     await expect(
-      page.getByText(/we use cookies to enhance your experience/i),
+      page.getByText(/we use cookies to enhance your experience/i)
     ).not.toBeVisible();
   });
 
@@ -80,7 +80,7 @@ test.describe("Cookie Consent", () => {
 
     // Modal should open
     await expect(
-      page.getByRole("heading", { name: /cookie preferences/i }),
+      page.getByRole("heading", { name: /cookie preferences/i })
     ).toBeVisible();
 
     // Should show cookie categories
@@ -125,12 +125,12 @@ test.describe("Cookie Consent", () => {
 
     // Modal should close
     await expect(
-      page.getByRole("heading", { name: /cookie preferences/i }),
+      page.getByRole("heading", { name: /cookie preferences/i })
     ).not.toBeVisible();
 
     // Banner should disappear
     await expect(
-      page.getByText(/we use cookies to enhance your experience/i),
+      page.getByText(/we use cookies to enhance your experience/i)
     ).not.toBeVisible();
 
     // Reload page
@@ -138,7 +138,7 @@ test.describe("Cookie Consent", () => {
 
     // Banner should not appear again
     await expect(
-      page.getByText(/we use cookies to enhance your experience/i),
+      page.getByText(/we use cookies to enhance your experience/i)
     ).not.toBeVisible();
   });
 
@@ -147,10 +147,10 @@ test.describe("Cookie Consent", () => {
 
     // Banner should have links to policies
     await expect(
-      page.getByRole("link", { name: /cookie policy/i }),
+      page.getByRole("link", { name: /cookie policy/i })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: /privacy policy/i }),
+      page.getByRole("link", { name: /privacy policy/i })
     ).toBeVisible();
   });
 
@@ -191,7 +191,7 @@ test.describe("Cookie Consent", () => {
 
     // Banner should not show
     await expect(
-      page.getByText(/we use cookies to enhance your experience/i),
+      page.getByText(/we use cookies to enhance your experience/i)
     ).not.toBeVisible();
 
     // Navigate to another page
@@ -199,7 +199,7 @@ test.describe("Cookie Consent", () => {
 
     // Banner should still not show
     await expect(
-      page.getByText(/we use cookies to enhance your experience/i),
+      page.getByText(/we use cookies to enhance your experience/i)
     ).not.toBeVisible();
   });
 
@@ -247,10 +247,10 @@ test.describe("Cookie Consent - Mobile", () => {
 
     // Buttons should be visible and clickable
     await expect(
-      page.getByRole("button", { name: /accept all/i }),
+      page.getByRole("button", { name: /accept all/i })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /reject all/i }),
+      page.getByRole("button", { name: /reject all/i })
     ).toBeVisible();
   });
 
@@ -261,7 +261,7 @@ test.describe("Cookie Consent - Mobile", () => {
 
     // Modal should be visible on mobile
     await expect(
-      page.getByRole("heading", { name: /cookie preferences/i }),
+      page.getByRole("heading", { name: /cookie preferences/i })
     ).toBeVisible();
   });
 });

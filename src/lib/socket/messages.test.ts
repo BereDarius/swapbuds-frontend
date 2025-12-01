@@ -162,7 +162,7 @@ describe("useMessagesSocket", () => {
 
       expect(mockSocket.emit).toHaveBeenCalledWith(
         "joinConversation",
-        "conv-1",
+        "conv-1"
       );
     });
   });
@@ -177,7 +177,7 @@ describe("useMessagesSocket", () => {
 
       expect(mockSocket.emit).toHaveBeenCalledWith(
         "leaveConversation",
-        "conv-1",
+        "conv-1"
       );
     });
   });

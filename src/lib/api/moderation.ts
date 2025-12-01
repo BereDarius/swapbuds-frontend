@@ -63,11 +63,11 @@ export async function flagItem(
   data: {
     reason: FlagReason;
     description?: string;
-  },
+  }
 ): Promise<ContentFlag> {
   const response = await api.post<ContentFlag>(
     `/moderation/items/${itemId}/flag`,
-    data,
+    data
   );
   return response.data;
 }
@@ -77,11 +77,11 @@ export async function flagItem(
  */
 export async function approveFlag(
   flagId: string,
-  reason: string,
+  reason: string
 ): Promise<ContentFlag> {
   const response = await api.patch<ContentFlag>(
     `/moderation/flags/${flagId}/approve`,
-    { reason },
+    { reason }
   );
   return response.data;
 }
@@ -91,11 +91,11 @@ export async function approveFlag(
  */
 export async function rejectFlag(
   flagId: string,
-  reason: string,
+  reason: string
 ): Promise<ContentFlag> {
   const response = await api.patch<ContentFlag>(
     `/moderation/flags/${flagId}/reject`,
-    { reason },
+    { reason }
   );
   return response.data;
 }
@@ -105,11 +105,11 @@ export async function rejectFlag(
  */
 export async function removeFlag(
   flagId: string,
-  reason: string,
+  reason: string
 ): Promise<ContentFlag> {
   const response = await api.patch<ContentFlag>(
     `/moderation/flags/${flagId}/remove`,
-    { reason },
+    { reason }
   );
   return response.data;
 }
@@ -118,7 +118,7 @@ export async function removeFlag(
  * Bulk approve flags
  */
 export async function bulkApproveFlags(
-  data: BulkApproveFlagsDto,
+  data: BulkApproveFlagsDto
 ): Promise<void> {
   await api.post("/moderation/flags/bulk-approve", data);
 }
@@ -179,7 +179,7 @@ export async function getFlaggedComments(params?: {
 }): Promise<FlaggedCommentsResponse> {
   const response = await api.get<FlaggedCommentsResponse>(
     "/moderation/comments/flagged",
-    { params },
+    { params }
   );
   return response.data;
 }
@@ -189,11 +189,11 @@ export async function getFlaggedComments(params?: {
  */
 export async function approveFlaggedComment(
   flagId: string,
-  notes?: string,
+  notes?: string
 ): Promise<{ message: string }> {
   const response = await api.patch<{ message: string }>(
     `/moderation/comments/flagged/${flagId}/approve`,
-    { notes },
+    { notes }
   );
   return response.data;
 }
@@ -204,11 +204,11 @@ export async function approveFlaggedComment(
 export async function removeFlaggedComment(
   flagId: string,
   reason: string,
-  notifyUser?: boolean,
+  notifyUser?: boolean
 ): Promise<{ message: string }> {
   const response = await api.delete<{ message: string }>(
     `/moderation/comments/flagged/${flagId}/remove`,
-    { data: { reason, notifyUser } },
+    { data: { reason, notifyUser } }
   );
   return response.data;
 }

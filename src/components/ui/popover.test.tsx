@@ -18,11 +18,11 @@ describe("Popover", () => {
           <Button>Open Popover</Button>
         </PopoverTrigger>
         <PopoverContent>Content</PopoverContent>
-      </Popover>,
+      </Popover>
     );
 
     expect(
-      screen.getByRole("button", { name: "Open Popover" }),
+      screen.getByRole("button", { name: "Open Popover" })
     ).toBeInTheDocument();
   });
 
@@ -34,7 +34,7 @@ describe("Popover", () => {
           <Button>Open</Button>
         </PopoverTrigger>
         <PopoverContent>Popover Content</PopoverContent>
-      </Popover>,
+      </Popover>
     );
 
     await user.click(screen.getByRole("button", { name: "Open" }));
@@ -55,7 +55,7 @@ describe("Popover", () => {
         >
           Test Content
         </PopoverContent>
-      </Popover>,
+      </Popover>
     );
 
     await user.click(screen.getByRole("button"));
@@ -72,7 +72,7 @@ describe("Popover", () => {
           <Button>Open</Button>
         </PopoverTrigger>
         <PopoverContent align="start">Aligned Content</PopoverContent>
-      </Popover>,
+      </Popover>
     );
 
     await user.click(screen.getByRole("button"));
@@ -88,7 +88,7 @@ describe("Popover", () => {
           <Button>Open</Button>
         </PopoverTrigger>
         <PopoverContent sideOffset={10}>Content with offset</PopoverContent>
-      </Popover>,
+      </Popover>
     );
 
     await user.click(screen.getByRole("button"));
@@ -103,7 +103,7 @@ describe("Popover", () => {
           <Button>Open</Button>
         </PopoverTrigger>
         <PopoverContent>Controlled Content</PopoverContent>
-      </Popover>,
+      </Popover>
     );
 
     expect(screen.queryByText("Controlled Content")).not.toBeInTheDocument();
@@ -114,7 +114,7 @@ describe("Popover", () => {
           <Button>Open</Button>
         </PopoverTrigger>
         <PopoverContent>Controlled Content</PopoverContent>
-      </Popover>,
+      </Popover>
     );
 
     expect(screen.getByText("Controlled Content")).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe("Popover", () => {
           <PopoverContent>Closable Content</PopoverContent>
         </Popover>
         <div>Outside content</div>
-      </div>,
+      </div>
     );
 
     await user.click(screen.getByRole("button"));
@@ -151,7 +151,7 @@ describe("Popover", () => {
           <Button>Open</Button>
         </PopoverTrigger>
         <PopoverContent>Content</PopoverContent>
-      </Popover>,
+      </Popover>
     );
 
     expect(screen.getByTestId("anchor-element")).toBeInTheDocument();

@@ -50,7 +50,7 @@ describe("Socket Helper", () => {
           reconnection: true,
           reconnectionAttempts: 5,
           reconnectionDelay: 1000,
-        }),
+        })
       );
       expect(socket).toBe(mockSocket);
     });
@@ -62,7 +62,7 @@ describe("Socket Helper", () => {
         expect.any(String),
         expect.objectContaining({
           auth: { token: "test-token" },
-        }),
+        })
       );
     });
 
@@ -81,7 +81,7 @@ describe("Socket Helper", () => {
 
       expect(io).toHaveBeenCalledWith(
         expect.stringContaining("/notifications"),
-        expect.any(Object),
+        expect.any(Object)
       );
       expect(socket).toBe(mockSocket);
     });
@@ -93,7 +93,7 @@ describe("Socket Helper", () => {
         expect.any(String),
         expect.objectContaining({
           auth: { token: "test-token" },
-        }),
+        })
       );
     });
   });
@@ -104,7 +104,7 @@ describe("Socket Helper", () => {
 
       expect(io).toHaveBeenCalledWith(
         expect.stringContaining("/support"),
-        expect.any(Object),
+        expect.any(Object)
       );
       expect(socket).toBe(mockSocket);
     });
@@ -116,7 +116,7 @@ describe("Socket Helper", () => {
         expect.any(String),
         expect.objectContaining({
           auth: { token: "test-token" },
-        }),
+        })
       );
     });
   });
@@ -193,7 +193,7 @@ describe("Socket Helper", () => {
 
       expect(io).toHaveBeenCalledWith(
         expect.stringContaining("ws://example.com"),
-        expect.any(Object),
+        expect.any(Object)
       );
 
       delete process.env.NEXT_PUBLIC_WS_URL;
@@ -208,7 +208,7 @@ describe("Socket Helper", () => {
 
       expect(io).toHaveBeenCalledWith(
         expect.stringContaining("http://example.com"),
-        expect.any(Object),
+        expect.any(Object)
       );
 
       delete process.env.NEXT_PUBLIC_API_URL;

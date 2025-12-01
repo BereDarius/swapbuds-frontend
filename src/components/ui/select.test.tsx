@@ -22,7 +22,7 @@ describe("Select", () => {
         <SelectContent>
           <SelectItem value="1">Option 1</SelectItem>
         </SelectContent>
-      </Select>,
+      </Select>
     );
 
     expect(screen.getByRole("combobox")).toBeInTheDocument();
@@ -37,7 +37,7 @@ describe("Select", () => {
         <SelectContent>
           <SelectItem value="1">Option 1</SelectItem>
         </SelectContent>
-      </Select>,
+      </Select>
     );
 
     expect(screen.getByText("Choose an option")).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe("Select", () => {
         <SelectContent>
           <SelectItem value="apple">Apple</SelectItem>
         </SelectContent>
-      </Select>,
+      </Select>
     );
 
     expect(screen.getByRole("combobox")).toHaveClass("custom-trigger");
@@ -67,7 +67,7 @@ describe("Select", () => {
         <SelectContent>
           <SelectItem value="apple">Apple</SelectItem>
         </SelectContent>
-      </Select>,
+      </Select>
     );
 
     expect(screen.getByRole("combobox")).toBeDisabled();
@@ -85,7 +85,7 @@ describe("Select", () => {
           <SelectItem value="orange">Orange</SelectItem>
           <SelectItem value="grape">Grape</SelectItem>
         </SelectContent>
-      </Select>,
+      </Select>
     );
 
     expect(screen.getByRole("combobox")).toBeInTheDocument();
@@ -101,7 +101,7 @@ describe("Select", () => {
           <SelectItem value="apple">Apple</SelectItem>
           <SelectItem value="banana">Banana</SelectItem>
         </SelectContent>
-      </Select>,
+      </Select>
     );
 
     expect(screen.getByText("Banana")).toBeInTheDocument();
@@ -125,7 +125,7 @@ describe("Select", () => {
             <SelectItem value="carrot">Carrot</SelectItem>
           </SelectGroup>
         </SelectContent>
-      </Select>,
+      </Select>
     );
 
     expect(screen.getByRole("combobox")).toBeInTheDocument();

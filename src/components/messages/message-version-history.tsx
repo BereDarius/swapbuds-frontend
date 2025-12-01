@@ -125,7 +125,7 @@ export function MessageVersionHistory({
                       <span>
                         {format(
                           new Date(version.createdAt),
-                          "MMM d, yyyy h:mm a",
+                          "MMM d, yyyy h:mm a"
                         )}
                       </span>
                     </div>

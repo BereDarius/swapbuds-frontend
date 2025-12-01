@@ -43,7 +43,7 @@ test.describe("Trade Flow", () => {
     // Check that received tab is active
     await expect(page.getByRole("tab", { name: /received/i })).toHaveAttribute(
       "aria-selected",
-      "true",
+      "true"
     );
 
     // Should display received proposals
@@ -108,7 +108,7 @@ test.describe("Trade Flow", () => {
     // Check that active tab is selected
     await expect(page.getByRole("tab", { name: /active/i })).toHaveAttribute(
       "aria-selected",
-      "true",
+      "true"
     );
   });
 
@@ -160,7 +160,7 @@ test.describe("Trade Flow", () => {
 
     // Verify messages section is visible
     await expect(
-      page.getByRole("heading", { name: /messages/i }),
+      page.getByRole("heading", { name: /messages/i })
     ).toBeVisible();
   });
 

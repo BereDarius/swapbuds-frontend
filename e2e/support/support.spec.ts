@@ -20,7 +20,7 @@ test.describe("Support System", () => {
     await expect(page.getByPlaceholder(/subject/i)).toBeVisible();
     await expect(page.getByPlaceholder(/describe your issue/i)).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /start chat/i }),
+      page.getByRole("button", { name: /start chat/i })
     ).toBeVisible();
   });
 
@@ -63,7 +63,7 @@ test.describe("Support System", () => {
 
     // Verify queue position indicator
     await expect(
-      page.getByText(/position in queue/i).or(page.getByText(/assigned/i)),
+      page.getByText(/position in queue/i).or(page.getByText(/assigned/i))
     ).toBeVisible();
   });
 
@@ -72,7 +72,7 @@ test.describe("Support System", () => {
 
     // Wait for agent assignment
     await expect(
-      page.getByText(/support agent/i).or(page.getByText(/assigned/i)),
+      page.getByText(/support agent/i).or(page.getByText(/assigned/i))
     ).toBeVisible({ timeout: 10000 });
   });
 
@@ -96,7 +96,7 @@ test.describe("Support System", () => {
 
     // Verify chat list is displayed
     await expect(
-      page.locator('[data-testid="chat-item"]').first(),
+      page.locator('[data-testid="chat-item"]').first()
     ).toBeVisible();
   });
 

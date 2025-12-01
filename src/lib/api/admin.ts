@@ -55,7 +55,7 @@ export async function banUser(userId: string, data: BanUserDto): Promise<void> {
  */
 export async function unbanUser(
   userId: string,
-  data: UnbanUserDto,
+  data: UnbanUserDto
 ): Promise<void> {
   await api.post(`/admin/users/${userId}/unban`, data);
 }
@@ -65,7 +65,7 @@ export async function unbanUser(
  */
 export async function changeUserRole(
   userId: string,
-  data: ChangeUserRoleDto,
+  data: ChangeUserRoleDto
 ): Promise<void> {
   await api.patch(`/admin/users/${userId}/role`, data);
 }

@@ -23,7 +23,7 @@ export default function MessagesPage() {
   });
 
   const filteredConversations = conversations.filter((conv) =>
-    conv.otherUser?.username.toLowerCase().includes(search.toLowerCase()),
+    conv.otherUser?.username.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -93,7 +93,7 @@ export default function MessagesPage() {
                             <span className="text-xs text-muted-foreground">
                               {format(
                                 new Date(conversation.lastMessageAt),
-                                "MMM d, h:mm a",
+                                "MMM d, h:mm a"
                               )}
                             </span>
                           )}

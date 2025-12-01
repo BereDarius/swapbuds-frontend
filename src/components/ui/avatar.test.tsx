@@ -9,7 +9,7 @@ describe("Avatar", () => {
       <Avatar data-testid="avatar">
         <AvatarImage src="https://example.com/avatar.jpg" alt="User avatar" />
         <AvatarFallback>JD</AvatarFallback>
-      </Avatar>,
+      </Avatar>
     );
 
     const avatar = screen.getByTestId("avatar");
@@ -21,7 +21,7 @@ describe("Avatar", () => {
       <Avatar>
         <AvatarImage src="invalid-url" alt="Invalid" />
         <AvatarFallback>FB</AvatarFallback>
-      </Avatar>,
+      </Avatar>
     );
 
     expect(screen.getByText("FB")).toBeInTheDocument();
@@ -31,7 +31,7 @@ describe("Avatar", () => {
     render(
       <Avatar>
         <AvatarFallback>XY</AvatarFallback>
-      </Avatar>,
+      </Avatar>
     );
 
     expect(screen.getByText("XY")).toBeInTheDocument();
@@ -41,7 +41,7 @@ describe("Avatar", () => {
     render(
       <Avatar className="size-16" data-testid="avatar">
         <AvatarFallback>AB</AvatarFallback>
-      </Avatar>,
+      </Avatar>
     );
 
     const avatar = screen.getByTestId("avatar");

@@ -122,7 +122,7 @@ export default function EditItemPage() {
   const handleDelete = () => {
     if (
       confirm(
-        "Are you sure you want to delete this item? This action cannot be undone.",
+        "Are you sure you want to delete this item? This action cannot be undone."
       )
     ) {
       deleteMutation.mutate(itemId);
@@ -263,7 +263,7 @@ export default function EditItemPage() {
                   <Checkbox
                     id="physical"
                     checked={formData.deliveryMethods.includes(
-                      DeliveryMethod.PHYSICAL,
+                      DeliveryMethod.PHYSICAL
                     )}
                     onCheckedChange={() =>
                       toggleDeliveryMethod(DeliveryMethod.PHYSICAL)
@@ -277,7 +277,7 @@ export default function EditItemPage() {
                   <Checkbox
                     id="mail"
                     checked={formData.deliveryMethods.includes(
-                      DeliveryMethod.MAIL,
+                      DeliveryMethod.MAIL
                     )}
                     onCheckedChange={() =>
                       toggleDeliveryMethod(DeliveryMethod.MAIL)

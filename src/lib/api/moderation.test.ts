@@ -54,7 +54,7 @@ describe("Moderation API Client", () => {
       });
 
       expect(api.get).toHaveBeenCalledWith(
-        expect.stringContaining("/moderation/flags"),
+        expect.stringContaining("/moderation/flags")
       );
       expect(result).toEqual(response);
     });
@@ -103,7 +103,7 @@ describe("Moderation API Client", () => {
       await moderationApi.getFlags({ contentType: "COMMENT" });
 
       expect(api.get).toHaveBeenCalledWith(
-        "/moderation/flags?contentType=COMMENT",
+        "/moderation/flags?contentType=COMMENT"
       );
     });
 
@@ -188,7 +188,7 @@ describe("Moderation API Client", () => {
 
       expect(api.post).toHaveBeenCalledWith(
         "/moderation/items/item-1/flag",
-        flagData,
+        flagData
       );
       expect(result).toEqual(mockFlag);
     });
@@ -208,14 +208,14 @@ describe("Moderation API Client", () => {
 
       const result = await moderationApi.approveFlag(
         "flag-1",
-        "No violation found",
+        "No violation found"
       );
 
       expect(api.patch).toHaveBeenCalledWith(
         "/moderation/flags/flag-1/approve",
         {
           reason: "No violation found",
-        },
+        }
       );
       expect(result).toEqual(approvedFlag);
     });
@@ -238,7 +238,7 @@ describe("Moderation API Client", () => {
         "/moderation/flags/flag-1/reject",
         {
           reason: "Not applicable",
-        },
+        }
       );
       expect(result).toEqual(rejectedFlag);
     });
@@ -257,14 +257,14 @@ describe("Moderation API Client", () => {
 
       const result = await moderationApi.removeFlag(
         "flag-1",
-        "Policy violation",
+        "Policy violation"
       );
 
       expect(api.patch).toHaveBeenCalledWith(
         "/moderation/flags/flag-1/remove",
         {
           reason: "Policy violation",
-        },
+        }
       );
       expect(result).toEqual(removedFlag);
     });
@@ -294,7 +294,7 @@ describe("Moderation API Client", () => {
         "/moderation/comments/flagged",
         expect.objectContaining({
           params: { page: 1, limit: 10, status: "PENDING" },
-        }),
+        })
       );
       expect(result).toEqual(response);
     });
@@ -308,12 +308,12 @@ describe("Moderation API Client", () => {
 
       const result = await moderationApi.approveFlaggedComment(
         "flag-1",
-        "No issues found",
+        "No issues found"
       );
 
       expect(api.patch).toHaveBeenCalledWith(
         "/moderation/comments/flagged/flag-1/approve",
-        { notes: "No issues found" },
+        { notes: "No issues found" }
       );
       expect(result).toEqual({ message: "Comment approved" });
     });
@@ -328,12 +328,12 @@ describe("Moderation API Client", () => {
       const result = await moderationApi.removeFlaggedComment(
         "flag-1",
         "Policy violation",
-        true,
+        true
       );
 
       expect(api.delete).toHaveBeenCalledWith(
         "/moderation/comments/flagged/flag-1/remove",
-        { data: { reason: "Policy violation", notifyUser: true } },
+        { data: { reason: "Policy violation", notifyUser: true } }
       );
       expect(result).toEqual({ message: "Comment removed" });
     });

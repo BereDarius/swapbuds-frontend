@@ -39,7 +39,7 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(1);
   const [roleFilter, setRoleFilter] = useState<UserRole | "ALL">("ALL");
   const [verifiedFilter, setVerifiedFilter] = useState<"ALL" | "YES" | "NO">(
-    "ALL",
+    "ALL"
   );
   const [bannedFilter, setBannedFilter] = useState<"ALL" | "YES" | "NO">("ALL");
 
@@ -54,14 +54,14 @@ export default function AdminUsersPage() {
           verifiedFilter === "YES"
             ? true
             : verifiedFilter === "NO"
-            ? false
-            : undefined,
+              ? false
+              : undefined,
         isBanned:
           bannedFilter === "YES"
             ? true
             : bannedFilter === "NO"
-            ? false
-            : undefined,
+              ? false
+              : undefined,
       }),
     enabled: user?.role === "ADMIN",
   });
@@ -194,8 +194,8 @@ export default function AdminUsersPage() {
                               u.role === "ADMIN"
                                 ? "destructive"
                                 : u.role === "MODERATOR"
-                                ? "default"
-                                : "secondary"
+                                  ? "default"
+                                  : "secondary"
                             }
                           >
                             {u.role}

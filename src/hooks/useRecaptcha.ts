@@ -41,7 +41,7 @@ export function useRecaptcha() {
       typeof window !== "undefined" &&
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (window as any).__PLAYWRIGHT__ !== undefined,
-    [],
+    []
   );
 
   /**
@@ -75,12 +75,12 @@ export function useRecaptcha() {
         return null;
       }
     },
-    [executeRecaptchaBase, isE2ETest],
+    [executeRecaptchaBase, isE2ETest]
   );
 
   const isRecaptchaLoaded = useMemo(
     () => isE2ETest || !!executeRecaptchaBase,
-    [isE2ETest, executeRecaptchaBase],
+    [isE2ETest, executeRecaptchaBase]
   );
 
   return {

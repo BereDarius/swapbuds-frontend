@@ -29,14 +29,12 @@ npm start
 3. **Navigate to Lighthouse tab**
 
 4. **Configure audit:**
-
    - Mode: Navigation
    - Device: Mobile & Desktop (run both)
    - Categories: Performance, Accessibility, Best Practices, SEO
    - Throttling: Simulated throttling (default)
 
 5. **Run audits for key pages:**
-
    - Homepage: `http://localhost:3000`
    - Items list: `http://localhost:3000/items`
    - Item detail: `http://localhost:3000/items/[id]`
@@ -159,7 +157,6 @@ In the bundle analyzer, look for:
 1. **Open DevTools** (F12) > **Network** tab
 
 2. **Configure throttling:**
-
    - Fast 3G (1.6 Mbps, 150ms RTT)
    - Slow 3G (400 Kbps, 400ms RTT)
    - Custom (test specific conditions)

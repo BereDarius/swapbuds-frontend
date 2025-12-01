@@ -94,7 +94,7 @@ describe("ItemCard", () => {
 
     const links = screen.getAllByRole("link");
     const itemLink = links.find(
-      (link) => link.getAttribute("href") === "/items/item1",
+      (link) => link.getAttribute("href") === "/items/item1"
     );
     expect(itemLink).toBeDefined();
   });

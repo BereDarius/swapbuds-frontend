@@ -107,12 +107,12 @@ export default function SupportPage() {
   const activeChats = chats.filter(
     (chat) =>
       chat.status !== SupportChatStatus.RESOLVED &&
-      chat.status !== SupportChatStatus.CLOSED,
+      chat.status !== SupportChatStatus.CLOSED
   );
   const resolvedChats = chats.filter(
     (chat) =>
       chat.status === SupportChatStatus.RESOLVED ||
-      chat.status === SupportChatStatus.CLOSED,
+      chat.status === SupportChatStatus.CLOSED
   );
 
   return (

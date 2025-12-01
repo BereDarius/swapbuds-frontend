@@ -28,7 +28,7 @@ export default function NewMessagePage() {
   });
 
   const existingConversation = conversations.find(
-    (conv) => conv.otherUser?.id === userId,
+    (conv) => conv.otherUser?.id === userId
   );
 
   const sendMessageMutation = useMutation({

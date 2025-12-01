@@ -246,7 +246,7 @@ export function ModerationPanel({ className }: ModerationPanelProps) {
                             new Date(flag.comment.createdAt),
                             {
                               addSuffix: true,
-                            },
+                            }
                           )}
                         </span>
                       </div>

@@ -16,7 +16,7 @@ import { useMemo, useState } from "react";
 export default function TradesPage() {
   const { user } = useAuthStore();
   const [direction, setDirection] = useState<"all" | "sent" | "received">(
-    "all",
+    "all"
   );
   const [status, setStatus] = useState<"all" | TradeStatus>("all");
   const [page, setPage] = useState(1);
@@ -134,8 +134,8 @@ export default function TradesPage() {
                             statusInfo.color === "yellow"
                               ? "default"
                               : statusInfo.color === "green"
-                              ? "default"
-                              : "secondary"
+                                ? "default"
+                                : "secondary"
                           }
                         >
                           {statusInfo.label}

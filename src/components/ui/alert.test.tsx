@@ -10,7 +10,7 @@ describe("Alert", () => {
       <Alert>
         <AlertTitle>Test Title</AlertTitle>
         <AlertDescription>Test Description</AlertDescription>
-      </Alert>,
+      </Alert>
     );
 
     expect(screen.getByText("Test Title")).toBeInTheDocument();
@@ -22,7 +22,7 @@ describe("Alert", () => {
       <Alert variant="destructive">
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>Something went wrong</AlertDescription>
-      </Alert>,
+      </Alert>
     );
 
     const alert = screen.getByRole("alert");
@@ -34,7 +34,7 @@ describe("Alert", () => {
     render(
       <Alert className="custom-alert">
         <AlertTitle>Title</AlertTitle>
-      </Alert>,
+      </Alert>
     );
 
     const alert = screen.getByRole("alert");
@@ -47,7 +47,7 @@ describe("Alert", () => {
         <AlertCircle data-testid="alert-icon" className="h-4 w-4" />
         <AlertTitle>Title</AlertTitle>
         <AlertDescription>Description</AlertDescription>
-      </Alert>,
+      </Alert>
     );
 
     expect(screen.getByTestId("alert-icon")).toBeInTheDocument();
@@ -57,7 +57,7 @@ describe("Alert", () => {
     render(
       <Alert>
         <AlertTitle>Only Title</AlertTitle>
-      </Alert>,
+      </Alert>
     );
 
     expect(screen.getByText("Only Title")).toBeInTheDocument();
@@ -68,7 +68,7 @@ describe("Alert", () => {
     render(
       <Alert>
         <AlertDescription>Only Description</AlertDescription>
-      </Alert>,
+      </Alert>
     );
 
     expect(screen.getByText("Only Description")).toBeInTheDocument();
@@ -79,7 +79,7 @@ describe("Alert", () => {
       <Alert>
         <AlertTitle>No Icon</AlertTitle>
         <AlertDescription>This alert has no icon</AlertDescription>
-      </Alert>,
+      </Alert>
     );
 
     const alert = screen.getByRole("alert");
@@ -92,7 +92,7 @@ describe("Alert", () => {
     render(
       <Alert>
         <AlertTitle>Accessible Alert</AlertTitle>
-      </Alert>,
+      </Alert>
     );
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
@@ -103,7 +103,7 @@ describe("Alert", () => {
     render(
       <Alert ref={ref}>
         <AlertTitle>Ref Test</AlertTitle>
-      </Alert>,
+      </Alert>
     );
 
     expect(ref.current).toBeInstanceOf(HTMLDivElement);
@@ -120,7 +120,7 @@ describe("Alert", () => {
             <p>Second paragraph</p>
           </div>
         </AlertDescription>
-      </Alert>,
+      </Alert>
     );
 
     expect(screen.getByText("First paragraph")).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe("Alert", () => {
     const { rerender } = render(
       <Alert variant="default">
         <AlertTitle>Default</AlertTitle>
-      </Alert>,
+      </Alert>
     );
 
     let alert = screen.getByRole("alert");
@@ -141,7 +141,7 @@ describe("Alert", () => {
     rerender(
       <Alert variant="destructive">
         <AlertTitle>Destructive</AlertTitle>
-      </Alert>,
+      </Alert>
     );
 
     alert = screen.getByRole("alert");
@@ -195,7 +195,7 @@ describe("AlertDescription", () => {
     render(
       <AlertDescription className="custom-description">
         Description
-      </AlertDescription>,
+      </AlertDescription>
     );
 
     const description = screen.getByText("Description");
@@ -206,7 +206,7 @@ describe("AlertDescription", () => {
     render(
       <AlertDescription>
         <span>Complex</span> <strong>content</strong>
-      </AlertDescription>,
+      </AlertDescription>
     );
 
     expect(screen.getByText("Complex")).toBeInTheDocument();

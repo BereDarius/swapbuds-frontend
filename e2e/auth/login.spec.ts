@@ -65,7 +65,7 @@ test.describe("Login Page", () => {
       // Should show error message
       await expect(page.getByTestId("login-error")).toBeVisible();
       await expect(page.getByTestId("login-error")).toContainText(
-        /invalid credentials/i,
+        /invalid credentials/i
       );
 
       // Should remain on login page
@@ -161,7 +161,7 @@ test.describe("Login Page", () => {
 
       // Check localStorage
       const rememberMe = await page.evaluate(() =>
-        localStorage.getItem("rememberMe"),
+        localStorage.getItem("rememberMe")
       );
       expect(rememberMe).toBe("true");
     });
@@ -181,14 +181,14 @@ test.describe("Login Page", () => {
     test("should show forgot password link", async ({ page }) => {
       await expect(page.getByTestId("login-forgot-password")).toBeVisible();
       await expect(page.getByTestId("login-forgot-password")).toHaveText(
-        /forgot password/i,
+        /forgot password/i
       );
     });
 
     test("should show signup link", async ({ page }) => {
       await expect(page.getByTestId("login-signup-link")).toBeVisible();
       await expect(page.getByTestId("login-signup-link")).toHaveText(
-        /sign up/i,
+        /sign up/i
       );
     });
   });
@@ -208,11 +208,11 @@ test.describe("Login Page", () => {
     test("should show correct placeholders", async ({ page }) => {
       await expect(page.getByTestId("login-email")).toHaveAttribute(
         "placeholder",
-        "you@example.com",
+        "you@example.com"
       );
       await expect(page.getByTestId("login-password")).toHaveAttribute(
         "placeholder",
-        /•+/,
+        /•+/
       );
     });
 

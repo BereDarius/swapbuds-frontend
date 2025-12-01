@@ -82,8 +82,8 @@ export default function TradeDetailPage() {
               statusInfo.color === "green"
                 ? "default"
                 : statusInfo.color === "red"
-                ? "destructive"
-                : "secondary"
+                  ? "destructive"
+                  : "secondary"
             }
           >
             {statusInfo.label}

@@ -9,11 +9,11 @@ test.describe("Items Browse Page", () => {
 
       await expect(page.getByTestId("items-page-title")).toBeVisible();
       await expect(page.getByTestId("items-page-title")).toHaveText(
-        "Browse Items",
+        "Browse Items"
       );
       await expect(page.getByTestId("items-page-description")).toBeVisible();
       await expect(page.getByTestId("items-page-description")).toContainText(
-        "Discover items",
+        "Discover items"
       );
     });
 
@@ -127,10 +127,10 @@ test.describe("Items Browse Page", () => {
       await expect(page.getByTestId("item-card-item-1")).toBeVisible();
       await expect(page.getByTestId("item-card-item-2")).toBeVisible();
       await expect(page.getByTestId("item-title-item-1")).toHaveText(
-        "Test Item 1",
+        "Test Item 1"
       );
       await expect(page.getByTestId("item-title-item-2")).toHaveText(
-        "Test Item 2",
+        "Test Item 2"
       );
     });
 
@@ -156,7 +156,7 @@ test.describe("Items Browse Page", () => {
 
       await expect(page.getByTestId("items-empty")).toBeVisible();
       await expect(page.getByTestId("items-empty-title")).toHaveText(
-        "No items found",
+        "No items found"
       );
       await expect(page.getByTestId("items-empty-message")).toBeVisible();
       await expect(page.getByTestId("items-empty-list-button")).toBeVisible();
@@ -205,7 +205,7 @@ test.describe("Items Browse Page", () => {
 
       await expect(page.getByTestId("items-error")).toBeVisible();
       await expect(page.getByTestId("items-error-message")).toContainText(
-        "Failed to load items",
+        "Failed to load items"
       );
       await expect(page.getByTestId("items-retry-button")).toBeVisible();
     });
@@ -420,7 +420,7 @@ test.describe("Items Browse Page", () => {
 
       await expect(page.getByTestId("items-pagination")).toBeVisible();
       await expect(page.getByTestId("items-page-info")).toContainText(
-        "Page 1 of 3",
+        "Page 1 of 3"
       );
       await expect(page.getByTestId("items-previous-button")).toBeDisabled();
       await expect(page.getByTestId("items-next-button")).toBeEnabled();
@@ -480,7 +480,7 @@ test.describe("Items Browse Page", () => {
       await page.waitForTimeout(300);
 
       await expect(page.getByTestId("items-page-info")).toContainText(
-        "Page 2 of 3",
+        "Page 2 of 3"
       );
       await expect(page.getByTestId("items-previous-button")).toBeEnabled();
     });
@@ -539,7 +539,7 @@ test.describe("Items Browse Page", () => {
       await page.waitForTimeout(300);
 
       await expect(page.getByTestId("items-page-info")).toContainText(
-        "Page 1 of 3",
+        "Page 1 of 3"
       );
     });
 
@@ -748,10 +748,10 @@ test.describe("Items Browse Page", () => {
         timeout: 10000,
       });
       await expect(page.getByTestId("item-title-item-1")).toHaveText(
-        "Gaming Laptop",
+        "Gaming Laptop"
       );
       await expect(page.getByTestId("item-category-item-1")).toContainText(
-        "Electronics",
+        "Electronics"
       );
     });
 

@@ -21,7 +21,7 @@ import { toast } from "sonner";
 export default function VerificationPage() {
   const queryClient = useQueryClient();
   const [documentType, setDocumentType] = useState<DocumentType>(
-    DocumentType.ID_CARD,
+    DocumentType.ID_CARD
   );
   const [frontImage, setFrontImage] = useState<File | null>(null);
   const [backImage, setBackImage] = useState<File | null>(null);
@@ -89,7 +89,7 @@ export default function VerificationPage() {
 
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    side: "front" | "back" | "selfie",
+    side: "front" | "back" | "selfie"
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -111,7 +111,7 @@ export default function VerificationPage() {
       const sizeInBytes = (compressed.length * 3) / 4;
       if (sizeInBytes > 8 * 1024 * 1024) {
         toast.error(
-          "Compressed image is still too large. Please use a smaller image.",
+          "Compressed image is still too large. Please use a smaller image."
         );
         return;
       }

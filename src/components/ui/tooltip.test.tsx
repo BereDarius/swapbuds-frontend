@@ -21,11 +21,11 @@ describe("Tooltip", () => {
             <p>Tooltip content</p>
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider>,
+      </TooltipProvider>
     );
 
     expect(
-      screen.getByRole("button", { name: "Hover me" }),
+      screen.getByRole("button", { name: "Hover me" })
     ).toBeInTheDocument();
   });
 
@@ -41,7 +41,7 @@ describe("Tooltip", () => {
             <p>Tooltip content</p>
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider>,
+      </TooltipProvider>
     );
 
     const trigger = screen.getByRole("button", { name: "Hover me" });
@@ -66,7 +66,7 @@ describe("Tooltip", () => {
             <p>Tooltip content</p>
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider>,
+      </TooltipProvider>
     );
 
     const trigger = screen.getByRole("button", { name: "Hover me" });
@@ -97,7 +97,7 @@ describe("Tooltip", () => {
             <p>Disabled tooltip</p>
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider>,
+      </TooltipProvider>
     );
 
     const trigger = screen.getByText("Disabled button").parentElement;
@@ -123,7 +123,7 @@ describe("Tooltip", () => {
             <p>Tooltip content</p>
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider>,
+      </TooltipProvider>
     );
 
     const trigger = screen.getByRole("button", { name: "Hover me" });
@@ -156,7 +156,7 @@ describe("Tooltip", () => {
               <p>Tooltip on {side}</p>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>,
+        </TooltipProvider>
       );
 
       const trigger = screen.getByRole("button", { name: "Hover me" });
@@ -183,7 +183,7 @@ describe("Tooltip", () => {
             <p>Tooltip with offset</p>
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider>,
+      </TooltipProvider>
     );
 
     const trigger = screen.getByRole("button", { name: "Hover me" });
@@ -210,7 +210,7 @@ describe("Tooltip", () => {
             </div>
           </TooltipContent>
         </Tooltip>
-      </TooltipProvider>,
+      </TooltipProvider>
     );
 
     const trigger = screen.getByRole("button", { name: "Hover me" });

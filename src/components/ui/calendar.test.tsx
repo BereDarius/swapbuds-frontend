@@ -14,7 +14,7 @@ describe("Calendar", () => {
 
   it("applies custom className", () => {
     const { container } = render(
-      <Calendar mode="single" className="custom-calendar" />,
+      <Calendar mode="single" className="custom-calendar" />
     );
 
     const calendar = container.firstChild as HTMLElement;
@@ -108,7 +108,7 @@ describe("Calendar", () => {
           month: "custom-month",
           day: "custom-day",
         }}
-      />,
+      />
     );
 
     expect(container.querySelector(".custom-month")).toBeInTheDocument();
@@ -123,7 +123,7 @@ describe("Calendar", () => {
         formatters={{
           formatMonthDropdown: customFormatter,
         }}
-      />,
+      />
     );
 
     const grid = screen.getByRole("grid");

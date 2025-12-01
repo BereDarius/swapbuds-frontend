@@ -247,30 +247,24 @@ expect(mockSocket.emit).toHaveBeenCalledWith("event", data);
 ### Completed Areas ✅
 
 1. **All API Clients** (17 files, 140+ tests)
-
    - items, auth, trades, messages, notifications
    - reviews, comments, likes, users, support
    - verification, disputes, moderation, waitlist
    - admin, legal, gdpr
 
 2. **State Management** (2 files, 18 tests)
-
    - authStore, cookieConsentStore
 
 3. **Custom Hooks** (2 files, 13 tests)
-
    - useRecaptcha, useVerification
 
 4. **WebSocket/Real-time** (4 files, 39 tests)
-
    - messages, notifications, support, socket helper
 
 5. **Core Utilities** (2 files, 10+ tests)
-
    - utils, errors
 
 6. **UI Components** (21 files)
-
    - shadcn/ui components
 
 7. **E2E Tests** (8 suites)
@@ -281,7 +275,6 @@ expect(mockSocket.emit).toHaveBeenCalledWith("event", data);
 #### High Priority
 
 1. **Feature Components** (30-40 test files needed)
-
    - Comments: 6 components (comment-card, comment-form, version-history, list, flag-dialog, etc.)
    - Legal: 1 component (markdown-content)
    - Messages: 3 components (message-bubble, version-history, etc.)
@@ -303,14 +296,12 @@ expect(mockSocket.emit).toHaveBeenCalledWith("event", data);
 #### Medium Priority
 
 3. **Context Providers** (3-5 test files)
-
    - Theme context
    - Socket provider (provider.tsx)
    - Query client setup
    - Error boundaries
 
 4. **Page Components** (15-20 test files)
-
    - Next.js page components
    - Loading states
    - Error states

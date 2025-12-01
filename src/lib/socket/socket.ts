@@ -114,7 +114,7 @@ export function getSupportSocket(token?: string): Socket {
  * @param socketType - Type of socket to disconnect
  */
 export function disconnectSocket(
-  socketType: "main" | "notifications" | "support" = "main",
+  socketType: "main" | "notifications" | "support" = "main"
 ): void {
   switch (socketType) {
     case "main":
@@ -154,7 +154,7 @@ export function disconnectAllSockets(): void {
  * @returns Connection status
  */
 export function isSocketConnected(
-  socketType: "main" | "notifications" | "support" = "main",
+  socketType: "main" | "notifications" | "support" = "main"
 ): boolean {
   switch (socketType) {
     case "main":

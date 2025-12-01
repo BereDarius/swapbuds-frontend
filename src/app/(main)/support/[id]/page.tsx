@@ -125,7 +125,7 @@ export default function SupportChatPage() {
               ...old,
               messages: [...(old.messages || []), data.message],
             };
-          },
+          }
         );
         setTimeout(() => {
           if (messagesContainerRef.current) {
@@ -353,8 +353,8 @@ export default function SupportChatPage() {
                             isOwn
                               ? "bg-primary text-primary-foreground"
                               : isAgent
-                              ? "bg-blue-50 text-blue-900"
-                              : "bg-muted"
+                                ? "bg-blue-50 text-blue-900"
+                                : "bg-muted"
                           }`}
                         >
                           {isAgent && (

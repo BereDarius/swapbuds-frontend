@@ -111,7 +111,7 @@ export default function SettingsPage() {
 
   const handlePrivacyUpdate = (
     key: keyof typeof privacySettings,
-    value: boolean,
+    value: boolean
   ) => {
     const newSettings = { ...privacySettings, [key]: value };
     setPrivacySettings(newSettings);

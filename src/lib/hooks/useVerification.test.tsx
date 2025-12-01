@@ -29,7 +29,7 @@ const createWrapper = () => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  Wrapper.displayName = 'TestQueryClientWrapper';
+  Wrapper.displayName = "TestQueryClientWrapper";
   return Wrapper;
 };
 
@@ -40,7 +40,9 @@ describe("useVerification", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue(mockRouter as ReturnType<typeof useRouter>);
+    vi.mocked(useRouter).mockReturnValue(
+      mockRouter as ReturnType<typeof useRouter>
+    );
     vi.mocked(useAuthStore).mockReturnValue({
       user: { id: "user-1", username: "testuser" },
     } as ReturnType<typeof useAuthStore>);
@@ -57,7 +59,7 @@ describe("useVerification", () => {
       };
 
       vi.mocked(verificationApi.getMyVerification).mockResolvedValue(
-        mockVerification,
+        mockVerification
       );
 
       const { result } = renderHook(() => useVerification(), {
@@ -82,7 +84,7 @@ describe("useVerification", () => {
       };
 
       vi.mocked(verificationApi.getMyVerification).mockResolvedValue(
-        mockVerification,
+        mockVerification
       );
 
       const { result } = renderHook(() => useVerification(), {
@@ -108,7 +110,7 @@ describe("useVerification", () => {
       };
 
       vi.mocked(verificationApi.getMyVerification).mockResolvedValue(
-        mockVerification,
+        mockVerification
       );
 
       const { result } = renderHook(() => useVerification(), {
@@ -147,7 +149,7 @@ describe("useVerification", () => {
       };
 
       vi.mocked(verificationApi.getMyVerification).mockResolvedValue(
-        mockVerification,
+        mockVerification
       );
 
       const { result } = renderHook(() => useVerification(), {
@@ -173,7 +175,7 @@ describe("useVerification", () => {
       };
 
       vi.mocked(verificationApi.getMyVerification).mockResolvedValue(
-        mockVerification,
+        mockVerification
       );
 
       const { result } = renderHook(() => useVerification(), {
@@ -190,7 +192,7 @@ describe("useVerification", () => {
         "Verification Pending",
         expect.objectContaining({
           description: expect.stringContaining("send message"),
-        }),
+        })
       );
     });
 
@@ -205,7 +207,7 @@ describe("useVerification", () => {
       };
 
       vi.mocked(verificationApi.getMyVerification).mockResolvedValue(
-        mockVerification,
+        mockVerification
       );
 
       const { result } = renderHook(() => useVerification(), {
@@ -225,7 +227,7 @@ describe("useVerification", () => {
           action: expect.objectContaining({
             label: "Verify Now",
           }),
-        }),
+        })
       );
     });
 
@@ -249,7 +251,7 @@ describe("useVerification", () => {
           action: expect.objectContaining({
             label: "Verify Now",
           }),
-        }),
+        })
       );
     });
 
@@ -270,7 +272,7 @@ describe("useVerification", () => {
         "Verification Required",
         expect.objectContaining({
           description: expect.stringContaining("perform this action"),
-        }),
+        })
       );
     });
   });

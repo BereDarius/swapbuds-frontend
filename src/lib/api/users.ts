@@ -25,7 +25,7 @@ export async function getUserProfile(userId: string): Promise<UserProfile> {
  * Update current user's profile
  */
 export async function updateProfile(
-  data: UpdateProfileDto,
+  data: UpdateProfileDto
 ): Promise<UserProfile> {
   const response = await api.patch<UserProfile>("/users/profile", data);
   return response.data;
@@ -50,7 +50,7 @@ export async function uploadAvatar(file: File): Promise<UserProfile> {
  * Get user statistics
  */
 export async function getUserStatistics(
-  userId: string,
+  userId: string
 ): Promise<UserStatistics> {
   const response = await api.get<UserStatistics>(`/users/${userId}/statistics`);
   return response.data;
@@ -68,7 +68,7 @@ export async function getUserSettings(): Promise<UserSettings> {
  * Update current user's settings
  */
 export async function updateSettings(
-  data: UpdateSettingsDto,
+  data: UpdateSettingsDto
 ): Promise<UserSettings> {
   const response = await api.patch<UserSettings>("/users/me/settings", data);
   return response.data;

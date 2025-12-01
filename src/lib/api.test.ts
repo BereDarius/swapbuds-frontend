@@ -93,7 +93,7 @@ describe("API Client", () => {
       const interceptor = api.interceptors.request.handlers[0];
 
       await expect(interceptor.rejected?.(error)).rejects.toThrow(
-        "Request setup failed",
+        "Request setup failed"
       );
     });
   });
@@ -303,7 +303,7 @@ describe("API Client", () => {
       expect(logger.apiError).toHaveBeenCalledWith(
         "GET",
         "/items/nonexistent",
-        error,
+        error
       );
     });
   });

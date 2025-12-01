@@ -305,8 +305,8 @@ export default function ItemDetailPage() {
                   item.deliveryMethods?.includes(DeliveryMethod.MAIL)
                     ? "In-person or Shipping"
                     : item.deliveryMethods?.includes(DeliveryMethod.PHYSICAL)
-                    ? "In-person only"
-                    : "Shipping only"}
+                      ? "In-person only"
+                      : "Shipping only"}
                 </dd>
               </div>
             </dl>

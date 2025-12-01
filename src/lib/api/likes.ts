@@ -11,10 +11,10 @@ import { api } from "../api";
  * @returns Object containing the updated likes count
  */
 export async function likeItem(
-  itemId: string,
+  itemId: string
 ): Promise<{ likesCount: number }> {
   const response = await api.post<{ message: string; likesCount: number }>(
-    `/items/${itemId}/like`,
+    `/items/${itemId}/like`
   );
   return { likesCount: response.data.likesCount };
 }
@@ -24,10 +24,10 @@ export async function likeItem(
  * @returns Object containing the updated likes count
  */
 export async function unlikeItem(
-  itemId: string,
+  itemId: string
 ): Promise<{ likesCount: number }> {
   const response = await api.delete<{ likesCount: number }>(
-    `/items/${itemId}/like`,
+    `/items/${itemId}/like`
   );
   return { likesCount: response.data.likesCount };
 }
@@ -37,7 +37,7 @@ export async function unlikeItem(
  */
 export async function getLikeCount(itemId: string): Promise<number> {
   const response = await api.get<{ count: number }>(
-    `/items/${itemId}/likes/count`,
+    `/items/${itemId}/likes/count`
   );
   return response.data.count;
 }
@@ -48,7 +48,7 @@ export async function getLikeCount(itemId: string): Promise<number> {
 export async function checkIfLiked(itemId: string): Promise<boolean> {
   try {
     const response = await api.get<{ liked: boolean }>(
-      `/items/${itemId}/likes/me`,
+      `/items/${itemId}/likes/me`
     );
     return response.data.liked;
   } catch {

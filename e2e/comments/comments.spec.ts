@@ -16,7 +16,7 @@ test.describe("Item Comments", () => {
 
     // Verify comments section
     await expect(
-      page.getByRole("heading", { name: /comments/i }),
+      page.getByRole("heading", { name: /comments/i })
     ).toBeVisible();
   });
 

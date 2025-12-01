@@ -20,7 +20,7 @@ describe("Card", () => {
         </CardHeader>
         <CardContent>Card Content</CardContent>
         <CardFooter>Card Footer</CardFooter>
-      </Card>,
+      </Card>
     );
 
     expect(screen.getByText("Card Title")).toBeInTheDocument();
@@ -33,7 +33,7 @@ describe("Card", () => {
     render(
       <Card>
         <CardContent>Simple content</CardContent>
-      </Card>,
+      </Card>
     );
 
     expect(screen.getByText("Simple content")).toBeInTheDocument();
@@ -43,7 +43,7 @@ describe("Card", () => {
     render(
       <Card className="custom-card" data-testid="card">
         <CardContent>Content</CardContent>
-      </Card>,
+      </Card>
     );
 
     const card = screen.getByTestId("card");
@@ -59,7 +59,7 @@ describe("Card", () => {
         </CardHeader>
         <CardContent>Content</CardContent>
         <CardFooter>Footer</CardFooter>
-      </Card>,
+      </Card>
     );
 
     expect(screen.getByText("Title")).toBeInTheDocument();
@@ -74,7 +74,7 @@ describe("Card", () => {
         <CardFooter className="custom-footer" data-testid="footer">
           Footer content
         </CardFooter>
-      </Card>,
+      </Card>
     );
 
     const footer = screen.getByTestId("footer");

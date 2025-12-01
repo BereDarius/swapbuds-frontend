@@ -11,7 +11,7 @@ test.describe("Notifications Flow", () => {
 
     // Verify notifications page is displayed
     await expect(
-      page.getByRole("heading", { name: /notifications/i }),
+      page.getByRole("heading", { name: /notifications/i })
     ).toBeVisible();
   });
 
@@ -55,7 +55,7 @@ test.describe("Notifications Flow", () => {
 
     // Should display notifications or empty state
     await expect(
-      page.getByText(/you have no notifications|new notification/i),
+      page.getByText(/you have no notifications|new notification/i)
     ).toBeVisible();
   });
 
@@ -70,7 +70,7 @@ test.describe("Notifications Flow", () => {
       // Notification should be marked as read
       await expect(firstNotification).not.toHaveAttribute(
         "data-unread",
-        "true",
+        "true"
       );
     }
   });
@@ -86,7 +86,7 @@ test.describe("Notifications Flow", () => {
 
     // Verify all are marked as read
     await expect(
-      page.getByText(/all notifications marked as read/i),
+      page.getByText(/all notifications marked as read/i)
     ).toBeVisible();
   });
 
@@ -148,7 +148,7 @@ test.describe("Notifications Flow", () => {
 
     // Notifications should have timestamps
     await expect(
-      page.getByText(/just now|minutes ago|hours ago|days ago/i),
+      page.getByText(/just now|minutes ago|hours ago|days ago/i)
     ).toBeVisible();
   });
 

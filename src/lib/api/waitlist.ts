@@ -18,7 +18,7 @@ export interface WaitlistResponse {
  * Join the waitlist
  */
 export async function joinWaitlist(
-  data: WaitlistSignupDto,
+  data: WaitlistSignupDto
 ): Promise<WaitlistResponse> {
   const response = await api.post("/waitlist", data);
   return response.data;
@@ -42,7 +42,7 @@ export async function getWaitlistStats(): Promise<{
  * Export all waitlist emails (admin only)
  */
 export async function exportWaitlistEmails(
-  notifiedOnly: boolean = false,
+  notifiedOnly: boolean = false
 ): Promise<{ emails: string[]; count: number }> {
   const response = await api.get("/waitlist/emails", {
     params: { notified: notifiedOnly },

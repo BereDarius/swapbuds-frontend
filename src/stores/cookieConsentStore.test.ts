@@ -216,7 +216,7 @@ describe("Cookie Consent Store", () => {
     it("should handle backend sync errors gracefully for acceptAll", async () => {
       const { updateCookieConsent } = await import("@/lib/api/legal");
       vi.mocked(updateCookieConsent).mockRejectedValueOnce(
-        new Error("Network error"),
+        new Error("Network error")
       );
 
       localStorage.setItem("accessToken", "test-token");
@@ -248,7 +248,7 @@ describe("Cookie Consent Store", () => {
     it("should handle backend sync errors gracefully for rejectAll", async () => {
       const { updateCookieConsent } = await import("@/lib/api/legal");
       vi.mocked(updateCookieConsent).mockRejectedValueOnce(
-        new Error("Network error"),
+        new Error("Network error")
       );
 
       localStorage.setItem("accessToken", "test-token");
@@ -281,7 +281,7 @@ describe("Cookie Consent Store", () => {
     it("should handle backend sync errors gracefully for savePreferences", async () => {
       const { updateCookieConsent } = await import("@/lib/api/legal");
       vi.mocked(updateCookieConsent).mockRejectedValueOnce(
-        new Error("Network error"),
+        new Error("Network error")
       );
 
       localStorage.setItem("accessToken", "test-token");
@@ -349,7 +349,7 @@ describe("Cookie Consent Store", () => {
     it("should handle backend load errors gracefully", async () => {
       const { getCookieConsent } = await import("@/lib/api/legal");
       vi.mocked(getCookieConsent).mockRejectedValueOnce(
-        new Error("Network error"),
+        new Error("Network error")
       );
 
       localStorage.setItem("accessToken", "test-token");
@@ -364,7 +364,7 @@ describe("Cookie Consent Store", () => {
     it("should not show banner on error if consent already exists", async () => {
       const { getCookieConsent } = await import("@/lib/api/legal");
       vi.mocked(getCookieConsent).mockRejectedValueOnce(
-        new Error("Network error"),
+        new Error("Network error")
       );
 
       const existingConsent: CookieConsent = {

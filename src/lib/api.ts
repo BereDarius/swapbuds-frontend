@@ -54,7 +54,7 @@ api.interceptors.request.use(
     logger.apiRequest(
       config.method?.toUpperCase() || "GET",
       config.url || "",
-      config.data,
+      config.data
     );
 
     // Check both localStorage and sessionStorage for token
@@ -69,7 +69,7 @@ api.interceptors.request.use(
   (error) => {
     logger.error("API Request Error", error);
     return Promise.reject(error);
-  },
+  }
 );
 
 /**
@@ -92,7 +92,7 @@ api.interceptors.response.use(
       response.config.method?.toUpperCase() || "GET",
       response.config.url || "",
       response.status,
-      response.data,
+      response.data
     );
     return response;
   },
@@ -107,7 +107,7 @@ api.interceptors.response.use(
       logger.apiError(
         error.config?.method?.toUpperCase() || "UNKNOWN",
         error.config?.url || "UNKNOWN",
-        error,
+        error
       );
     }
 
@@ -128,7 +128,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;

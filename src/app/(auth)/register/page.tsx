@@ -83,7 +83,7 @@ export default function RegisterPage() {
         const [tos, privacy] = await Promise.all([
           getActiveLegalDocument(
             LegalDocumentType.TERMS_OF_SERVICE,
-            Language.EN,
+            Language.EN
           ),
           getActiveLegalDocument(LegalDocumentType.PRIVACY_POLICY, Language.EN),
         ]);
@@ -219,7 +219,7 @@ export default function RegisterPage() {
     } catch (error) {
       const message = getErrorMessage(
         error,
-        "Failed to resend verification email",
+        "Failed to resend verification email"
       );
       toast.error(message);
     } finally {
@@ -386,7 +386,7 @@ export default function RegisterPage() {
                     variant="outline"
                     className={cn(
                       "w-full justify-start text-left font-normal",
-                      !formData.dateOfBirth && "text-muted-foreground",
+                      !formData.dateOfBirth && "text-muted-foreground"
                     )}
                     disabled={isLoading}
                     data-testid="register-dob-button"

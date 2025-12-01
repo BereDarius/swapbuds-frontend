@@ -66,7 +66,7 @@ export default function NotificationsPage() {
       queryClient.setQueryData<Notification[]>(["notifications"], (old) => {
         if (!old) return [];
         return old.map((n) =>
-          n.id === data.notificationId ? { ...n, read: true } : n,
+          n.id === data.notificationId ? { ...n, read: true } : n
         );
       });
     });
@@ -173,7 +173,7 @@ export default function NotificationsPage() {
                       <p className="text-xs text-muted-foreground">
                         {format(
                           new Date(notification.createdAt),
-                          "MMM d, h:mm a",
+                          "MMM d, h:mm a"
                         )}
                       </p>
                       {notification.type && (

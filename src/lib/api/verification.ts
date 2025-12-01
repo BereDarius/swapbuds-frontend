@@ -29,7 +29,7 @@ export async function getMyVerification(): Promise<VerificationRequest | null> {
  * Submit a verification request
  */
 export async function submitVerification(
-  data: SubmitVerificationDto,
+  data: SubmitVerificationDto
 ): Promise<VerificationRequest> {
   const response = await api.post<VerificationRequest>("/verification", data);
   return response.data;
@@ -63,10 +63,10 @@ export async function getAllVerifications(params?: {
  * Get a specific verification request by ID (admin/moderator only)
  */
 export async function getVerificationById(
-  verificationId: string,
+  verificationId: string
 ): Promise<VerificationRequest> {
   const response = await api.get<VerificationRequest>(
-    `/verification/${verificationId}`,
+    `/verification/${verificationId}`
   );
   return response.data;
 }
@@ -76,11 +76,11 @@ export async function getVerificationById(
  */
 export async function approveVerification(
   verificationId: string,
-  data: ReviewVerificationDto,
+  data: ReviewVerificationDto
 ): Promise<VerificationRequest> {
   const response = await api.patch<VerificationRequest>(
     `/verification/admin/${verificationId}/approve`,
-    data,
+    data
   );
   return response.data;
 }
@@ -90,11 +90,11 @@ export async function approveVerification(
  */
 export async function rejectVerification(
   verificationId: string,
-  data: ReviewVerificationDto,
+  data: ReviewVerificationDto
 ): Promise<VerificationRequest> {
   const response = await api.patch<VerificationRequest>(
     `/verification/admin/${verificationId}/reject`,
-    data,
+    data
   );
   return response.data;
 }
@@ -104,11 +104,11 @@ export async function rejectVerification(
  */
 export async function updateVerificationNotes(
   verificationId: string,
-  notes: string,
+  notes: string
 ): Promise<VerificationRequest> {
   const response = await api.patch<VerificationRequest>(
     `/verification/admin/${verificationId}/notes`,
-    { notes },
+    { notes }
   );
   return response.data;
 }

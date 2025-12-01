@@ -120,8 +120,8 @@ export function CommentForm({
             {createMutation.isPending
               ? "Posting..."
               : parentId
-              ? "Reply"
-              : "Comment"}
+                ? "Reply"
+                : "Comment"}
           </Button>
         </div>
       </div>

@@ -99,7 +99,7 @@ export function Navbar() {
 
   // Filter out NEW_MESSAGE notifications (they appear in messages dropdown)
   const notifications = allNotifications.filter(
-    (n) => n.type !== "NEW_MESSAGE",
+    (n) => n.type !== "NEW_MESSAGE"
   );
 
   // Helper to get notification redirect URL based on type
@@ -409,7 +409,7 @@ export function Navbar() {
                                   {conversation.lastMessageAt && (
                                     <span className="text-xs text-muted-foreground">
                                       {formatTimeAgo(
-                                        conversation.lastMessageAt.toString(),
+                                        conversation.lastMessageAt.toString()
                                       )}
                                     </span>
                                   )}
