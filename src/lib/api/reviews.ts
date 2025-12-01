@@ -12,7 +12,7 @@ import api from "../api";
  */
 export async function createReview(
   tradeId: string,
-  data: CreateReviewDto,
+  data: CreateReviewDto
 ): Promise<Review> {
   const response = await api.post(`/reviews/trades/${tradeId}`, data);
   return response.data;
@@ -55,7 +55,7 @@ export async function getReviewById(id: string): Promise<Review> {
  */
 export async function updateReview(
   id: string,
-  data: UpdateReviewDto,
+  data: UpdateReviewDto
 ): Promise<Review> {
   const response = await api.put(`/reviews/${id}`, data);
   return response.data;

@@ -130,7 +130,7 @@ describe("Disputes API Client", () => {
 
       expect(api.patch).toHaveBeenCalledWith(
         "/disputes/dispute-1/resolve",
-        resolveDto,
+        resolveDto
       );
       expect(result).toEqual(resolvedDispute);
     });

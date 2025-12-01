@@ -11,7 +11,7 @@ test.describe("Content Moderation", () => {
 
     // Verify moderation page loads
     await expect(
-      page.getByRole("heading", { name: /moderation/i }),
+      page.getByRole("heading", { name: /moderation/i })
     ).toBeVisible();
   });
 
@@ -21,7 +21,7 @@ test.describe("Content Moderation", () => {
     // Verify flags list is displayed
     await expect(page.getByText(/flagged content/i)).toBeVisible();
     await expect(
-      page.locator('[data-testid="flag-card"]').first(),
+      page.locator('[data-testid="flag-card"]').first()
     ).toBeVisible();
   });
 

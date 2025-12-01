@@ -26,7 +26,7 @@ export async function mockLegalDocuments(page: Page) {
           updatedAt: new Date().toISOString(),
         }),
       });
-    },
+    }
   );
 
   // Mock the Privacy Policy endpoint - use flexible pattern for cross-browser compatibility
@@ -50,6 +50,6 @@ export async function mockLegalDocuments(page: Page) {
           updatedAt: new Date().toISOString(),
         }),
       });
-    },
+    }
   );
 }

@@ -15,7 +15,7 @@ export async function getConversations(): Promise<Conversation[]> {
 
 // Get a single conversation with metadata
 export async function getConversation(
-  conversationId: string,
+  conversationId: string
 ): Promise<Conversation> {
   // Fetch from the conversations list and find the matching one
   const conversations = await getConversations();
@@ -29,7 +29,7 @@ export async function getConversation(
 // Get messages in a conversation
 export async function getMessages(
   conversationId: string,
-  params?: GetMessagesDto,
+  params?: GetMessagesDto
 ): Promise<MessagesResponse> {
   const response = await api.get(`/messages/conversations/${conversationId}`, {
     params,
@@ -51,10 +51,10 @@ export async function markMessageAsRead(messageId: string): Promise<Message> {
 
 // Mark all messages in a conversation as read
 export async function markConversationAsRead(
-  conversationId: string,
+  conversationId: string
 ): Promise<{ count: number }> {
   const response = await api.patch(
-    `/messages/conversations/${conversationId}/read`,
+    `/messages/conversations/${conversationId}/read`
   );
   return response.data;
 }
@@ -68,7 +68,7 @@ export async function getMessageUnreadCount(): Promise<number> {
 // Update a message
 export async function updateMessage(
   messageId: string,
-  data: { content: string },
+  data: { content: string }
 ): Promise<Message> {
   const response = await api.patch(`/messages/${messageId}`, data);
   return response.data;
@@ -76,7 +76,7 @@ export async function updateMessage(
 
 // Delete a message (soft delete)
 export async function deleteMessage(
-  messageId: string,
+  messageId: string
 ): Promise<{ message: string }> {
   const response = await api.delete(`/messages/${messageId}`);
   return response.data;
@@ -84,7 +84,7 @@ export async function deleteMessage(
 
 // Get message version history (admins only)
 export async function getMessageVersions(
-  messageId: string,
+  messageId: string
 ): Promise<
   Array<{ id: string; content: string; editedBy: string; createdAt: string }>
 > {

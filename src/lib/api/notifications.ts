@@ -6,7 +6,7 @@ import api from "../api";
 
 // Get all notifications for the current user
 export async function getNotifications(
-  unreadOnly?: boolean,
+  unreadOnly?: boolean
 ): Promise<Notification[]> {
   const response = await api.get("/notifications", {
     params: { unreadOnly },
@@ -29,14 +29,14 @@ export async function getNotificationUnreadCountExcludingMessages(): Promise<num
   const notifications = response.data as Array<{ type: string }>;
   // Filter out NEW_MESSAGE notifications
   const nonMessageNotifications = notifications.filter(
-    (n) => n.type !== "NEW_MESSAGE",
+    (n) => n.type !== "NEW_MESSAGE"
   );
   return nonMessageNotifications.length;
 }
 
 // Mark a notification as read
 export async function markNotificationAsRead(
-  notificationId: string,
+  notificationId: string
 ): Promise<Notification> {
   const response = await api.patch(`/notifications/${notificationId}/read`);
   return response.data;
@@ -50,7 +50,7 @@ export async function markAllNotificationsAsRead(): Promise<{ count: number }> {
 
 // Delete a notification
 export async function deleteNotification(
-  notificationId: string,
+  notificationId: string
 ): Promise<{ message: string }> {
   const response = await api.delete(`/notifications/${notificationId}`);
   return response.data;
@@ -64,7 +64,7 @@ export async function getNotificationPreferences(): Promise<NotificationPreferen
 
 // Update notification preferences
 export async function updateNotificationPreferences(
-  preferences: Partial<NotificationPreferences>,
+  preferences: Partial<NotificationPreferences>
 ): Promise<NotificationPreferences> {
   const response = await api.put("/notifications/preferences", preferences);
   return response.data;

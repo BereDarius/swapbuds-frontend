@@ -19,17 +19,17 @@ test.describe("Verify Email Page", () => {
       // Should show verifying state first
       await expect(page.getByTestId("verify-email-card")).toBeVisible();
       await expect(page.getByTestId("verify-email-title")).toHaveText(
-        "Email Verification",
+        "Email Verification"
       );
 
       // Should show success state
       await expect(page.getByTestId("verify-email-success")).toBeVisible();
       await expect(page.getByTestId("verify-email-success-icon")).toBeVisible();
       await expect(page.getByTestId("verify-email-success-message")).toHaveText(
-        "Email verified successfully!",
+        "Email verified successfully!"
       );
       await expect(
-        page.getByTestId("verify-email-redirect-message"),
+        page.getByTestId("verify-email-redirect-message")
       ).toHaveText("Redirecting to login page...");
     });
 
@@ -63,7 +63,7 @@ test.describe("Verify Email Page", () => {
       await expect(page.getByTestId("verify-email-error")).toBeVisible();
       await expect(page.getByTestId("verify-email-error-icon")).toBeVisible();
       await expect(page.getByTestId("verify-email-error-message")).toHaveText(
-        "No verification token provided.",
+        "No verification token provided."
       );
     });
 
@@ -82,7 +82,7 @@ test.describe("Verify Email Page", () => {
 
       await expect(page.getByTestId("verify-email-error")).toBeVisible();
       await expect(page.getByTestId("verify-email-error-message")).toHaveText(
-        "Invalid verification token.",
+        "Invalid verification token."
       );
     });
 
@@ -101,7 +101,7 @@ test.describe("Verify Email Page", () => {
 
       await expect(page.getByTestId("verify-email-error")).toBeVisible();
       await expect(page.getByTestId("verify-email-error-message")).toHaveText(
-        "Verification token has expired.",
+        "Verification token has expired."
       );
     });
 
@@ -120,7 +120,7 @@ test.describe("Verify Email Page", () => {
 
       await expect(page.getByTestId("verify-email-error")).toBeVisible();
       await expect(page.getByTestId("verify-email-error-message")).toHaveText(
-        "Internal server error",
+        "Internal server error"
       );
     });
   });
@@ -172,7 +172,7 @@ test.describe("Verify Email Page", () => {
       await expect(page.getByTestId("verify-email-verifying")).toBeVisible();
       await expect(page.getByTestId("verify-email-spinner")).toBeVisible();
       await expect(page.getByTestId("verify-email-message")).toContainText(
-        "Verifying",
+        "Verifying"
       );
     });
 
@@ -195,10 +195,10 @@ test.describe("Verify Email Page", () => {
       // Check success state elements
       await expect(page.getByTestId("verify-email-success-icon")).toBeVisible();
       await expect(
-        page.getByTestId("verify-email-success-message"),
+        page.getByTestId("verify-email-success-message")
       ).toBeVisible();
       await expect(
-        page.getByTestId("verify-email-redirect-message"),
+        page.getByTestId("verify-email-redirect-message")
       ).toBeVisible();
     });
 
@@ -212,10 +212,10 @@ test.describe("Verify Email Page", () => {
       await expect(page.getByTestId("verify-email-error")).toBeVisible();
       await expect(page.getByTestId("verify-email-error-icon")).toBeVisible();
       await expect(
-        page.getByTestId("verify-email-error-message"),
+        page.getByTestId("verify-email-error-message")
       ).toBeVisible();
       await expect(
-        page.getByTestId("verify-email-register-button"),
+        page.getByTestId("verify-email-register-button")
       ).toBeVisible();
       await expect(page.getByTestId("verify-email-login-button")).toBeVisible();
     });
@@ -293,7 +293,7 @@ test.describe("Verify Email Page", () => {
         timeout: 3000,
       });
       await expect(
-        page.getByTestId("verify-email-verifying"),
+        page.getByTestId("verify-email-verifying")
       ).not.toBeVisible();
     });
 
@@ -321,7 +321,7 @@ test.describe("Verify Email Page", () => {
         timeout: 3000,
       });
       await expect(
-        page.getByTestId("verify-email-verifying"),
+        page.getByTestId("verify-email-verifying")
       ).not.toBeVisible();
     });
 
@@ -333,7 +333,7 @@ test.describe("Verify Email Page", () => {
       // Should show error state immediately (no verifying state)
       await expect(page.getByTestId("verify-email-error")).toBeVisible();
       await expect(
-        page.getByTestId("verify-email-verifying"),
+        page.getByTestId("verify-email-verifying")
       ).not.toBeVisible();
     });
   });

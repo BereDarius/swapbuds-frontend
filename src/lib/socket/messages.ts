@@ -25,7 +25,7 @@ export function useMessagesSocket() {
         socket.off("message", callback);
       };
     },
-    [socket],
+    [socket]
   );
 
   /**
@@ -33,7 +33,7 @@ export function useMessagesSocket() {
    */
   const onMessageRead = useCallback(
     (
-      callback: (data: { messageId: string; conversationId: string }) => void,
+      callback: (data: { messageId: string; conversationId: string }) => void
     ) => {
       if (!socket) return () => {};
       socket.on("messageRead", callback);
@@ -41,7 +41,7 @@ export function useMessagesSocket() {
         socket.off("messageRead", callback);
       };
     },
-    [socket],
+    [socket]
   );
 
   /**
@@ -55,7 +55,7 @@ export function useMessagesSocket() {
         socket.off("conversationRead", callback);
       };
     },
-    [socket],
+    [socket]
   );
 
   /**
@@ -69,7 +69,7 @@ export function useMessagesSocket() {
         socket.off("messageUpdated", callback);
       };
     },
-    [socket],
+    [socket]
   );
 
   /**
@@ -77,7 +77,7 @@ export function useMessagesSocket() {
    */
   const onMessageDeleted = useCallback(
     (
-      callback: (data: { messageId: string; conversationId: string }) => void,
+      callback: (data: { messageId: string; conversationId: string }) => void
     ) => {
       if (!socket) return () => {};
       socket.on("messageDeleted", callback);
@@ -85,7 +85,7 @@ export function useMessagesSocket() {
         socket.off("messageDeleted", callback);
       };
     },
-    [socket],
+    [socket]
   );
 
   /**
@@ -97,7 +97,7 @@ export function useMessagesSocket() {
         conversationId: string;
         isTyping: boolean;
         typerUsername: string;
-      }) => void,
+      }) => void
     ) => {
       if (!socket) return () => {};
       socket.on("typing", callback);
@@ -105,7 +105,7 @@ export function useMessagesSocket() {
         socket.off("typing", callback);
       };
     },
-    [socket],
+    [socket]
   );
 
   /**
@@ -121,7 +121,7 @@ export function useMessagesSocket() {
         });
       }
     },
-    [socket],
+    [socket]
   );
 
   /**
@@ -133,7 +133,7 @@ export function useMessagesSocket() {
         socket.emit("joinConversation", conversationId);
       }
     },
-    [socket],
+    [socket]
   );
 
   /**
@@ -145,7 +145,7 @@ export function useMessagesSocket() {
         socket.emit("leaveConversation", conversationId);
       }
     },
-    [socket],
+    [socket]
   );
 
   return {

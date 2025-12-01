@@ -66,7 +66,7 @@ describe("Comments API Client", () => {
 
       expect(api.post).toHaveBeenCalledWith(
         "/items/item-1/comments",
-        createDto,
+        createDto
       );
       expect(result).toEqual(response);
     });
@@ -116,7 +116,7 @@ describe("Comments API Client", () => {
 
       expect(api.patch).toHaveBeenCalledWith(
         "/items/comments/comment-1",
-        updateDto,
+        updateDto
       );
       expect(result).toEqual(updatedComment);
     });
@@ -201,7 +201,7 @@ describe("Comments API Client", () => {
 
       expect(api.post).toHaveBeenCalledWith(
         "/moderation/comments/comment-1/flag",
-        flagData,
+        flagData
       );
       expect(result).toEqual({ message: "Comment flagged for review" });
     });
@@ -225,7 +225,7 @@ describe("Comments API Client", () => {
       const result = await commentsApi.getCommentVersions("comment-1");
 
       expect(api.get).toHaveBeenCalledWith(
-        "/items/comments/comment-1/versions",
+        "/items/comments/comment-1/versions"
       );
       expect(result).toEqual(versions);
     });

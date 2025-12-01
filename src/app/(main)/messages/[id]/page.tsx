@@ -74,7 +74,7 @@ export default function ConversationPage() {
     getNextPageParam: (lastPage, allPages) => {
       const totalFetched = allPages.reduce(
         (sum, page) => sum + page.messages.length,
-        0,
+        0
       );
       return totalFetched < lastPage.total ? allPages.length + 1 : undefined;
     },
@@ -87,7 +87,7 @@ export default function ConversationPage() {
   // Backend returns messages in DESC order (newest first), but we need ASC (oldest first) for chat
   const allMessages = React.useMemo(
     () => messagesData?.pages.flatMap((page) => page.messages).reverse() || [],
-    [messagesData],
+    [messagesData]
   );
 
   const sendMutation = useMutation({
@@ -112,7 +112,7 @@ export default function ConversationPage() {
             total: lastPage.total + 1,
           };
           return { ...old, pages };
-        },
+        }
       );
       // Invalidate conversations list so new conversation appears
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
@@ -141,7 +141,7 @@ export default function ConversationPage() {
   useEffect(() => {
     console.log(
       "🎧 Setting up message listener for conversation:",
-      conversationId,
+      conversationId
     );
     const unsubscribe = onMessage((newMessage) => {
       console.log("📨 Message received via socket:", {
@@ -162,7 +162,7 @@ export default function ConversationPage() {
             const lastPage = pages[pages.length - 1];
             // Avoid duplicates
             const exists = lastPage.messages.some(
-              (m: Message) => m.id === newMessage.id,
+              (m: Message) => m.id === newMessage.id
             );
             if (exists) return old;
             // Prepend to array since backend stores in desc order (newest first)
@@ -172,7 +172,7 @@ export default function ConversationPage() {
               total: lastPage.total + 1,
             };
             return { ...old, pages };
-          },
+          }
         );
         // Scroll to bottom of messages container
         setTimeout(() => {
@@ -214,11 +214,11 @@ export default function ConversationPage() {
               messages: page.messages.map((m: Message) =>
                 m.id === data.messageId
                   ? { ...m, isRead: true, readAt: new Date() }
-                  : m,
+                  : m
               ),
             }));
             return { ...old, pages };
-          },
+          }
         );
       }
     });
@@ -233,7 +233,7 @@ export default function ConversationPage() {
       if (data.conversationId === conversationId) {
         console.log(
           "[ConversationPage] Marking all messages as read in conversation:",
-          conversationId,
+          conversationId
         );
         // Mark ALL messages in the conversation as read
         queryClient.setQueryData<InfiniteData<MessagesResponse>>(
@@ -249,7 +249,7 @@ export default function ConversationPage() {
               })),
             }));
             return { ...old, pages };
-          },
+          }
         );
       }
     });
@@ -268,11 +268,11 @@ export default function ConversationPage() {
             const pages = old.pages.map((page) => ({
               ...page,
               messages: page.messages.map((m: Message) =>
-                m.id === updatedMessage.id ? { ...m, ...updatedMessage } : m,
+                m.id === updatedMessage.id ? { ...m, ...updatedMessage } : m
               ),
             }));
             return { ...old, pages };
-          },
+          }
         );
       }
     });
@@ -298,11 +298,11 @@ export default function ConversationPage() {
                       deletedAt: new Date(),
                       content: "[deleted]",
                     }
-                  : m,
+                  : m
               ),
             }));
             return { ...old, pages };
-          },
+          }
         );
       }
     });
@@ -316,7 +316,7 @@ export default function ConversationPage() {
       // Check if there are unread messages where current user is the recipient
       // (i.e., messages sent by the other user)
       const hasUnreadMessagesToMe = allMessages.some(
-        (msg) => !msg.isRead && msg.senderId !== user.id,
+        (msg) => !msg.isRead && msg.senderId !== user.id
       );
 
       if (hasUnreadMessagesToMe) {
@@ -429,7 +429,7 @@ export default function ConversationPage() {
       const otherUserMessage = allMessages.find(
         (msg) =>
           msg.senderId !== user?.id ||
-          (msg.sender?.id && msg.sender.id !== user?.id),
+          (msg.sender?.id && msg.sender.id !== user?.id)
       );
 
       if (otherUserMessage) {
@@ -595,7 +595,7 @@ export default function ConversationPage() {
                     const otherUserMessage = allMessages.find(
                       (msg) =>
                         msg.senderId !== user?.id ||
-                        (msg.sender?.id && msg.sender.id !== user?.id),
+                        (msg.sender?.id && msg.sender.id !== user?.id)
                     );
                     if (otherUserMessage) {
                       recipientId =

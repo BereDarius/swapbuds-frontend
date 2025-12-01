@@ -90,7 +90,7 @@ describe("Messages API Client", () => {
       } as AxiosResponse);
 
       await expect(messagesApi.getConversation("invalid-id")).rejects.toThrow(
-        "Conversation not found",
+        "Conversation not found"
       );
     });
   });
@@ -115,7 +115,7 @@ describe("Messages API Client", () => {
         "/messages/conversations/conv-1",
         expect.objectContaining({
           params: { page: 1, limit: 50 },
-        }),
+        })
       );
       expect(result).toEqual(mockResponse);
     });
@@ -163,7 +163,7 @@ describe("Messages API Client", () => {
       const result = await messagesApi.markConversationAsRead("conv-1");
 
       expect(api.patch).toHaveBeenCalledWith(
-        "/messages/conversations/conv-1/read",
+        "/messages/conversations/conv-1/read"
       );
       expect(result).toEqual({ count: 5 });
     });

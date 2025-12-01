@@ -14,7 +14,7 @@ describe("Label", () => {
       <div>
         <Label htmlFor="email">Email</Label>
         <input id="email" type="email" />
-      </div>,
+      </div>
     );
 
     const label = screen.getByText("Email");

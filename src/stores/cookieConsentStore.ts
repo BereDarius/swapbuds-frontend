@@ -121,7 +121,7 @@ export const useCookieConsentStore = create<CookieConsentState>()(
             if (!consent) {
               set({ bannerVisible: true });
               logger.info(
-                "Showing cookie consent banner (no previous consent)",
+                "Showing cookie consent banner (no previous consent)"
               );
             }
           }
@@ -144,6 +144,6 @@ export const useCookieConsentStore = create<CookieConsentState>()(
     {
       name: "cookie-consent",
       partialize: (state) => ({ consent: state.consent }),
-    },
-  ),
+    }
+  )
 );

@@ -35,7 +35,7 @@ describe("Badge", () => {
     render(
       <Badge asChild>
         <a href="/test">Link Badge</a>
-      </Badge>,
+      </Badge>
     );
 
     const link = screen.getByRole("link");

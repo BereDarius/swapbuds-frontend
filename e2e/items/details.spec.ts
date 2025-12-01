@@ -62,10 +62,10 @@ test.describe("Item Details Page", () => {
 
       await expect(page.getByTestId("item-details-error")).toBeVisible();
       await expect(page.getByTestId("item-error-title")).toHaveText(
-        "Item not found",
+        "Item not found"
       );
       await expect(page.getByTestId("item-error-message")).toContainText(
-        "removed or doesn't exist",
+        "removed or doesn't exist"
       );
       await expect(page.getByTestId("item-error-back-button")).toBeVisible();
     });

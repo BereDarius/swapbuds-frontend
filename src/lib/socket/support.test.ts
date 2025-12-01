@@ -83,7 +83,7 @@ describe("useSupportSocket", () => {
 
       expect(mockSupportSocket.on).toHaveBeenCalledWith(
         "support:newMessage",
-        callback,
+        callback
       );
     });
 
@@ -102,7 +102,7 @@ describe("useSupportSocket", () => {
 
       expect(mockSupportSocket.off).toHaveBeenCalledWith(
         "support:newMessage",
-        callback,
+        callback
       );
     });
   });
@@ -118,7 +118,7 @@ describe("useSupportSocket", () => {
 
       expect(mockSupportSocket.on).toHaveBeenCalledWith(
         "support:userTyping",
-        callback,
+        callback
       );
     });
   });
@@ -134,7 +134,7 @@ describe("useSupportSocket", () => {
 
       expect(mockSupportSocket.on).toHaveBeenCalledWith(
         "support:chatAssigned",
-        callback,
+        callback
       );
     });
   });
@@ -150,7 +150,7 @@ describe("useSupportSocket", () => {
 
       expect(mockSupportSocket.on).toHaveBeenCalledWith(
         "support:newChatAssigned",
-        callback,
+        callback
       );
     });
   });
@@ -166,7 +166,7 @@ describe("useSupportSocket", () => {
 
       expect(mockSupportSocket.on).toHaveBeenCalledWith(
         "support:queueUpdate",
-        callback,
+        callback
       );
     });
   });
@@ -182,7 +182,7 @@ describe("useSupportSocket", () => {
 
       expect(mockSupportSocket.on).toHaveBeenCalledWith(
         "support:chatResolved",
-        callback,
+        callback
       );
     });
   });
@@ -198,7 +198,7 @@ describe("useSupportSocket", () => {
 
       expect(mockSupportSocket.on).toHaveBeenCalledWith(
         "support:chatClosed",
-        callback,
+        callback
       );
     });
   });
@@ -214,7 +214,7 @@ describe("useSupportSocket", () => {
 
       expect(mockSupportSocket.on).toHaveBeenCalledWith(
         "support:agentAvailability",
-        callback,
+        callback
       );
     });
   });

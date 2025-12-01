@@ -36,7 +36,7 @@ test.describe("Item Likes", () => {
     await expect(
       page
         .getByText(/\d+ likes?/i)
-        .or(page.locator('[data-testid="like-count"]')),
+        .or(page.locator('[data-testid="like-count"]'))
     ).toBeVisible();
   });
 
@@ -60,10 +60,10 @@ test.describe("Item Likes", () => {
 
     // Verify liked items are displayed
     await expect(
-      page.getByRole("heading", { name: /liked items|favorites/i }),
+      page.getByRole("heading", { name: /liked items|favorites/i })
     ).toBeVisible();
     await expect(
-      page.locator('[data-testid="item-card"]').first(),
+      page.locator('[data-testid="item-card"]').first()
     ).toBeVisible();
   });
 
@@ -87,7 +87,7 @@ test.describe("Item Likes", () => {
     await expect(
       page
         .getByText(/no liked items/i)
-        .or(page.locator('[data-testid="item-card"]').first()),
+        .or(page.locator('[data-testid="item-card"]').first())
     ).toBeVisible();
   });
 
@@ -106,7 +106,7 @@ test.describe("Item Likes", () => {
     });
 
     await expect(
-      itemCard.getByRole("button", { name: /like/i }),
+      itemCard.getByRole("button", { name: /like/i })
     ).toHaveAttribute("aria-pressed", "true");
   });
 
@@ -118,7 +118,7 @@ test.describe("Item Likes", () => {
 
     // Verify modal/list of users appears
     await expect(
-      page.getByRole("heading", { name: /liked by/i }),
+      page.getByRole("heading", { name: /liked by/i })
     ).toBeVisible();
   });
 
@@ -148,7 +148,7 @@ test.describe("Item Likes", () => {
     await expect(
       page
         .getByText(/sign in to like/i)
-        .or(page.getByRole("heading", { name: /login/i })),
+        .or(page.getByRole("heading", { name: /login/i }))
     ).toBeVisible();
   });
 

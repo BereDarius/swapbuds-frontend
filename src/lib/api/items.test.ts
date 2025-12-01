@@ -189,7 +189,7 @@ describe("Items API", () => {
       });
 
       expect(api.get).toHaveBeenCalledWith(
-        "/items/user/user123?status=AVAILABLE&page=1&limit=10",
+        "/items/user/user123?status=AVAILABLE&page=1&limit=10"
       );
     });
 
@@ -205,7 +205,7 @@ describe("Items API", () => {
       });
 
       expect(api.get).toHaveBeenCalledWith(
-        "/items/user/user123?status=AVAILABLE",
+        "/items/user/user123?status=AVAILABLE"
       );
     });
 
@@ -286,7 +286,7 @@ describe("Items API", () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        },
+        }
       );
       expect(result.url).toBe("https://cloudinary.com/image.jpg");
       expect(result.publicId).toBe("image123");
@@ -338,7 +338,7 @@ describe("Items API", () => {
       });
 
       expect(api.get).toHaveBeenCalledWith(
-        "/items/user/user123?status=AVAILABLE&page=2",
+        "/items/user/user123?status=AVAILABLE&page=2"
       );
     });
   });

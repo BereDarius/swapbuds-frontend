@@ -66,11 +66,11 @@ describe("Legal API Client", () => {
       } as AxiosResponse);
 
       const result = await legalApi.getActiveLegalDocument(
-        LegalDocumentType.TERMS_OF_SERVICE,
+        LegalDocumentType.TERMS_OF_SERVICE
       );
 
       expect(api.get).toHaveBeenCalledWith(
-        "/legal/documents/TERMS_OF_SERVICE?lang=en",
+        "/legal/documents/TERMS_OF_SERVICE?lang=en"
       );
       expect(result).toEqual(mockLegalDocument);
     });
@@ -82,11 +82,11 @@ describe("Legal API Client", () => {
 
       const result = await legalApi.getActiveLegalDocument(
         LegalDocumentType.PRIVACY_POLICY,
-        Language.RO,
+        Language.RO
       );
 
       expect(api.get).toHaveBeenCalledWith(
-        "/legal/documents/PRIVACY_POLICY?lang=ro",
+        "/legal/documents/PRIVACY_POLICY?lang=ro"
       );
       expect(result).toEqual(mockLegalDocument);
     });
@@ -101,11 +101,11 @@ describe("Legal API Client", () => {
       const result = await legalApi.getLegalDocumentByVersion(
         LegalDocumentType.TERMS_OF_SERVICE,
         "1.0.0",
-        Language.EN,
+        Language.EN
       );
 
       expect(api.get).toHaveBeenCalledWith(
-        "/legal/documents/TERMS_OF_SERVICE/version/1.0.0?lang=en",
+        "/legal/documents/TERMS_OF_SERVICE/version/1.0.0?lang=en"
       );
       expect(result).toEqual(mockLegalDocument);
     });
@@ -120,11 +120,11 @@ describe("Legal API Client", () => {
       } as AxiosResponse);
 
       const result = await legalApi.listLegalDocumentVersions(
-        LegalDocumentType.TERMS_OF_SERVICE,
+        LegalDocumentType.TERMS_OF_SERVICE
       );
 
       expect(api.get).toHaveBeenCalledWith(
-        "/legal/documents/TERMS_OF_SERVICE/versions",
+        "/legal/documents/TERMS_OF_SERVICE/versions"
       );
       expect(result).toEqual(versions);
     });
@@ -222,7 +222,7 @@ describe("Legal API Client", () => {
 
       expect(api.post).toHaveBeenCalledWith(
         "/legal/cookie-consent",
-        consentDto,
+        consentDto
       );
       expect(result).toEqual(mockCookieConsent);
     });
@@ -268,11 +268,11 @@ describe("Legal API Client", () => {
 
       const result = await legalApi.setActiveLegalDocumentVersion(
         LegalDocumentType.TERMS_OF_SERVICE,
-        "2.0.0",
+        "2.0.0"
       );
 
       expect(api.put).toHaveBeenCalledWith(
-        "/legal/documents/TERMS_OF_SERVICE/version/2.0.0/activate",
+        "/legal/documents/TERMS_OF_SERVICE/version/2.0.0/activate"
       );
       expect(result).toEqual(mockLegalDocument);
     });

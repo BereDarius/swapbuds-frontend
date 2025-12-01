@@ -34,7 +34,7 @@ import { api } from "../api";
  */
 export const getActiveLegalDocument = async (
   type: LegalDocumentType,
-  language: Language = Language.EN,
+  language: Language = Language.EN
 ): Promise<LegalDocument> => {
   const url = `/legal/documents/${type}?lang=${language}`;
   const response = await api.get<LegalDocument>(url);
@@ -61,10 +61,10 @@ export const getActiveLegalDocument = async (
 export const getLegalDocumentByVersion = async (
   type: LegalDocumentType,
   version: string,
-  language: Language = Language.EN,
+  language: Language = Language.EN
 ): Promise<LegalDocument> => {
   const response = await api.get<LegalDocument>(
-    `/legal/documents/${type}/version/${version}?lang=${language}`,
+    `/legal/documents/${type}/version/${version}?lang=${language}`
   );
   return response.data;
 };
@@ -81,10 +81,10 @@ export const getLegalDocumentByVersion = async (
  * ```
  */
 export const listLegalDocumentVersions = async (
-  type: LegalDocumentType,
+  type: LegalDocumentType
 ): Promise<LegalDocument[]> => {
   const response = await api.get<LegalDocument[]>(
-    `/legal/documents/${type}/versions`,
+    `/legal/documents/${type}/versions`
   );
   return response.data;
 };
@@ -106,7 +106,7 @@ export const listLegalDocumentVersions = async (
  * ```
  */
 export const acceptLegalDocument = async (
-  data: AcceptLegalDocumentDto,
+  data: AcceptLegalDocumentDto
 ): Promise<LegalConsent> => {
   const response = await api.post<LegalConsent>("/legal/accept", data);
   return response.data;
@@ -145,7 +145,7 @@ export const getUserConsents = async (): Promise<LegalConsent[]> => {
 export const checkLegalAcceptanceRequired =
   async (): Promise<LegalAcceptanceStatus> => {
     const response = await api.get<LegalAcceptanceStatus>(
-      "/legal/acceptance-required",
+      "/legal/acceptance-required"
     );
     return response.data;
   };
@@ -167,11 +167,11 @@ export const checkLegalAcceptanceRequired =
  * ```
  */
 export const updateCookieConsent = async (
-  consent: UpdateCookieConsentDto,
+  consent: UpdateCookieConsentDto
 ): Promise<CookieConsent> => {
   const response = await api.post<CookieConsent>(
     "/legal/cookie-consent",
-    consent,
+    consent
   );
   return response.data;
 };
@@ -218,10 +218,10 @@ export const createLegalDocument = async (data: {
  */
 export const setActiveLegalDocumentVersion = async (
   type: LegalDocumentType,
-  version: string,
+  version: string
 ): Promise<LegalDocument> => {
   const response = await api.put<LegalDocument>(
-    `/legal/documents/${type}/version/${version}/activate`,
+    `/legal/documents/${type}/version/${version}/activate`
   );
   return response.data;
 };

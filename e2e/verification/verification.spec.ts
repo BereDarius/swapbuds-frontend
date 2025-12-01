@@ -18,7 +18,7 @@ test.describe("ID Verification", () => {
 
     // Verify instructions are shown
     await expect(
-      page.getByText(/upload a government-issued id/i),
+      page.getByText(/upload a government-issued id/i)
     ).toBeVisible();
     await expect(page.getByText(/requirements/i)).toBeVisible();
   });
@@ -127,7 +127,7 @@ test.describe("ID Verification", () => {
 
     // Verify approved status
     await expect(
-      page.getByText(/verified/i).or(page.getByText(/approved/i)),
+      page.getByText(/verified/i).or(page.getByText(/approved/i))
     ).toBeVisible();
   });
 
@@ -162,9 +162,7 @@ test.describe("ID Verification", () => {
 
     // Verify accepted formats message
     await expect(
-      page
-        .getByText(/jpg, jpeg, png/i)
-        .or(page.getByText(/supported formats/i)),
+      page.getByText(/jpg, jpeg, png/i).or(page.getByText(/supported formats/i))
     ).toBeVisible();
   });
 });

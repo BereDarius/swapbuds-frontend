@@ -34,7 +34,7 @@ import { api } from "../api";
  * ```
  */
 export const getItems = async (
-  filters: ItemFilters = {},
+  filters: ItemFilters = {}
 ): Promise<PaginatedItemsResponse> => {
   // If userId is specified, use the dedicated user items endpoint
   if (filters.userId) {
@@ -80,7 +80,7 @@ export const getItems = async (
   if (filters.sortOrder) params.append("sortOrder", filters.sortOrder);
 
   const response = await api.get<PaginatedItemsResponse>(
-    `/items?${params.toString()}`,
+    `/items?${params.toString()}`
   );
   return response.data;
 };
@@ -141,7 +141,7 @@ export const createItem = async (data: CreateItemDto): Promise<Item> => {
  */
 export const updateItem = async (
   id: string,
-  data: UpdateItemDto,
+  data: UpdateItemDto
 ): Promise<Item> => {
   const response = await api.patch<Item>(`/items/${id}`, data);
   return response.data;
@@ -174,7 +174,7 @@ export const deleteItem = async (id: string): Promise<void> => {
  * ```
  */
 export const uploadImage = async (
-  file: File,
+  file: File
 ): Promise<CloudinaryUploadResponse> => {
   const formData = new FormData();
   formData.append("files", file); // Backend expects 'files' field name
@@ -186,7 +186,7 @@ export const uploadImage = async (
       headers: {
         "Content-Type": "multipart/form-data",
       },
-    },
+    }
   );
 
   // Return first image since we only upload one
@@ -248,7 +248,7 @@ export const incrementItemView = async (id: string): Promise<void> => {
  */
 export const getUserItems = async (
   userId: string,
-  filters: Omit<ItemFilters, "userId"> = {},
+  filters: Omit<ItemFilters, "userId"> = {}
 ): Promise<PaginatedItemsResponse> => {
   const params = new URLSearchParams();
   if (filters.status) params.append("status", filters.status);
@@ -285,7 +285,7 @@ export const getUserItems = async (
  */
 export const searchItems = async (
   query: string,
-  filters: Omit<ItemFilters, "search"> = {},
+  filters: Omit<ItemFilters, "search"> = {}
 ): Promise<PaginatedItemsResponse> => {
   return getItems({ ...filters, search: query });
 };

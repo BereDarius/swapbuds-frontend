@@ -121,7 +121,7 @@ describe("Auth API", () => {
       vi.mocked(api.post).mockRejectedValue(new Error("Email already exists"));
 
       await expect(register(registerData)).rejects.toThrow(
-        "Email already exists",
+        "Email already exists"
       );
     });
   });

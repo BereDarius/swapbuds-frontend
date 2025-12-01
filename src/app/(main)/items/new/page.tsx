@@ -241,7 +241,7 @@ export default function NewItemPage() {
                   <input
                     type="checkbox"
                     checked={formData.deliveryMethods.includes(
-                      DeliveryMethod.PHYSICAL,
+                      DeliveryMethod.PHYSICAL
                     )}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -256,7 +256,7 @@ export default function NewItemPage() {
                         setFormData({
                           ...formData,
                           deliveryMethods: formData.deliveryMethods.filter(
-                            (m) => m !== DeliveryMethod.PHYSICAL,
+                            (m) => m !== DeliveryMethod.PHYSICAL
                           ),
                         });
                       }
@@ -268,7 +268,7 @@ export default function NewItemPage() {
                   <input
                     type="checkbox"
                     checked={formData.deliveryMethods.includes(
-                      DeliveryMethod.MAIL,
+                      DeliveryMethod.MAIL
                     )}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -283,7 +283,7 @@ export default function NewItemPage() {
                         setFormData({
                           ...formData,
                           deliveryMethods: formData.deliveryMethods.filter(
-                            (m) => m !== DeliveryMethod.MAIL,
+                            (m) => m !== DeliveryMethod.MAIL
                           ),
                         });
                       }

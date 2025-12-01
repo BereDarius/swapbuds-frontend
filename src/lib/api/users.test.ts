@@ -127,7 +127,7 @@ describe("Users API Client", () => {
           headers: {
             "Content-Type": "multipart/form-data",
           },
-        },
+        }
       );
       expect(result).toEqual(updatedProfile);
     });

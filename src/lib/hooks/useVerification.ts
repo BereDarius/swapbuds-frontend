@@ -35,7 +35,7 @@ export function useVerification() {
    * @returns true if verified, false if not
    */
   const requireVerification = (
-    action: string = "perform this action",
+    action: string = "perform this action"
   ): boolean => {
     if (isVerified) {
       return true;

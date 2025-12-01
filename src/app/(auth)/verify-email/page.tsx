@@ -22,10 +22,10 @@ export default function VerifyEmailPage() {
   const token = searchParams.get("token");
 
   const [status, setStatus] = useState<"verifying" | "success" | "error">(
-    !token ? "error" : "verifying",
+    !token ? "error" : "verifying"
   );
   const [message, setMessage] = useState(
-    !token ? "No verification token provided." : "Verifying your email...",
+    !token ? "No verification token provided." : "Verifying your email..."
   );
 
   useEffect(() => {

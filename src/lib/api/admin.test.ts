@@ -71,7 +71,7 @@ describe("Admin API Client", () => {
       const result = await adminApi.getUsers(query);
 
       expect(api.get).toHaveBeenCalledWith(
-        expect.stringContaining("/admin/users"),
+        expect.stringContaining("/admin/users")
       );
       expect(result).toEqual(response);
     });
@@ -102,7 +102,7 @@ describe("Admin API Client", () => {
       const result = await adminApi.getUsers(query);
 
       expect(api.get).toHaveBeenCalledWith(
-        expect.stringContaining("/admin/users"),
+        expect.stringContaining("/admin/users")
       );
       expect(result).toEqual(response);
     });
@@ -134,7 +134,7 @@ describe("Admin API Client", () => {
 
       expect(api.post).toHaveBeenCalledWith(
         "/admin/users/user-1/unban",
-        unbanDto,
+        unbanDto
       );
     });
   });
@@ -152,7 +152,7 @@ describe("Admin API Client", () => {
 
       expect(api.patch).toHaveBeenCalledWith(
         "/admin/users/user-1/role",
-        roleDto,
+        roleDto
       );
     });
   });
@@ -210,7 +210,7 @@ describe("Admin API Client", () => {
       const result = await adminApi.getAdminLogs({ page: 1, limit: 20 });
 
       expect(api.get).toHaveBeenCalledWith(
-        expect.stringContaining("/admin/logs"),
+        expect.stringContaining("/admin/logs")
       );
       expect(result).toEqual(response);
     });

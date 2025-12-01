@@ -111,7 +111,7 @@ describe("Verification API Client", () => {
       });
 
       expect(api.get).toHaveBeenCalledWith(
-        expect.stringContaining("/verification/all"),
+        expect.stringContaining("/verification/all")
       );
       expect(result).toEqual(response);
     });
@@ -194,12 +194,12 @@ describe("Verification API Client", () => {
 
       const result = await verificationApi.approveVerification(
         "verify-1",
-        reviewDto,
+        reviewDto
       );
 
       expect(api.patch).toHaveBeenCalledWith(
         "/verification/admin/verify-1/approve",
-        reviewDto,
+        reviewDto
       );
       expect(result).toEqual(approvedVerification);
     });
@@ -223,12 +223,12 @@ describe("Verification API Client", () => {
 
       const result = await verificationApi.rejectVerification(
         "verify-1",
-        reviewDto,
+        reviewDto
       );
 
       expect(api.patch).toHaveBeenCalledWith(
         "/verification/admin/verify-1/reject",
-        reviewDto,
+        reviewDto
       );
       expect(result).toEqual(rejectedVerification);
     });
@@ -247,12 +247,12 @@ describe("Verification API Client", () => {
 
       const result = await verificationApi.updateVerificationNotes(
         "verify-1",
-        "Additional notes added",
+        "Additional notes added"
       );
 
       expect(api.patch).toHaveBeenCalledWith(
         "/verification/admin/verify-1/notes",
-        { notes: "Additional notes added" },
+        { notes: "Additional notes added" }
       );
       expect(result).toEqual(updatedVerification);
     });

@@ -188,13 +188,12 @@ describe("Notifications API Client", () => {
         data: updatedPreferences,
       } as AxiosResponse);
 
-      const result = await notificationsApi.updateNotificationPreferences(
-        updates,
-      );
+      const result =
+        await notificationsApi.updateNotificationPreferences(updates);
 
       expect(api.put).toHaveBeenCalledWith(
         "/notifications/preferences",
-        updates,
+        updates
       );
       expect(result).toEqual(updatedPreferences);
     });

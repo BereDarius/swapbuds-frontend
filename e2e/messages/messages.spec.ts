@@ -11,7 +11,7 @@ test.describe("Messages Flow", () => {
 
     // Verify messages page is displayed
     await expect(
-      page.getByRole("heading", { name: /messages/i }),
+      page.getByRole("heading", { name: /messages/i })
     ).toBeVisible();
   });
 
@@ -170,7 +170,7 @@ test.describe("Messages - Mobile", () => {
 
     // Verify mobile layout
     await expect(
-      page.getByRole("heading", { name: /messages/i }),
+      page.getByRole("heading", { name: /messages/i })
     ).toBeVisible();
   });
 

@@ -35,7 +35,7 @@ export async function login(data: LoginDto): Promise<AuthResponse> {
  * Refresh access token using refresh token
  */
 export async function refreshToken(
-  data: RefreshTokenDto,
+  data: RefreshTokenDto
 ): Promise<{ accessToken: string; refreshToken: string }> {
   const response = await api.post("/auth/refresh", data);
   return response.data;
@@ -92,7 +92,7 @@ export async function setupMFA(): Promise<MFASetupResponse> {
  * Verify MFA code
  */
 export async function verifyMFA(
-  data: MFAVerifyDto,
+  data: MFAVerifyDto
 ): Promise<{ verified: boolean }> {
   const response = await api.post("/auth/mfa/verify", data);
   return response.data;

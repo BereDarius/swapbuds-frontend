@@ -97,7 +97,7 @@ const throttledScroll = useMemo(
       const scrollY = window.scrollY;
       setShowBackToTop(scrollY > 500);
     }, 100),
-  [],
+  []
 );
 
 useEffect(() => {

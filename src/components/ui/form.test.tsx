@@ -49,7 +49,7 @@ describe("Form", () => {
     expect(screen.getByText("Username")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter username")).toBeInTheDocument();
     expect(
-      screen.getByText("This is your public username"),
+      screen.getByText("This is your public username")
     ).toBeInTheDocument();
   });
 

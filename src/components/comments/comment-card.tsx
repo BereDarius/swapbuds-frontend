@@ -133,7 +133,7 @@ export function CommentCard({
       if (context?.previousComments) {
         queryClient.setQueryData(
           ["comments", itemId],
-          context.previousComments,
+          context.previousComments
         );
       }
 

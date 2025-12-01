@@ -33,7 +33,7 @@ export async function requestDataExport(): Promise<DataExportRequest> {
  * Get data export request status
  */
 export async function getDataExportStatus(
-  exportId: string,
+  exportId: string
 ): Promise<DataExportRequest> {
   const response = await api.get<DataExportRequest>(`/gdpr/export/${exportId}`);
   return response.data;
@@ -53,7 +53,7 @@ export async function downloadExportedData(exportId: string): Promise<Blob> {
  * Request account deletion
  */
 export async function requestDeletion(
-  data?: RequestDeletionDto,
+  data?: RequestDeletionDto
 ): Promise<DeletionRequest> {
   const response = await api.post<DeletionRequest>("/gdpr/deletion", data);
   return response.data;

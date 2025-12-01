@@ -51,8 +51,7 @@ jobs:
           files: ./coverage/lcov.info
           flags: frontend-unit
           name: frontend-unit-coverage
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   # e2e-test:
   #   name: E2E Tests (${{ matrix.browser }})

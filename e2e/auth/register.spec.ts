@@ -74,10 +74,10 @@ test.describe("Register Page", () => {
 
       // Should show verification message
       await expect(
-        page.getByText(/Please verify your email to continue/i),
+        page.getByText(/Please verify your email to continue/i)
       ).toBeVisible();
       await expect(
-        page.getByText(`test${timestamp}@example.com`),
+        page.getByText(`test${timestamp}@example.com`)
       ).toBeVisible();
     });
 
@@ -109,7 +109,7 @@ test.describe("Register Page", () => {
 
       // Should show verification screen with email
       await expect(
-        page.getByText(/Please verify your email to continue/i),
+        page.getByText(/Please verify your email to continue/i)
       ).toBeVisible();
     });
   });
@@ -170,7 +170,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/Username must be at least 3 characters/i),
+        page.getByText(/Username must be at least 3 characters/i)
       ).toBeVisible();
       expect(page.url()).toContain("/register");
     });
@@ -189,7 +189,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/can only contain letters, numbers, and underscores/i),
+        page.getByText(/can only contain letters, numbers, and underscores/i)
       ).toBeVisible();
     });
 
@@ -226,7 +226,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/Password must be at least 8 characters/i),
+        page.getByText(/Password must be at least 8 characters/i)
       ).toBeVisible();
     });
 
@@ -244,7 +244,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/Password must contain an uppercase letter/i),
+        page.getByText(/Password must contain an uppercase letter/i)
       ).toBeVisible();
     });
 
@@ -262,7 +262,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/Password must contain a lowercase letter/i),
+        page.getByText(/Password must contain a lowercase letter/i)
       ).toBeVisible();
     });
 
@@ -278,7 +278,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/Password must contain a number/i),
+        page.getByText(/Password must contain a number/i)
       ).toBeVisible();
     });
 
@@ -317,7 +317,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/You must be at least 18 years old/i),
+        page.getByText(/You must be at least 18 years old/i)
       ).toBeVisible();
     });
 
@@ -338,7 +338,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/You must confirm you are 18 or older/i),
+        page.getByText(/You must confirm you are 18 or older/i)
       ).toBeVisible();
     });
 
@@ -359,7 +359,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/You must accept the Terms of Service/i),
+        page.getByText(/You must accept the Terms of Service/i)
       ).toBeVisible();
     });
 
@@ -382,7 +382,7 @@ test.describe("Register Page", () => {
       await page.getByTestId("register-submit").click();
 
       await expect(
-        page.getByText(/You must accept the Privacy Policy/i),
+        page.getByText(/You must accept the Privacy Policy/i)
       ).toBeVisible();
     });
   });
@@ -425,15 +425,15 @@ test.describe("Register Page", () => {
     test("should show correct placeholders", async ({ page }) => {
       await expect(page.getByTestId("register-username")).toHaveAttribute(
         "placeholder",
-        "johndoe",
+        "johndoe"
       );
       await expect(page.getByTestId("register-email")).toHaveAttribute(
         "placeholder",
-        "you@example.com",
+        "you@example.com"
       );
       await expect(page.getByTestId("register-password")).toHaveAttribute(
         "placeholder",
-        "••••••••",
+        "••••••••"
       );
     });
 
@@ -461,7 +461,7 @@ test.describe("Register Page", () => {
     test("should mask password input", async ({ page }) => {
       await expect(page.getByTestId("register-password")).toHaveAttribute(
         "type",
-        "password",
+        "password"
       );
     });
   });
@@ -494,7 +494,7 @@ test.describe("Register Page", () => {
 
       // Verify screen elements
       await expect(
-        page.getByText(/Please verify your email to continue/i),
+        page.getByText(/Please verify your email to continue/i)
       ).toBeVisible();
       await expect(page.getByTestId("register-resend-button")).toBeVisible();
       await expect(page.getByTestId("register-back-to-login")).toBeVisible();
@@ -529,7 +529,7 @@ test.describe("Register Page", () => {
 
       // Verify we're on verification screen
       await expect(
-        page.getByText(/Please verify your email to continue/i),
+        page.getByText(/Please verify your email to continue/i)
       ).toBeVisible();
 
       // Click back to login

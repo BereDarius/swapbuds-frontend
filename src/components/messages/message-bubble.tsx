@@ -74,11 +74,11 @@ export function MessageBubble({
             pages: old.pages.map((page) => ({
               ...page,
               messages: page.messages.map((m: Message) =>
-                m.id === message.id ? { ...m, ...updatedMessage } : m,
+                m.id === message.id ? { ...m, ...updatedMessage } : m
               ),
             })),
           };
-        },
+        }
       );
     },
     onError: (error: Error) => {
@@ -109,11 +109,11 @@ export function MessageBubble({
                       deletedAt: new Date(),
                       content: "[deleted]",
                     }
-                  : m,
+                  : m
               ),
             })),
           };
-        },
+        }
       );
     },
     onError: (error: Error) => {

@@ -25,7 +25,7 @@ export async function createTrade(data: CreateTradeDto): Promise<Trade> {
  * Create a new multi-item trade proposal
  */
 export async function createMultiItemTrade(
-  data: CreateMultiItemTradeDto,
+  data: CreateMultiItemTradeDto
 ): Promise<Trade> {
   const response = await api.post<Trade>("/trades", data);
   return response.data;
@@ -36,7 +36,7 @@ export async function createMultiItemTrade(
  * Note: Direction filtering is handled client-side in the component since backend doesn't support it
  */
 export async function getTrades(
-  filters?: TradeFilters,
+  filters?: TradeFilters
 ): Promise<PaginatedTradesResponse> {
   const params = new URLSearchParams();
 
@@ -50,7 +50,7 @@ export async function getTrades(
   if (filters?.limit) params.append("limit", filters.limit.toString());
 
   const response = await api.get<PaginatedTradesResponse>(
-    `/trades/my-trades?${params.toString()}`,
+    `/trades/my-trades?${params.toString()}`
   );
   return response.data;
 }

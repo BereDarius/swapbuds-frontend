@@ -138,7 +138,7 @@ describe("Trades API Client", () => {
       });
 
       expect(api.get).toHaveBeenCalledWith(
-        expect.stringContaining("/trades/my-trades"),
+        expect.stringContaining("/trades/my-trades")
       );
       expect(result).toEqual(mockResponse);
     });

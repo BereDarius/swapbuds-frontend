@@ -26,7 +26,7 @@ export function useNotificationsSocket() {
         notificationsSocket.off("notification", callback);
       };
     },
-    [notificationsSocket],
+    [notificationsSocket]
   );
 
   /**
@@ -40,7 +40,7 @@ export function useNotificationsSocket() {
         notificationsSocket.off("notificationRead", callback);
       };
     },
-    [notificationsSocket],
+    [notificationsSocket]
   );
 
   /**
@@ -54,7 +54,7 @@ export function useNotificationsSocket() {
         notificationsSocket.off("allNotificationsRead", callback);
       };
     },
-    [notificationsSocket],
+    [notificationsSocket]
   );
 
   /**
@@ -68,7 +68,7 @@ export function useNotificationsSocket() {
         notificationsSocket.off("notificationDeleted", callback);
       };
     },
-    [notificationsSocket],
+    [notificationsSocket]
   );
 
   return {

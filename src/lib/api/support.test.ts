@@ -117,7 +117,7 @@ describe("Support API Client", () => {
 
       expect(api.post).toHaveBeenCalledWith(
         "/support/chats/chat-1/messages",
-        messageDto,
+        messageDto
       );
       expect(result).toEqual(mockMessage);
     });
@@ -142,7 +142,7 @@ describe("Support API Client", () => {
 
       expect(api.patch).toHaveBeenCalledWith(
         "/support/chats/chat-1/resolve",
-        resolveDto,
+        resolveDto
       );
       expect(result).toEqual(resolvedChat);
     });
@@ -204,7 +204,7 @@ describe("Support API Client", () => {
       });
 
       expect(api.get).toHaveBeenCalledWith(
-        expect.stringContaining("/support/chats"),
+        expect.stringContaining("/support/chats")
       );
       expect(result).toEqual(response);
     });

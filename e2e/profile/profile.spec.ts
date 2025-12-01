@@ -51,7 +51,7 @@ test.describe("Profile Flow", () => {
     // Verify items tab is active
     await expect(page.getByRole("tab", { name: /items/i })).toHaveAttribute(
       "aria-selected",
-      "true",
+      "true"
     );
 
     // Should display user's items
@@ -64,7 +64,7 @@ test.describe("Profile Flow", () => {
     // Verify reviews tab is active
     await expect(page.getByRole("tab", { name: /reviews/i })).toHaveAttribute(
       "aria-selected",
-      "true",
+      "true"
     );
 
     // Should display reviews
@@ -144,7 +144,7 @@ test.describe("Profile - Settings", () => {
 
   test("should display settings page", async ({ page }) => {
     await expect(
-      page.getByRole("heading", { name: /settings/i }),
+      page.getByRole("heading", { name: /settings/i })
     ).toBeVisible();
   });
 

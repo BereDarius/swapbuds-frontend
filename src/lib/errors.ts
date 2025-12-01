@@ -14,7 +14,7 @@ export interface ApiErrorResponse {
  * Type guard to check if error is an Axios error with API response
  */
 export function isApiError(
-  error: unknown,
+  error: unknown
 ): error is AxiosError<ApiErrorResponse> {
   return (
     error !== null &&
@@ -31,7 +31,7 @@ export function isApiError(
  */
 export function getErrorMessage(
   error: unknown,
-  fallback = "An error occurred",
+  fallback = "An error occurred"
 ): string {
   // Handle API errors
   if (isApiError(error)) {

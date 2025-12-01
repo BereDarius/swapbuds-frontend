@@ -41,7 +41,7 @@ describe("useNotificationsSocket", () => {
 
       expect(mockNotificationsSocket.on).toHaveBeenCalledWith(
         "notification",
-        callback,
+        callback
       );
     });
 
@@ -60,7 +60,7 @@ describe("useNotificationsSocket", () => {
 
       expect(mockNotificationsSocket.off).toHaveBeenCalledWith(
         "notification",
-        callback,
+        callback
       );
     });
   });
@@ -76,7 +76,7 @@ describe("useNotificationsSocket", () => {
 
       expect(mockNotificationsSocket.on).toHaveBeenCalledWith(
         "notificationRead",
-        callback,
+        callback
       );
     });
   });
@@ -92,7 +92,7 @@ describe("useNotificationsSocket", () => {
 
       expect(mockNotificationsSocket.on).toHaveBeenCalledWith(
         "allNotificationsRead",
-        callback,
+        callback
       );
     });
   });
@@ -108,7 +108,7 @@ describe("useNotificationsSocket", () => {
 
       expect(mockNotificationsSocket.on).toHaveBeenCalledWith(
         "notificationDeleted",
-        callback,
+        callback
       );
     });
   });

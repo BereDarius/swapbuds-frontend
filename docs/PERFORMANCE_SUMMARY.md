@@ -291,7 +291,6 @@ Based on these optimizations:
    ```
 
 2. **Add Service Worker:**
-
    - Offline support
    - Asset caching
    - API response caching
@@ -304,12 +303,10 @@ Based on these optimizations:
 ### Ongoing:
 
 1. **Monitor Web Vitals:**
-
    - Check Sentry Performance dashboard
    - Target: LCP < 2.5s, FID < 100ms, CLS < 0.1
 
 2. **Run Lighthouse Audits:**
-
    - Weekly audits on key pages
    - Target: Score > 90 for all metrics
 
@@ -424,7 +421,6 @@ ANALYZE=true npm run build
 View performance metrics in production:
 
 1. **Sentry Dashboard:**
-
    - Performance > Web Vitals
    - View CLS, LCP, FID/INP trends
    - Identify slow pages

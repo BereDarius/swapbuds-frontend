@@ -23,7 +23,7 @@ export function useSupportSocket() {
         supportSocket.emit("support:joinChat", { chatId });
       }
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -35,7 +35,7 @@ export function useSupportSocket() {
         supportSocket.emit("support:leaveChat", { chatId });
       }
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -47,7 +47,7 @@ export function useSupportSocket() {
         supportSocket.emit("support:typing", { chatId, username });
       }
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -61,7 +61,7 @@ export function useSupportSocket() {
         supportSocket.off("support:newMessage", callback);
       };
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -75,7 +75,7 @@ export function useSupportSocket() {
         supportSocket.off("support:userTyping", callback);
       };
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -89,7 +89,7 @@ export function useSupportSocket() {
         supportSocket.off("support:chatAssigned", callback);
       };
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -103,7 +103,7 @@ export function useSupportSocket() {
         supportSocket.off("support:newChatAssigned", callback);
       };
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -117,7 +117,7 @@ export function useSupportSocket() {
         supportSocket.off("support:queueUpdate", callback);
       };
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -131,7 +131,7 @@ export function useSupportSocket() {
         supportSocket.off("support:chatResolved", callback);
       };
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -145,7 +145,7 @@ export function useSupportSocket() {
         supportSocket.off("support:chatClosed", callback);
       };
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   /**
@@ -159,7 +159,7 @@ export function useSupportSocket() {
         supportSocket.off("support:agentAvailability", callback);
       };
     },
-    [supportSocket],
+    [supportSocket]
   );
 
   return {
