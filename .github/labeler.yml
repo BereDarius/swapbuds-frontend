@@ -1,0 +1,46 @@
+documentation:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.md"
+          - "docs/**/*"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ".github/**/*"
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.spec.ts"
+          - "**/*.test.ts"
+          - "**/*.spec.tsx"
+          - "**/*.test.tsx"
+          - "e2e/**/*"
+
+dependencies:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "package.json"
+          - "yarn.lock"
+          - "package-lock.json"
+
+components:
+  - changed-files:
+      - any-glob-to-any-file: "src/components/**/*"
+
+pages:
+  - changed-files:
+      - any-glob-to-any-file: "src/app/**/*"
+
+styles:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "**/*.css"
+          - "**/*.scss"
+          - "src/styles/**/*"
+
+config:
+  - changed-files:
+      - any-glob-to-any-file:
+          - "*.config.*"
+          - ".env*"
