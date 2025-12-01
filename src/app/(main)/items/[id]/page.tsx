@@ -141,7 +141,10 @@ export default function ItemDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+      <div
+        className="flex min-h-[60vh] items-center justify-center"
+        data-testid="item-details-loading"
+      >
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     );
@@ -149,13 +152,26 @@ export default function ItemDetailPage() {
 
   if (error || !item) {
     return (
-      <div className="container mx-auto px-4 py-16 text-center">
+      <div
+        className="container mx-auto px-4 py-16 text-center"
+        data-testid="item-details-error"
+      >
         <Package className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-        <h2 className="mb-2 text-2xl font-bold">Item not found</h2>
-        <p className="mb-6 text-muted-foreground">
+        <h2 className="mb-2 text-2xl font-bold" data-testid="item-error-title">
+          Item not found
+        </h2>
+        <p
+          className="mb-6 text-muted-foreground"
+          data-testid="item-error-message"
+        >
           This item may have been removed or doesn&apos;t exist.
         </p>
-        <Button onClick={() => router.push("/items")}>Back to Items</Button>
+        <Button
+          onClick={() => router.push("/items")}
+          data-testid="item-error-back-button"
+        >
+          Back to Items
+        </Button>
       </div>
     );
   }
@@ -169,12 +185,18 @@ export default function ItemDetailPage() {
   const displayCommentsCount = item.commentsCount ?? 0;
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div
+      className="container mx-auto px-4 py-8"
+      data-testid="item-details-page"
+    >
       <div className="grid gap-8 lg:grid-cols-2">
         {/* Images Carousel */}
-        <div className="space-y-4">
+        <div className="space-y-4" data-testid="item-images-section">
           {/* Main Image Display */}
-          <div className="relative aspect-square overflow-hidden rounded-lg bg-muted">
+          <div
+            className="relative aspect-square overflow-hidden rounded-lg bg-muted"
+            data-testid="item-main-image"
+          >
             {item.images && item.images.length > 0 ? (
               <Image
                 src={item.images[selectedImageIndex]}
@@ -193,7 +215,10 @@ export default function ItemDetailPage() {
 
           {/* Thumbnail Navigation */}
           {item.images && item.images.length > 1 && (
-            <div className="grid grid-cols-5 gap-2">
+            <div
+              className="grid grid-cols-5 gap-2"
+              data-testid="item-thumbnails"
+            >
               {item.images.map((img, idx) => (
                 <button
                   key={idx}
@@ -204,6 +229,7 @@ export default function ItemDetailPage() {
                   }`}
                   onClick={() => setSelectedImageIndex(idx)}
                   type="button"
+                  data-testid={`item-thumbnail-${idx}`}
                 >
                   <Image
                     src={img}
@@ -219,50 +245,62 @@ export default function ItemDetailPage() {
         </div>
 
         {/* Details */}
-        <div className="space-y-6">
+        <div className="space-y-6" data-testid="item-details-section">
           <div>
             <div className="mb-2 flex items-center gap-2">
-              <Badge>
+              <Badge data-testid="item-category-badge">
                 {categoryInfo.icon} {categoryInfo.label}
               </Badge>
-              <Badge variant="outline">{conditionInfo.label}</Badge>
+              <Badge variant="outline" data-testid="item-condition-badge">
+                {conditionInfo.label}
+              </Badge>
               {item.status !== "AVAILABLE" && (
-                <Badge variant="secondary">
+                <Badge variant="secondary" data-testid="item-status-badge">
                   {item.status === "IN_TRADE" ? "In Trade" : "Traded"}
                 </Badge>
               )}
             </div>
-            <h1 className="text-3xl font-bold">{item.title}</h1>
+            <h1 className="text-3xl font-bold" data-testid="item-title">
+              {item.title}
+            </h1>
             {item.estimatedValue && (
-              <p className="mt-2 text-2xl font-semibold text-primary">
+              <p
+                className="mt-2 text-2xl font-semibold text-primary"
+                data-testid="item-price"
+              >
                 €{item.estimatedValue}
               </p>
             )}
           </div>
 
           {item.description && (
-            <div>
+            <div data-testid="item-description-section">
               <h2 className="mb-2 font-semibold">Description</h2>
-              <p className="text-muted-foreground whitespace-pre-wrap">
+              <p
+                className="text-muted-foreground whitespace-pre-wrap"
+                data-testid="item-description"
+              >
                 {item.description}
               </p>
             </div>
           )}
 
-          <div>
+          <div data-testid="item-details-info">
             <h2 className="mb-2 font-semibold">Details</h2>
             <dl className="space-y-1 text-sm">
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Condition:</dt>
-                <dd>{conditionInfo.label}</dd>
+                <dd data-testid="item-condition-detail">
+                  {conditionInfo.label}
+                </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Category:</dt>
-                <dd>{categoryInfo.label}</dd>
+                <dd data-testid="item-category-detail">{categoryInfo.label}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-muted-foreground">Delivery:</dt>
-                <dd>
+                <dd data-testid="item-delivery-detail">
                   {item.deliveryMethods?.includes(DeliveryMethod.PHYSICAL) &&
                   item.deliveryMethods?.includes(DeliveryMethod.MAIL)
                     ? "In-person or Shipping"
@@ -276,21 +314,27 @@ export default function ItemDetailPage() {
 
           {/* Owner */}
           {item.owner && (
-            <Card>
+            <Card data-testid="item-owner-card">
               <CardContent className="p-4">
                 <h3 className="mb-3 font-semibold">Listed by</h3>
                 <Link
                   href={`/profile/${item.owner.username}`}
                   className="flex items-center gap-3 hover:underline"
+                  data-testid="item-owner-link"
                 >
-                  <Avatar>
+                  <Avatar data-testid="item-owner-avatar">
                     <AvatarImage src={item.owner.avatarUrl || undefined} />
                     <AvatarFallback>
                       {item.owner.username.slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">{item.owner.username}</p>
+                    <p
+                      className="font-medium"
+                      data-testid="item-owner-username"
+                    >
+                      {item.owner.username}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       View profile
                     </p>
@@ -301,7 +345,7 @@ export default function ItemDetailPage() {
           )}
 
           {/* Actions */}
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-3" data-testid="item-actions">
             {!isOwner && item.status === "AVAILABLE" && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -310,7 +354,12 @@ export default function ItemDetailPage() {
                       !isVerified ? "cursor-not-allowed" : ""
                     }`}
                   >
-                    <Button size="lg" className="w-full" disabled={!isVerified}>
+                    <Button
+                      size="lg"
+                      className="w-full"
+                      disabled={!isVerified}
+                      data-testid="item-propose-trade-button"
+                    >
                       Propose Trade
                     </Button>
                   </span>
@@ -328,10 +377,15 @@ export default function ItemDetailPage() {
                   size="lg"
                   variant="outline"
                   onClick={() => router.push(`/items/${item.id}/edit`)}
+                  data-testid="item-edit-button"
                 >
                   Edit Item
                 </Button>
-                <Button size="lg" variant="outline">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  data-testid="item-delete-button"
+                >
                   Delete
                 </Button>
               </>
@@ -346,6 +400,7 @@ export default function ItemDetailPage() {
                         variant={isLiked ? "default" : "outline"}
                         onClick={handleLike}
                         disabled={likeMutation.isPending || !isVerified}
+                        data-testid="item-like-button"
                       >
                         <Heart
                           className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`}
@@ -372,6 +427,7 @@ export default function ItemDetailPage() {
                             behavior: "smooth",
                           });
                         }}
+                        data-testid="item-comment-button"
                       >
                         <MessageSquare className="h-5 w-5" />
                       </Button>
@@ -380,7 +436,12 @@ export default function ItemDetailPage() {
                 </Tooltip>
               </>
             )}
-            <Button size="icon" variant="outline" onClick={handleShare}>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={handleShare}
+              data-testid="item-share-button"
+            >
               <Share2 className="h-5 w-5" />
             </Button>
             {!isOwner && (
@@ -392,6 +453,7 @@ export default function ItemDetailPage() {
                       variant="outline"
                       disabled={!isVerified}
                       onClick={() => setShowFlagDialog(true)}
+                      data-testid="item-flag-button"
                     >
                       <Flag className="h-5 w-5" />
                     </Button>
@@ -407,12 +469,16 @@ export default function ItemDetailPage() {
           </div>
 
           {/* Stats */}
-          <div className="flex gap-6 text-sm text-muted-foreground">
+          <div
+            className="flex gap-6 text-sm text-muted-foreground"
+            data-testid="item-stats"
+          >
             <div
               className={`flex items-center gap-1 ${
                 !isOwner ? "cursor-pointer hover:text-foreground" : ""
               }`}
               onClick={() => !isOwner && handleLike()}
+              data-testid="item-likes-count"
             >
               <Heart className="h-4 w-4" />
               <span>
@@ -429,6 +495,7 @@ export default function ItemDetailPage() {
                   document.getElementById("comments-section");
                 commentsSection?.scrollIntoView({ behavior: "smooth" });
               }}
+              data-testid="item-comments-count"
             >
               <MessageSquare className="h-4 w-4" />
               <span>
@@ -441,7 +508,11 @@ export default function ItemDetailPage() {
       </div>
 
       {/* Comments Section */}
-      <div id="comments-section" className="mt-12">
+      <div
+        id="comments-section"
+        className="mt-12"
+        data-testid="item-comments-section"
+      >
         <CommentsList itemId={itemId} />
       </div>
 

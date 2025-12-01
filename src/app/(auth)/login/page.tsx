@@ -28,12 +28,18 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
   const { executeRecaptcha, isRecaptchaLoaded } = useRecaptcha();
 
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
+
+  // Set mounted state for client-side hydration
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Only redirect if user is logged in AND hydration is complete
   // This prevents redirect loops when API interceptor clears tokens
@@ -95,7 +101,10 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              <div
+                data-testid="login-error"
+                className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+              >
                 {error}
               </div>
             )}
@@ -103,6 +112,7 @@ export default function LoginPage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                data-testid="login-email"
                 type="email"
                 placeholder="you@example.com"
                 value={formData.email}
@@ -117,6 +127,7 @@ export default function LoginPage() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                data-testid="login-password"
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
@@ -131,6 +142,7 @@ export default function LoginPage() {
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="remember"
+                  data-testid="login-remember-me"
                   checked={rememberMe}
                   onCheckedChange={(checked) =>
                     setRememberMe(checked as boolean)
@@ -146,6 +158,7 @@ export default function LoginPage() {
               </div>
               <Link
                 href="/forgot-password"
+                data-testid="login-forgot-password"
                 className="text-sm text-primary hover:underline"
               >
                 Forgot password?
@@ -153,12 +166,13 @@ export default function LoginPage() {
             </div>
             <Button
               type="submit"
+              data-testid="login-submit"
               className="w-full"
-              disabled={isLoading || !isRecaptchaLoaded}
+              disabled={isLoading || !isMounted || !isRecaptchaLoaded}
             >
               {isLoading ? "Signing in..." : "Sign in"}
             </Button>
-            {!isRecaptchaLoaded && (
+            {isMounted && !isRecaptchaLoaded && (
               <p className="text-center text-xs text-muted-foreground">
                 Loading security verification...
               </p>
@@ -170,6 +184,7 @@ export default function LoginPage() {
             Don&apos;t have an account?{" "}
             <Link
               href="/register"
+              data-testid="login-signup-link"
               className="font-medium text-primary hover:underline"
             >
               Sign up

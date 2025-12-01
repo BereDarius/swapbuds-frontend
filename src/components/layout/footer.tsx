@@ -5,12 +5,16 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted/30">
+    <footer className="border-t bg-muted/30" data-testid="footer">
       <div className="container mx-auto px-4 py-12">
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div>
-            <Link href="/" className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="flex items-center gap-2"
+              data-testid="footer-logo"
+            >
               <Package className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold">SwapBuds</span>
             </Link>
@@ -28,6 +32,7 @@ export function Footer() {
                 <Link
                   href="/items"
                   className="text-muted-foreground transition-colors hover:text-primary"
+                  data-testid="footer-browse-items"
                 >
                   Browse Items
                 </Link>
@@ -36,6 +41,7 @@ export function Footer() {
                 <Link
                   href="/trades"
                   className="text-muted-foreground transition-colors hover:text-primary"
+                  data-testid="footer-my-trades"
                 >
                   My Trades
                 </Link>
@@ -44,6 +50,7 @@ export function Footer() {
                 <Link
                   href="/items/new"
                   className="text-muted-foreground transition-colors hover:text-primary"
+                  data-testid="footer-list-item"
                 >
                   List Item
                 </Link>

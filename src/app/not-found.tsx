@@ -9,7 +9,7 @@ export default function NotFound() {
         <FileQuestion className="mx-auto h-12 w-12 text-muted-foreground" />
         <h2 className="mt-4 text-2xl font-bold">404 - Page Not Found</h2>
         <p className="mt-2 text-muted-foreground">
-          The page you're looking for doesn't exist.
+          The page you&apos;re looking for doesn&apos;t exist.
         </p>
         <div className="mt-6 flex justify-center gap-4">
           <Button asChild>

@@ -30,6 +30,7 @@ import { CalendarIcon, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { flushSync } from "react-dom";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
@@ -41,6 +42,7 @@ export default function RegisterPage() {
   const [tosVersion, setTosVersion] = useState<string>("");
   const [privacyVersion, setPrivacyVersion] = useState<string>("");
   const [isLoadingLegal, setIsLoadingLegal] = useState(true);
+  const [legalDocsLoaded, setLegalDocsLoaded] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState<string>("");
   const [isResendingEmail, setIsResendingEmail] = useState(false);
   const { executeRecaptcha, isRecaptchaLoaded } = useRecaptcha();
@@ -67,11 +69,12 @@ export default function RegisterPage() {
 
   // Redirect if already logged in (only after hydration completes)
   // This prevents redirect loops when API interceptor clears tokens
+  // Don't redirect if showing verification screen
   useEffect(() => {
-    if (_hasHydrated && user) {
+    if (_hasHydrated && user && !registeredEmail) {
       router.push("/");
     }
-  }, [_hasHydrated, user, router]);
+  }, [_hasHydrated, user, registeredEmail, router]);
 
   // Fetch legal document versions on mount
   useEffect(() => {
@@ -86,6 +89,7 @@ export default function RegisterPage() {
         ]);
         setTosVersion(tos.version);
         setPrivacyVersion(privacy.version);
+        setLegalDocsLoaded(true);
       } catch (error) {
         console.error("Failed to fetch legal documents:", error);
         toast.error("Failed to load legal documents. Please refresh the page.");
@@ -188,10 +192,15 @@ export default function RegisterPage() {
       });
 
       const { user, accessToken } = response.data;
-      setAuth(user, accessToken);
 
       // Show email verification message instead of redirecting
-      setRegisteredEmail(formData.email);
+      // Force registeredEmail to update BEFORE setAuth to prevent redirect race condition
+      flushSync(() => {
+        setRegisteredEmail(formData.email);
+      });
+
+      // Now setAuth - the useEffect won't redirect because registeredEmail is already set
+      setAuth(user, accessToken);
       toast.success(`Welcome to SwapBuds, ${user.username}!`);
     } catch (error) {
       const message = getErrorMessage(error, "Failed to create account");
@@ -263,6 +272,7 @@ export default function RegisterPage() {
               className="w-full"
               onClick={handleResendVerification}
               disabled={isResendingEmail}
+              data-testid="register-resend-button"
             >
               {isResendingEmail ? (
                 <>
@@ -278,6 +288,7 @@ export default function RegisterPage() {
               <Link
                 href="/login"
                 className="text-sm font-medium text-primary hover:underline"
+                data-testid="register-back-to-login"
               >
                 Back to login
               </Link>
@@ -302,7 +313,10 @@ export default function RegisterPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {authError && (
-              <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+              <div
+                className="rounded-md bg-destructive/10 p-3 text-sm text-destructive"
+                data-testid="register-error"
+              >
                 {authError}
               </div>
             )}
@@ -311,6 +325,7 @@ export default function RegisterPage() {
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
+                data-testid="register-username"
                 type="text"
                 placeholder="johndoe"
                 value={formData.username}
@@ -329,7 +344,8 @@ export default function RegisterPage() {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
-                type="email"
+                data-testid="register-email"
+                type="text"
                 placeholder="you@example.com"
                 value={formData.email}
                 onChange={(e) =>
@@ -347,6 +363,7 @@ export default function RegisterPage() {
               <Label htmlFor="password">Password</Label>
               <Input
                 id="password"
+                data-testid="register-password"
                 type="password"
                 placeholder="••••••••"
                 value={formData.password}
@@ -372,6 +389,7 @@ export default function RegisterPage() {
                       !formData.dateOfBirth && "text-muted-foreground",
                     )}
                     disabled={isLoading}
+                    data-testid="register-dob-button"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.dateOfBirth
@@ -405,6 +423,7 @@ export default function RegisterPage() {
               <div className="flex items-start space-x-2">
                 <Checkbox
                   id="age18"
+                  data-testid="register-age-checkbox"
                   checked={formData.selfDeclaredAge18}
                   onCheckedChange={(checked) =>
                     setFormData({
@@ -433,6 +452,7 @@ export default function RegisterPage() {
               <div className="flex items-start space-x-2">
                 <Checkbox
                   id="tos"
+                  data-testid="register-tos-checkbox"
                   checked={formData.tosAccepted}
                   onCheckedChange={(checked) =>
                     setFormData({
@@ -451,6 +471,7 @@ export default function RegisterPage() {
                     href="/terms"
                     target="_blank"
                     className="text-primary hover:underline"
+                    data-testid="register-tos-link"
                   >
                     Terms of Service
                   </Link>
@@ -466,6 +487,7 @@ export default function RegisterPage() {
               <div className="flex items-start space-x-2">
                 <Checkbox
                   id="privacy"
+                  data-testid="register-privacy-checkbox"
                   checked={formData.privacyAccepted}
                   onCheckedChange={(checked) =>
                     setFormData({
@@ -484,6 +506,7 @@ export default function RegisterPage() {
                     href="/privacy"
                     target="_blank"
                     className="text-primary hover:underline"
+                    data-testid="register-privacy-link"
                   >
                     Privacy Policy
                   </Link>
@@ -499,7 +522,8 @@ export default function RegisterPage() {
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading || !isRecaptchaLoaded || isLoadingLegal}
+              disabled={isLoading || !isRecaptchaLoaded || !legalDocsLoaded}
+              data-testid="register-submit"
             >
               {isLoading ? (
                 <>
@@ -529,6 +553,7 @@ export default function RegisterPage() {
             <Link
               href="/login"
               className="font-medium text-primary hover:underline"
+              data-testid="register-signin-link"
             >
               Sign in
             </Link>

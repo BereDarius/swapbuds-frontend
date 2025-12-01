@@ -60,40 +60,74 @@ export default function VerifyEmailPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
+      <Card className="w-full max-w-md" data-testid="verify-email-card">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Email Verification</CardTitle>
-          <CardDescription>Confirming your email address</CardDescription>
+          <CardTitle className="text-2xl" data-testid="verify-email-title">
+            Email Verification
+          </CardTitle>
+          <CardDescription data-testid="verify-email-description">
+            Confirming your email address
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {status === "verifying" && (
-            <div className="flex flex-col items-center gap-4">
-              <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
-              <p className="text-center text-sm text-muted-foreground">
+            <div
+              className="flex flex-col items-center gap-4"
+              data-testid="verify-email-verifying"
+            >
+              <Loader2
+                className="h-12 w-12 animate-spin text-blue-600"
+                data-testid="verify-email-spinner"
+              />
+              <p
+                className="text-center text-sm text-muted-foreground"
+                data-testid="verify-email-message"
+              >
                 {message}
               </p>
             </div>
           )}
 
           {status === "success" && (
-            <div className="flex flex-col items-center gap-4">
-              <CheckCircle2 className="h-12 w-12 text-green-600" />
+            <div
+              className="flex flex-col items-center gap-4"
+              data-testid="verify-email-success"
+            >
+              <CheckCircle2
+                className="h-12 w-12 text-green-600"
+                data-testid="verify-email-success-icon"
+              />
               <Alert className="border-green-200 bg-green-50">
-                <AlertDescription className="text-center text-green-800">
+                <AlertDescription
+                  className="text-center text-green-800"
+                  data-testid="verify-email-success-message"
+                >
                   {message}
                 </AlertDescription>
               </Alert>
-              <p className="text-center text-sm text-muted-foreground">
+              <p
+                className="text-center text-sm text-muted-foreground"
+                data-testid="verify-email-redirect-message"
+              >
                 Redirecting to login page...
               </p>
             </div>
           )}
 
           {status === "error" && (
-            <div className="flex flex-col items-center gap-4">
-              <XCircle className="h-12 w-12 text-red-600" />
+            <div
+              className="flex flex-col items-center gap-4"
+              data-testid="verify-email-error"
+            >
+              <XCircle
+                className="h-12 w-12 text-red-600"
+                data-testid="verify-email-error-icon"
+              />
               <Alert className="border-red-200 bg-red-50">
-                <AlertDescription className="text-center text-red-800">
+                <AlertDescription
+                  className="text-center text-red-800"
+                  data-testid="verify-email-error-message"
+                >
                   {message}
                 </AlertDescription>
               </Alert>
@@ -101,10 +135,14 @@ export default function VerifyEmailPage() {
                 <Button
                   variant="outline"
                   onClick={() => router.push("/register")}
+                  data-testid="verify-email-register-button"
                 >
                   Register Again
                 </Button>
-                <Button onClick={() => router.push("/login")}>
+                <Button
+                  onClick={() => router.push("/login")}
+                  data-testid="verify-email-login-button"
+                >
                   Go to Login
                 </Button>
               </div>

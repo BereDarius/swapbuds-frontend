@@ -128,7 +128,11 @@ export async function flagComment(
 /**
  * Get comment version history (moderators only)
  */
-export async function getCommentVersions(commentId: string): Promise<any[]> {
+export async function getCommentVersions(
+  commentId: string,
+): Promise<
+  Array<{ id: string; content: string; editedBy: string; createdAt: string }>
+> {
   const response = await api.get(`/items/comments/${commentId}/versions`);
   return response.data;
 }

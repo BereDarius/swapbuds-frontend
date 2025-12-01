@@ -36,9 +36,8 @@ export const getActiveLegalDocument = async (
   type: LegalDocumentType,
   language: Language = Language.EN,
 ): Promise<LegalDocument> => {
-  const response = await api.get<LegalDocument>(
-    `/legal/documents/${type}?lang=${language}`,
-  );
+  const url = `/legal/documents/${type}?lang=${language}`;
+  const response = await api.get<LegalDocument>(url);
   return response.data;
 };
 

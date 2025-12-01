@@ -16,7 +16,13 @@ export interface ApiErrorResponse {
 export function isApiError(
   error: unknown,
 ): error is AxiosError<ApiErrorResponse> {
-  return (error as AxiosError).isAxiosError === true;
+  return (
+    error !== null &&
+    error !== undefined &&
+    typeof error === "object" &&
+    (error as AxiosError).isAxiosError === true &&
+    (error as AxiosError).response !== undefined
+  );
 }
 
 /**
@@ -27,15 +33,26 @@ export function getErrorMessage(
   error: unknown,
   fallback = "An error occurred",
 ): string {
-  if (!isApiError(error)) {
-    return fallback;
+  // Handle API errors
+  if (isApiError(error)) {
+    const message = error.response?.data?.message;
+
+    if (Array.isArray(message)) {
+      return message.join(", "); // Join all validation errors
+    }
+
+    return message || error.response?.statusText || error.message || fallback;
   }
 
-  const message = error.response?.data?.message;
-
-  if (Array.isArray(message)) {
-    return message[0]; // Return first validation error
+  // Handle regular Error instances
+  if (error instanceof Error) {
+    return error.message;
   }
 
-  return message || fallback;
+  // Handle string errors
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return fallback;
 }

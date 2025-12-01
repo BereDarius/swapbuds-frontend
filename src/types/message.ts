@@ -10,7 +10,7 @@ export interface MessageVersion {
   id: string;
   content: string;
   editedBy: string;
-  createdAt: Date;
+  createdAt: string;
 }
 
 export interface Message {

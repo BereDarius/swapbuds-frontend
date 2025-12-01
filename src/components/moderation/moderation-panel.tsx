@@ -53,14 +53,13 @@ import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 
-const REASONS = {
-  INAPPROPRIATE: "Inappropriate Content",
+const REASONS: Record<string, string> = {
+  INAPPROPRIATE_CONTENT: "Inappropriate Content",
   SPAM: "Spam",
-  SCAM: "Scam",
-  DUPLICATE: "Duplicate",
-  PROHIBITED: "Prohibited Item",
-  MISLEADING: "Misleading Information",
-  COPYRIGHT: "Copyright Violation",
+  HARASSMENT: "Harassment",
+  MISLEADING_INFORMATION: "Misleading Information",
+  COPYRIGHT_VIOLATION: "Copyright Violation",
+  PROHIBITED_ITEM: "Prohibited Item",
   OTHER: "Other",
 };
 

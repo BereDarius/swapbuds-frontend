@@ -1,0 +1,108 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e5]:
+        - link "SwapBuds" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img [ref=e7]
+          - generic [ref=e12]: SwapBuds
+        - generic [ref=e13]:
+          - link "Log in" [ref=e14] [cursor=pointer]:
+            - /url: /login
+          - link "Sign up" [ref=e15] [cursor=pointer]:
+            - /url: /register
+    - main [ref=e16]:
+      - generic [ref=e18]:
+        - generic [ref=e19]:
+          - generic [ref=e20]: Welcome back
+          - generic [ref=e21]: Sign in to your SwapBuds account
+        - generic [ref=e23]:
+          - generic [ref=e24]: Network Error
+          - generic [ref=e25]:
+            - generic [ref=e26]: Email
+            - textbox "Email" [ref=e27]:
+              - /placeholder: you@example.com
+              - text: john.doe@example.com
+          - generic [ref=e28]:
+            - generic [ref=e29]: Password
+            - textbox "Password" [ref=e30]:
+              - /placeholder: ••••••••
+              - text: Password123!
+          - generic [ref=e31]:
+            - generic [ref=e32]:
+              - checkbox "Remember me" [ref=e33] [cursor=pointer]
+              - checkbox
+              - generic [ref=e34]: Remember me
+            - link "Forgot password?" [ref=e35] [cursor=pointer]:
+              - /url: /forgot-password
+          - button "Sign in" [ref=e36] [cursor=pointer]
+        - generic [ref=e38]:
+          - text: Don't have an account?
+          - link "Sign up" [ref=e39] [cursor=pointer]:
+            - /url: /register
+    - contentinfo [ref=e40]:
+      - generic [ref=e41]:
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - link "SwapBuds" [ref=e44] [cursor=pointer]:
+              - /url: /
+              - img [ref=e45]
+              - generic [ref=e50]: SwapBuds
+            - paragraph [ref=e51]: Peer-to-peer trading platform for collectors, gamers, and enthusiasts.
+          - generic [ref=e52]:
+            - heading "Platform" [level=3] [ref=e53]
+            - list [ref=e54]:
+              - listitem [ref=e55]:
+                - link "Browse Items" [ref=e56] [cursor=pointer]:
+                  - /url: /items
+              - listitem [ref=e57]:
+                - link "My Trades" [ref=e58] [cursor=pointer]:
+                  - /url: /trades
+              - listitem [ref=e59]:
+                - link "List Item" [ref=e60] [cursor=pointer]:
+                  - /url: /items/new
+          - generic [ref=e61]:
+            - heading "Support" [level=3] [ref=e62]
+            - list [ref=e63]:
+              - listitem [ref=e64]:
+                - link "Contact Us" [ref=e65] [cursor=pointer]:
+                  - /url: /support
+              - listitem [ref=e66]:
+                - link "FAQ" [ref=e67] [cursor=pointer]:
+                  - /url: /faq
+              - listitem [ref=e68]:
+                - link "Report an Issue" [ref=e69] [cursor=pointer]:
+                  - /url: /disputes
+          - generic [ref=e70]:
+            - heading "Legal" [level=3] [ref=e71]
+            - list [ref=e72]:
+              - listitem [ref=e73]:
+                - link "Terms of Service" [ref=e74] [cursor=pointer]:
+                  - /url: /terms
+              - listitem [ref=e75]:
+                - link "Privacy Policy" [ref=e76] [cursor=pointer]:
+                  - /url: /privacy
+              - listitem [ref=e77]:
+                - link "Cookie Policy" [ref=e78] [cursor=pointer]:
+                  - /url: /cookies
+        - paragraph [ref=e80]: © 2025 SwapBuds. All rights reserved.
+  - generic [ref=e85] [cursor=pointer]:
+    - button "Open Next.js Dev Tools" [ref=e86]:
+      - img [ref=e87]
+    - generic [ref=e91]:
+      - button "Open issues overlay" [ref=e92]:
+        - generic [ref=e93]:
+          - generic [ref=e94]: "0"
+          - generic [ref=e95]: "1"
+        - generic [ref=e96]: Issue
+      - button "Collapse issues badge" [ref=e97]:
+        - img [ref=e98]
+  - alert [ref=e100]
+  - generic [ref=e101]:
+    - img [ref=e103]
+    - button "Open Tanstack query devtools" [ref=e152] [cursor=pointer]:
+      - img [ref=e153]
+```

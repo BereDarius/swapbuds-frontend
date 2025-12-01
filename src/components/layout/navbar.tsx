@@ -288,11 +288,18 @@ export function Navbar() {
   }
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+    <nav
+      className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur"
+      data-testid="navbar"
+    >
       <div className="container mx-auto px-4">
         <div className="relative flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link
+            href="/"
+            className="flex items-center gap-2"
+            data-testid="nav-logo"
+          >
             <Package className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">SwapBuds</span>
           </Link>
@@ -304,12 +311,14 @@ export function Navbar() {
                 <Link
                   href="/items"
                   className="text-sm font-medium transition-colors hover:text-primary"
+                  data-testid="nav-browse-items"
                 >
                   Browse Items
                 </Link>
                 <Link
                   href="/trades"
                   className="text-sm font-medium transition-colors hover:text-primary"
+                  data-testid="nav-my-trades"
                 >
                   My Trades
                 </Link>
@@ -317,11 +326,17 @@ export function Navbar() {
                   <Link
                     href="/admin"
                     className="text-sm font-medium transition-colors hover:text-primary"
+                    data-testid="nav-admin"
                   >
                     Admin
                   </Link>
                 )}
-                <Button size="sm" className="gap-2" asChild>
+                <Button
+                  size="sm"
+                  className="gap-2"
+                  asChild
+                  data-testid="nav-list-item"
+                >
                   <Link href="/items/new">
                     <Plus className="h-4 w-4" />
                     List Item
@@ -334,7 +349,12 @@ export function Navbar() {
                 {/* Messages Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative"
+                      data-testid="nav-messages-button"
+                    >
                       <MessageSquare className="h-5 w-5" />
                       {unreadMessagesCount > 0 && (
                         <Badge
@@ -427,7 +447,12 @@ export function Navbar() {
                 {/* Notifications Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="relative"
+                      data-testid="nav-notifications-button"
+                    >
                       <Bell className="h-5 w-5" />
                       {unreadNotificationsCount > 0 && (
                         <Badge
@@ -489,7 +514,12 @@ export function Navbar() {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <Button variant="ghost" size="icon" asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  data-testid="nav-support-button"
+                >
                   <Link href="/support">
                     <HelpCircle className="h-5 w-5" />
                   </Link>
@@ -502,6 +532,7 @@ export function Navbar() {
                     <Button
                       variant="ghost"
                       className="relative h-9 w-9 rounded-full"
+                      data-testid="nav-user-menu-button"
                     >
                       <Avatar className="h-9 w-9">
                         <AvatarImage
@@ -588,10 +619,10 @@ export function Navbar() {
           ) : (
             /* Anonymous User - Login/Signup buttons */
             <div className="flex items-center gap-2">
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild data-testid="nav-login-button">
                 <Link href="/login">Log in</Link>
               </Button>
-              <Button asChild>
+              <Button asChild data-testid="nav-signup-button">
                 <Link href="/register">Sign up</Link>
               </Button>
             </div>

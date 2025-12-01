@@ -83,7 +83,11 @@ export async function deleteMessage(
 }
 
 // Get message version history (admins only)
-export async function getMessageVersions(messageId: string): Promise<any[]> {
+export async function getMessageVersions(
+  messageId: string,
+): Promise<
+  Array<{ id: string; content: string; editedBy: string; createdAt: string }>
+> {
   const response = await api.get(`/messages/${messageId}/versions`);
   return response.data;
 }
