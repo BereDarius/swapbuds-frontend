@@ -26,9 +26,11 @@ const createWrapper = () => {
       },
     },
   });
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
+  Wrapper.displayName = 'TestQueryClientWrapper';
+  return Wrapper;
 };
 
 describe("useVerification", () => {
@@ -38,10 +40,10 @@ describe("useVerification", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useRouter).mockReturnValue(mockRouter as any);
+    vi.mocked(useRouter).mockReturnValue(mockRouter as ReturnType<typeof useRouter>);
     vi.mocked(useAuthStore).mockReturnValue({
       user: { id: "user-1", username: "testuser" },
-    } as any);
+    } as ReturnType<typeof useAuthStore>);
   });
 
   describe("verification status", () => {
@@ -294,7 +296,7 @@ describe("useVerification", () => {
     it("should not fetch when user is not logged in", () => {
       vi.mocked(useAuthStore).mockReturnValue({
         user: null,
-      } as any);
+      } as ReturnType<typeof useAuthStore>);
 
       renderHook(() => useVerification(), {
         wrapper: createWrapper(),

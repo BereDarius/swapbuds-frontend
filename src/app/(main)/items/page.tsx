@@ -37,16 +37,17 @@ export default function ItemsPage() {
   });
   const limit = 12;
 
-  // Sync page state with URL query params
+  // Derive page from URL query params
   useEffect(() => {
     const pageParam = searchParams.get("page");
     if (pageParam) {
       const pageNum = parseInt(pageParam, 10);
-      if (!isNaN(pageNum) && pageNum > 0) {
+      if (!isNaN(pageNum) && pageNum > 0 && pageNum !== page) {
         setPage(pageNum);
       }
     }
-  }, [searchParams]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+  }, [searchParams, page]);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["items", { search, category, condition, page, limit }],
