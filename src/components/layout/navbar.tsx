@@ -53,20 +53,19 @@ export function Navbar() {
   };
 
   // Fetch unread counts once on mount, then rely on WebSocket updates
-  const { data: unreadMessagesCount = 0, refetch: refetchMessagesCount } =
-    useQuery({
-      queryKey: ["messages", "unread-count"],
-      queryFn: async () => {
-        const count = await getMessageUnreadCount();
-        return count;
-      },
-      enabled: !!user,
-      staleTime: 0, // Allow refetch when invalidated
-      refetchInterval: false, // No automatic refetching
-      refetchOnWindowFocus: false, // No refetch on focus
-      refetchOnReconnect: true, // Refetch on reconnect to catch missed updates
-      retry: 1,
-    });
+  const { data: unreadMessagesCount = 0 } = useQuery({
+    queryKey: ["messages", "unread-count"],
+    queryFn: async () => {
+      const count = await getMessageUnreadCount();
+      return count;
+    },
+    enabled: !!user,
+    staleTime: 0, // Allow refetch when invalidated
+    refetchInterval: false, // No automatic refetching
+    refetchOnWindowFocus: false, // No refetch on focus
+    refetchOnReconnect: true, // Refetch on reconnect to catch missed updates
+    retry: 1,
+  });
 
   const { data: unreadNotificationsCount = 0 } = useQuery({
     queryKey: ["notifications", "unread-count"],

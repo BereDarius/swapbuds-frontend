@@ -42,10 +42,10 @@ interface SocketProviderProps {
 }
 
 export function SocketProvider({ children }: SocketProviderProps) {
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected] = useState(false);
   const [isNotificationsConnected, setIsNotificationsConnected] =
     useState(false);
-  const [isSupportConnected, setIsSupportConnected] = useState(false);
+  const [isSupportConnected] = useState(false);
 
   const { user, accessToken: storeToken } = useAuthStore();
 
