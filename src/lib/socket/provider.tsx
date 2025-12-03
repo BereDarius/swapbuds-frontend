@@ -67,30 +67,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
       return;
     }
 
-    // Create main socket connection using helper (default namespace - messages)
-    const mainSocket = getSocket(token);
-
-    mainSocket.on("connect", () => {
-      logger.debug("Messages WebSocket connected", { socketId: mainSocket.id });
-      setIsConnected(true);
-
-      // Subscribe to user's message room
-      if (user?.id) {
-        mainSocket.emit("subscribe", user.id);
-      }
-    });
-
-    mainSocket.on("disconnect", () => {
-      logger.debug("Messages WebSocket disconnected");
-      setIsConnected(false);
-    });
-
-    mainSocket.on("connect_error", (error: Error) => {
-      logger.error("Messages WebSocket connection error", error);
-      setIsConnected(false);
-    });
-
-    // Create notifications socket connection using helper
+    // ONLY auto-connect notifications socket (needed on all authenticated pages for navbar badge)
+    // Other sockets (messages, support) are lazy-loaded when their pages are accessed
     const notifSocket = getNotificationsSocket(token);
 
     notifSocket.on("connect", () => {
@@ -113,29 +91,6 @@ export function SocketProvider({ children }: SocketProviderProps) {
     notifSocket.on("connect_error", (error: Error) => {
       logger.error("Notifications WebSocket connection error", error);
       setIsNotificationsConnected(false);
-    });
-
-    // Create support socket connection using helper
-    const suppSocket = getSupportSocket(token);
-
-    suppSocket.on("connect", () => {
-      logger.debug("Support WebSocket connected", { socketId: suppSocket.id });
-      setIsSupportConnected(true);
-
-      // Join support system
-      if (user?.id) {
-        suppSocket.emit("support:join", { userId: user.id });
-      }
-    });
-
-    suppSocket.on("disconnect", () => {
-      logger.debug("Support WebSocket disconnected");
-      setIsSupportConnected(false);
-    });
-
-    suppSocket.on("connect_error", (error: Error) => {
-      logger.error("Support WebSocket connection error", error);
-      setIsSupportConnected(false);
     });
 
     // Cleanup on unmount or user change (state updates via disconnect events)

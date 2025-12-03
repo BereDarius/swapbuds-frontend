@@ -33,7 +33,11 @@ export default function MainLayout({
 
   return (
     <>
-      <div className="container mx-auto px-4 py-4">
+      {/* Reserve minimum space for verification banner to prevent CLS */}
+      <div
+        className="container mx-auto px-4 py-4"
+        style={{ minHeight: "4rem" }}
+      >
         <VerificationBanner />
       </div>
       {children}

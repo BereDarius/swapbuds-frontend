@@ -31,6 +31,8 @@ export function OptimizedImage({
         className={cn("object-cover", className)}
         priority={priority}
         sizes={sizes}
+        loading={priority ? "eager" : "lazy"}
+        quality={85}
       />
     );
   }
@@ -43,6 +45,8 @@ export function OptimizedImage({
       height={height || 300}
       className={cn("object-cover", className)}
       priority={priority}
+      loading={priority ? "eager" : "lazy"}
+      quality={85}
     />
   );
 }

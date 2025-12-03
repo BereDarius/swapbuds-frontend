@@ -2,16 +2,53 @@
  * Messages Socket Hook
  *
  * Handles WebSocket events for real-time messaging
+ * Auto-connects socket on first use (lazy loading)
  */
 
 "use client";
 
+import { logger } from "@/lib/logger";
+import { useAuthStore } from "@/stores/authStore";
 import type { Message } from "@/types/message";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useSocketContext } from "./provider";
 
 export function useMessagesSocket() {
   const { getSocket, isConnected } = useSocketContext();
+  const { user } = useAuthStore();
+
+  // Auto-connect socket when hook is used (lazy loading)
+  useEffect(() => {
+    if (!user) return;
+
+    const token =
+      localStorage.getItem("accessToken") ||
+      sessionStorage.getItem("accessToken");
+    if (!token) return;
+
+    const socket = getSocket();
+    if (!socket) return;
+
+    // Connect if not already connected
+    if (!socket.connected) {
+      socket.auth = { token };
+      socket.connect();
+      logger.debug("Messages socket connecting (lazy load)");
+    }
+
+    // Subscribe to user's message room
+    socket.on("connect", () => {
+      if (user?.id) {
+        socket.emit("subscribe", user.id);
+      }
+    });
+
+    // If already connected, subscribe immediately
+    if (socket.connected && user?.id) {
+      socket.emit("subscribe", user.id);
+    }
+  }, [getSocket, user]);
+
   const socket = getSocket();
 
   /**

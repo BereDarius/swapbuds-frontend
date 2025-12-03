@@ -38,6 +38,33 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        source: "/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
+        source: "/_next/image/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=86400, stale-while-revalidate=604800",
+          },
+        ],
+      },
     ];
   },
 
@@ -69,7 +96,7 @@ const nextConfig: NextConfig = {
   compress: true,
 
   // Optimize production builds
-  productionBrowserSourceMaps: false,
+  productionBrowserSourceMaps: true,
 
   // Experimental optimizations
   experimental: {
@@ -77,7 +104,18 @@ const nextConfig: NextConfig = {
       "@radix-ui/react-icons",
       "lucide-react",
       "date-fns",
+      "@radix-ui/react-avatar",
+      "@radix-ui/react-dialog",
+      "@radix-ui/react-dropdown-menu",
+      "@radix-ui/react-select",
+      "@radix-ui/react-popover",
+      "@radix-ui/react-tabs",
+      "@radix-ui/react-tooltip",
     ],
+    // Enable CSS optimization
+    optimizeCss: true,
+    // Enable module layer
+    webpackBuildWorker: true,
   },
 
   // Webpack optimizations
@@ -93,40 +131,81 @@ const nextConfig: NextConfig = {
           cacheGroups: {
             default: false,
             vendors: false,
-            // Vendor chunk for node_modules
-            vendor: {
-              name: "vendor",
+            // Framework chunk (React ecosystem)
+            framework: {
+              test: /[\\/]node_modules[\\/](react|react-dom|scheduler|use-sync-external-store)[\\/]/,
+              name: "framework",
               chunks: "all",
-              test: /node_modules/,
+              priority: 40,
+              enforce: true,
+            },
+            // Radix UI chunk
+            radix: {
+              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
+              name: "radix-ui",
+              chunks: "all",
+              priority: 35,
+              enforce: true,
+            },
+            // TanStack Query chunk
+            tanstack: {
+              test: /[\\/]node_modules[\\/]@tanstack[\\/]/,
+              name: "tanstack",
+              chunks: "all",
+              priority: 30,
+            },
+            // Icons chunk (lucide-react)
+            icons: {
+              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+              name: "icons",
+              chunks: "all",
+              priority: 25,
+            },
+            // Large libraries
+            libs: {
+              test: /[\\/]node_modules[\\/](axios|zod|date-fns|socket\.io-client)[\\/]/,
+              name: "libs",
+              chunks: "all",
               priority: 20,
+            },
+            // Common vendor chunk
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name(module: { context: string }) {
+                const packageName: string | undefined = module.context.match(
+                  /[\\/]node_modules[\\/](.*?)(?:[\\/]|$)/
+                )?.[1];
+                return `vendor.${packageName?.replace("@", "")}` || "vendor";
+              },
+              chunks: "all",
+              priority: 10,
+              minSize: 20000,
+              maxSize: 244000,
             },
             // Common chunk for shared code
             common: {
               name: "common",
               minChunks: 2,
               chunks: "all",
-              priority: 10,
+              priority: 5,
               reuseExistingChunk: true,
-              enforce: true,
-            },
-            // React chunk
-            react: {
-              test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
-              name: "react",
-              chunks: "all",
-              priority: 30,
-            },
-            // Radix UI chunk
-            radix: {
-              test: /[\\/]node_modules[\\/]@radix-ui[\\/]/,
-              name: "radix",
-              chunks: "all",
-              priority: 25,
+              minSize: 10000,
             },
           },
         },
+        // Tree shaking
+        usedExports: true,
+        sideEffects: false,
       };
     }
+
+    // Resolve optimizations
+    config.resolve = {
+      ...config.resolve,
+      alias: {
+        ...config.resolve?.alias,
+      },
+    };
 
     return config;
   },

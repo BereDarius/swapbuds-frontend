@@ -20,6 +20,10 @@
 
 # lighthouse
 /lighthouse-reports/
+*.report.json
+.lighthouse-cookies-*.json
+lighthouse-results.txt
+.lighthouseci/
 
 # next.js
 /.next/

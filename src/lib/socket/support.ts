@@ -2,16 +2,53 @@
  * Support Socket Hook
  *
  * Handles WebSocket events for real-time support chat
+ * Auto-connects socket on first use (lazy loading)
  */
 
 "use client";
 
+import { logger } from "@/lib/logger";
+import { useAuthStore } from "@/stores/authStore";
 import type { SupportMessage } from "@/types/support";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useSocketContext } from "./provider";
 
 export function useSupportSocket() {
   const { getSupportSocket, isSupportConnected } = useSocketContext();
+  const { user } = useAuthStore();
+
+  // Auto-connect socket when hook is used (lazy loading)
+  useEffect(() => {
+    if (!user) return;
+
+    const token =
+      localStorage.getItem("accessToken") ||
+      sessionStorage.getItem("accessToken");
+    if (!token) return;
+
+    const socket = getSupportSocket();
+    if (!socket) return;
+
+    // Connect if not already connected
+    if (!socket.connected) {
+      socket.auth = { token };
+      socket.connect();
+      logger.debug("Support socket connecting (lazy load)");
+    }
+
+    // Join support system
+    socket.on("connect", () => {
+      if (user?.id) {
+        socket.emit("support:join", { userId: user.id });
+      }
+    });
+
+    // If already connected, join immediately
+    if (socket.connected && user?.id) {
+      socket.emit("support:join", { userId: user.id });
+    }
+  }, [getSupportSocket, user]);
+
   const supportSocket = getSupportSocket();
 
   /**

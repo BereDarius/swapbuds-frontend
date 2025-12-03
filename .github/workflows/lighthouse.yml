@@ -8,58 +8,148 @@ on:
       - "public/**"
       - "next.config.ts"
       - "package.json"
+      - "scripts/lighthouse-*.js"
       - ".github/workflows/lighthouse.yml"
 
 jobs:
   lighthouse:
     name: Lighthouse Performance Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: swapbuds_test
+          POSTGRES_PASSWORD: swapbuds_test_password
+          POSTGRES_DB: swapbuds_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-      - name: Checkout code
+      - name: Checkout frontend
         uses: actions/checkout@v4
+        with:
+          path: frontend
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/swapbuds-backend
+          path: backend
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "yarn"
+          cache-dependency-path: |
+            frontend/yarn.lock
+            backend/yarn.lock
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: |
+          cd backend && yarn install --frozen-lockfile
+          cd ../frontend && yarn install --frozen-lockfile
 
-      - name: Build application
-        run: yarn build
+      - name: Setup and start backend
+        working-directory: backend
+        run: |
+          yarn prisma generate
+          yarn prisma migrate deploy
+          yarn prisma db seed
+          yarn build
+          yarn start:prod &
+          echo $! > backend.pid
+
+          # Wait for backend to respond
+          for i in {1..30}; do
+            if curl -s http://localhost:3001/api/health > /dev/null 2>&1; then
+              echo "✅ Backend ready"
+              break
+            fi
+            echo "⏳ Waiting for backend ($i/30)..."
+            sleep 2
+          done
+        env:
+          DATABASE_URL: postgresql://swapbuds_test:swapbuds_test_password@localhost:5432/swapbuds_test
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+          JWT_SECRET: lighthouse-test-jwt-secret
+          JWT_EXPIRES_IN: 7d
+          PORT: 3001
+          NODE_ENV: production
+          CORS_ORIGIN: http://localhost:3000
+          CLOUDINARY_CLOUD_NAME: test
+          CLOUDINARY_API_KEY: test
+          CLOUDINARY_API_SECRET: test
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: test
+          AWS_REGION: us-east-1
+          AWS_S3_BUCKET: test
+
+      - name: Build and start frontend
+        working-directory: frontend
+        run: |
+          yarn build
+          yarn start &
+          echo $! > frontend.pid
+
+          # Wait for frontend
+          for i in {1..30}; do
+            if curl -f http://localhost:3000 > /dev/null 2>&1; then
+              echo "✅ Frontend ready"
+              break
+            fi
+            echo "⏳ Waiting for frontend ($i/30)..."
+            sleep 2
+          done
         env:
           NEXT_PUBLIC_API_URL: http://localhost:3001
+          NEXT_PUBLIC_SKIP_RECAPTCHA: "true"
           NODE_ENV: production
 
-      - name: Run Lighthouse CI
-        uses: treosh/lighthouse-ci-action@v12
-        with:
-          urls: |
-            http://localhost:3000
-            http://localhost:3000/items
-            http://localhost:3000/items/new
-            http://localhost:3000/trades
-            http://localhost:3000/messages
-            http://localhost:3000/notifications
-            http://localhost:3000/settings
-            http://localhost:3000/support
-            http://localhost:3000/verification
-            http://localhost:3000/login
-            http://localhost:3000/register
-            http://localhost:3000/terms
-            http://localhost:3000/privacy
-            http://localhost:3000/guidelines
-            http://localhost:3000/cookies
-          uploadArtifacts: true
-          temporaryPublicStorage: true
-          configPath: "./.lighthouserc.json"
+      - name: Install Lighthouse dependencies
+        working-directory: frontend
+        run: yarn add -D puppeteer lighthouse chrome-launcher
+
+      - name: Authenticate test users
+        working-directory: frontend
+        run: |
+          npx tsx scripts/lighthouse-auth.ts user
+          npx tsx scripts/lighthouse-auth.ts admin
+
+      - name: Run Lighthouse audits
+        working-directory: frontend
+        run: node scripts/lighthouse-runner.mjs
 
       - name: Upload Lighthouse reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: lighthouse-reports
-          path: ".lighthouseci"
+          path: "frontend/.lighthouseci"
           retention-days: 30
+
+      - name: Cleanup servers
+        if: always()
+        run: |
+          [ -f backend/backend.pid ] && kill $(cat backend/backend.pid) 2>/dev/null || true
+          [ -f frontend/frontend.pid ] && kill $(cat frontend/frontend.pid) 2>/dev/null || true

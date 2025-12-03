@@ -1,6 +1,5 @@
 "use client";
 
-import { RecaptchaProvider } from "@/components/recaptcha/recaptcha-provider";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SocketProvider } from "@/lib/socket";
@@ -33,6 +32,8 @@ const ReactQueryDevtools =
  *
  * This should wrap your root layout or _app component.
  *
+ * @param withSocket - Optional: Load Socket.IO provider (only for real-time pages)
+ *
  * @example
  * ```tsx
  * // In app/layout.tsx
@@ -63,13 +64,11 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <RecaptchaProvider>
-            <SocketProvider>
-              {children}
-              {/* Development-only devtools panel for inspecting queries/cache */}
-              <ReactQueryDevtools initialIsOpen={false} />
-            </SocketProvider>
-          </RecaptchaProvider>
+          <SocketProvider>
+            {children}
+            {/* Development-only devtools panel for inspecting queries/cache */}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </SocketProvider>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>

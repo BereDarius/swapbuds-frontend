@@ -18,7 +18,7 @@ import {
   getNotifications,
   markNotificationAsRead,
 } from "@/lib/api/notifications";
-import { getNotificationsSocket, getSocket } from "@/lib/socket/socket";
+import { getNotificationsSocket } from "@/lib/socket/socket";
 import { useAuthStore } from "@/stores/authStore";
 import type { Conversation } from "@/types/message";
 import type { Notification, NotificationType } from "@/types/notification";
@@ -79,20 +79,26 @@ export function Navbar() {
     retry: 1,
   });
 
-  // Fetch recent conversations for dropdown
+  // Defer dropdown data fetching - only fetch when dropdowns are opened
+  // This reduces initial page load by not fetching data users might not need
+  const [messagesDropdownOpen, setMessagesDropdownOpen] = useState(false);
+  const [notificationsDropdownOpen, setNotificationsDropdownOpen] =
+    useState(false);
+
+  // Fetch recent conversations for dropdown - ONLY when dropdown is opened
   const { data: conversations = [] } = useQuery<Conversation[]>({
     queryKey: ["conversations"],
     queryFn: getConversations,
-    enabled: !!user,
+    enabled: !!user && messagesDropdownOpen, // Only fetch when dropdown is open
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false,
   });
 
-  // Fetch recent notifications for dropdown (excluding NEW_MESSAGE)
+  // Fetch recent notifications for dropdown (excluding NEW_MESSAGE) - ONLY when dropdown is opened
   const { data: allNotifications = [] } = useQuery<Notification[]>({
     queryKey: ["notifications", "recent"],
     queryFn: () => getNotifications(true), // unreadOnly = true
-    enabled: !!user,
+    enabled: !!user && notificationsDropdownOpen, // Only fetch when dropdown is open
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false,
   });
@@ -173,77 +179,18 @@ export function Navbar() {
   };
 
   // Setup WebSocket listeners for real-time updates
+  // NOTE: Message socket is lazy-loaded (only connects when messages page is accessed)
+  // Notification socket auto-connects in SocketProvider for navbar badge updates
   useEffect(() => {
     if (!user) return;
 
-    const token =
-      localStorage.getItem("accessToken") ||
-      sessionStorage.getItem("accessToken");
-    if (!token) return;
-
-    // Connect to message socket
-    const messageSocket = getSocket(token);
-    const notificationSocket = getNotificationsSocket(token);
-
-    // Listen for connection events FIRST (before connecting)
-    messageSocket.on("connect", () => {
-      // Subscribe to user room to receive messages
-      messageSocket.emit("subscribe", user.id);
-    });
-
-    // If socket exists but not connected, reconnect with token
-    if (!messageSocket.connected) {
-      messageSocket.auth = { token };
-      messageSocket.connect();
-    } else {
-      // Already connected, subscribe immediately
-      messageSocket.emit("subscribe", user.id);
-    }
-
-    if (!notificationSocket.connected) {
-      notificationSocket.auth = { token };
-      notificationSocket.connect();
-    } else {
-      // Already connected, subscribe immediately
-      notificationSocket.emit("subscribe", user.id);
-    }
-
-    messageSocket.on("disconnect", () => {
-      // Socket disconnected
-    });
-
-    // Notification socket connection events FIRST (before connecting)
-    notificationSocket.on("connect", () => {
-      // Subscribe to user room to receive notifications
-      notificationSocket.emit("subscribe", user.id);
-    });
-
-    notificationSocket.on("disconnect", () => {
-      // Socket disconnected
-    });
-
-    // Listen for message read events
-    const handleMessageRead = () => {
-      queryClient.invalidateQueries({ queryKey: ["messages", "unread-count"] });
-    };
+    // Get notification socket (already connected by SocketProvider)
+    const notificationSocket = getNotificationsSocket();
 
     // Listen for notification read events
     const handleNotificationRead = () => {
       queryClient.invalidateQueries({
         queryKey: ["notifications", "unread-count"],
-      });
-    };
-
-    // Listen for new messages - backend emits "message" not "newMessage"
-    // Invalidate both unread count and conversations list
-    const handleNewMessageWithList = () => {
-      // Force refetch immediately
-      refetchMessagesCount();
-
-      // Also invalidate conversations list
-      queryClient.invalidateQueries({
-        queryKey: ["conversations"],
-        refetchType: "active",
       });
     };
 
@@ -256,20 +203,15 @@ export function Navbar() {
       queryClient.invalidateQueries({ queryKey: ["notifications", "recent"] });
     };
 
-    messageSocket.on("message", handleNewMessageWithList);
-    messageSocket.on("messageRead", handleMessageRead);
     notificationSocket.on("notification", handleNewNotificationWithList);
     notificationSocket.on("notificationRead", handleNotificationRead);
 
     return () => {
-      // Remove event listeners only, keep sockets connected
-      // Sockets are singleton instances that persist across component lifecycle
-      messageSocket.off("message", handleNewMessageWithList);
-      messageSocket.off("messageRead", handleMessageRead);
+      // Remove event listeners only, keep socket connected
       notificationSocket.off("notification", handleNewNotificationWithList);
       notificationSocket.off("notificationRead", handleNotificationRead);
     };
-  }, [user, queryClient, refetchMessagesCount]);
+  }, [user, queryClient]);
 
   // Show loading state while hydrating to prevent flash of wrong content
   if (!_hasHydrated) {
@@ -347,7 +289,7 @@ export function Navbar() {
               {/* Desktop User Menu */}
               <div className="hidden items-center gap-4 md:flex">
                 {/* Messages Dropdown */}
-                <DropdownMenu>
+                <DropdownMenu onOpenChange={setMessagesDropdownOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
@@ -445,7 +387,7 @@ export function Navbar() {
                 </DropdownMenu>
 
                 {/* Notifications Dropdown */}
-                <DropdownMenu>
+                <DropdownMenu onOpenChange={setNotificationsDropdownOpen}>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"

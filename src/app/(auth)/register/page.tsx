@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
   CardContent,
@@ -21,17 +20,31 @@ import {
 import { useRecaptcha } from "@/hooks/useRecaptcha";
 import { api } from "@/lib/api";
 import { getActiveLegalDocument } from "@/lib/api/legal";
+import { differenceInYears, format } from "@/lib/date-utils";
 import { getErrorMessage } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/authStore";
 import { Language, LegalDocumentType } from "@/types/legal";
-import { differenceInYears, format } from "date-fns";
 import { CalendarIcon, Loader2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import { toast } from "sonner";
+
+// Lazy load Calendar component (only loads when popover opens)
+const Calendar = dynamic(
+  () => import("@/components/ui/calendar").then((mod) => mod.Calendar),
+  {
+    loading: () => (
+      <div className="flex h-[300px] w-[280px] items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 export default function RegisterPage() {
   const { user, _hasHydrated } = useAuthStore();

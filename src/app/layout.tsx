@@ -10,6 +10,8 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
   display: "swap",
+  preload: true,
+  fallback: ["system-ui", "arial"],
 });
 
 export const metadata: Metadata = {
@@ -33,12 +35,29 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+      </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <Providers>
           <LayoutContent>
             <div className="flex min-h-screen flex-col">
+              {/* Reserve space for navbar to prevent CLS */}
+              <div className="h-16" aria-hidden="true" />
               <Navbar />
-              <main className="flex-1">{children}</main>
+              <main
+                className="flex-1"
+                style={{ minHeight: "calc(100vh - 16rem)" }}
+              >
+                {children}
+              </main>
               <Footer />
             </div>
           </LayoutContent>

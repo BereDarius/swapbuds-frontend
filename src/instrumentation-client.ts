@@ -4,8 +4,14 @@
 
 import * as Sentry from "@sentry/nextjs";
 
-// Only initialize Sentry in production
-if (process.env.NODE_ENV === "production") {
+// Only initialize Sentry in production and not on localhost or CI
+const isLocalhost =
+  typeof window !== "undefined"
+    ? window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+    : process.env.CI === "true";
+
+if (process.env.NODE_ENV === "production" && !isLocalhost) {
   Sentry.init({
     dsn: "https://5fc1e8f553d627d6278274557ba16a73@o4510399085608960.ingest.de.sentry.io/4510399098912848",
 

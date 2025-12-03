@@ -205,6 +205,8 @@ export default function ItemDetailPage() {
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
+                loading="eager"
+                quality={90}
               />
             ) : (
               <div className="flex h-full items-center justify-center">
@@ -237,6 +239,8 @@ export default function ItemDetailPage() {
                     fill
                     className="object-cover"
                     sizes="20vw"
+                    loading="lazy"
+                    quality={80}
                   />
                 </button>
               ))}

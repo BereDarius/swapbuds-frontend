@@ -34,6 +34,12 @@ interface RecaptchaProviderProps {
  */
 export function RecaptchaProvider({ children }: RecaptchaProviderProps) {
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  const skipRecaptcha = process.env.NEXT_PUBLIC_SKIP_RECAPTCHA === "true";
+
+  if (skipRecaptcha) {
+    logger.debug("reCAPTCHA disabled via NEXT_PUBLIC_SKIP_RECAPTCHA");
+    return <>{children}</>;
+  }
 
   if (!siteKey) {
     logger.warn("reCAPTCHA site key not configured");

@@ -114,6 +114,8 @@ export default function TradeDetailPage() {
                     fill
                     className="object-cover"
                     sizes="50vw"
+                    loading="lazy"
+                    quality={85}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
@@ -149,6 +151,8 @@ export default function TradeDetailPage() {
                     fill
                     className="object-cover"
                     sizes="50vw"
+                    loading="lazy"
+                    quality={85}
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center">
