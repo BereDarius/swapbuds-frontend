@@ -69,7 +69,7 @@ describe("Items API", () => {
       expect(result).toEqual(mockResponse.data);
     });
 
-    it("should fetch items with filters", async () => {
+    it("should fetch items with all filters", async () => {
       const mockResponse = {
         data: {
           items: [mockItem],
@@ -84,14 +84,32 @@ describe("Items API", () => {
 
       const filters = {
         category: ItemCategory.ELECTRONICS,
+        condition: ItemCondition.NEW,
+        status: ItemStatus.AVAILABLE,
         search: "laptop",
-        page: 1,
+        minValue: 50,
+        maxValue: 500,
+        deliveryScope: DeliveryScope.LOCAL,
+        page: 2,
         limit: 10,
+        sortBy: "createdAt" as const,
+        sortOrder: "desc" as const,
       };
 
       await getItems(filters);
 
-      expect(api.get).toHaveBeenCalled();
+      const callArg = vi.mocked(api.get).mock.calls[0][0];
+      expect(callArg).toContain("category=ELECTRONICS");
+      expect(callArg).toContain("condition=NEW");
+      expect(callArg).toContain("status=AVAILABLE");
+      expect(callArg).toContain("search=laptop");
+      expect(callArg).toContain("minValue=50");
+      expect(callArg).toContain("maxValue=500");
+      expect(callArg).toContain("deliveryScope=LOCAL");
+      expect(callArg).toContain("page=2");
+      expect(callArg).toContain("limit=10");
+      expect(callArg).toContain("sortBy=createdAt");
+      expect(callArg).toContain("sortOrder=desc");
     });
   });
 

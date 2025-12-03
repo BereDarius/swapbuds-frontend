@@ -76,7 +76,7 @@ describe("Admin API Client", () => {
       expect(result).toEqual(response);
     });
 
-    it("should fetch users with filters", async () => {
+    it("should fetch users with all filters", async () => {
       const response = {
         users: [mockUser],
         pagination: {
@@ -100,6 +100,32 @@ describe("Admin API Client", () => {
       };
 
       const result = await adminApi.getUsers(query);
+
+      const callArg = vi.mocked(api.get).mock.calls[0][0];
+      expect(callArg).toContain("role=USER");
+      expect(callArg).toContain("isVerified=true");
+      expect(callArg).toContain("isBanned=false");
+      expect(callArg).toContain("page=1");
+      expect(callArg).toContain("limit=10");
+      expect(result).toEqual(response);
+    });
+
+    it("should handle undefined query", async () => {
+      const response = {
+        users: [mockUser],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          totalPages: 1,
+        },
+      };
+
+      vi.mocked(api.get).mockResolvedValue({
+        data: response,
+      } as AxiosResponse);
+
+      const result = await adminApi.getUsers();
 
       expect(api.get).toHaveBeenCalledWith(
         expect.stringContaining("/admin/users")

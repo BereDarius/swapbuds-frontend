@@ -143,6 +143,49 @@ describe("Trades API Client", () => {
       expect(result).toEqual(mockResponse);
     });
 
+    it("should handle all filter parameters", async () => {
+      const mockResponse: PaginatedTradesResponse = {
+        trades: [mockTrade],
+        total: 1,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
+      };
+
+      vi.mocked(api.get).mockResolvedValue({
+        data: mockResponse,
+      } as AxiosResponse);
+
+      const result = await tradesApi.getTrades({
+        status: TradeStatus.PENDING,
+        startDate: "2024-01-01",
+        endDate: "2024-01-31",
+        category: "Electronics",
+        search: "laptop",
+        page: 2,
+        limit: 20,
+      });
+
+      expect(api.get).toHaveBeenCalledWith(
+        expect.stringContaining("status=PENDING")
+      );
+      expect(api.get).toHaveBeenCalledWith(
+        expect.stringContaining("startDate=2024-01-01")
+      );
+      expect(api.get).toHaveBeenCalledWith(
+        expect.stringContaining("endDate=2024-01-31")
+      );
+      expect(api.get).toHaveBeenCalledWith(
+        expect.stringContaining("category=Electronics")
+      );
+      expect(api.get).toHaveBeenCalledWith(
+        expect.stringContaining("search=laptop")
+      );
+      expect(api.get).toHaveBeenCalledWith(expect.stringContaining("page=2"));
+      expect(api.get).toHaveBeenCalledWith(expect.stringContaining("limit=20"));
+      expect(result).toEqual(mockResponse);
+    });
+
     it("should handle empty filters", async () => {
       const mockResponse: PaginatedTradesResponse = {
         trades: [mockTrade],
