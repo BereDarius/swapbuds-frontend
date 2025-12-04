@@ -179,8 +179,17 @@ jobs:
       - name: Authenticate test users
         working-directory: frontend
         run: |
+          echo "🔐 Authenticating test users..."
           npx tsx scripts/lighthouse-auth.ts user
           npx tsx scripts/lighthouse-auth.ts admin
+          
+          # Verify cookie files were created
+          if [ ! -f ".lighthouse-cookies-user.json" ] || [ ! -f ".lighthouse-cookies-admin.json" ]; then
+            echo "❌ Cookie files not created"
+            ls -la .lighthouse-cookies-*.json 2>/dev/null || echo "No cookie files found"
+            exit 1
+          fi
+          echo "✅ Authentication complete"
 
       - name: Run Lighthouse audits
         working-directory: frontend

@@ -64,12 +64,30 @@ async function authenticate(userType: "user" | "admin"): Promise<void> {
     const lighthouseDir = join(process.cwd(), ".lighthouseci");
     await mkdir(lighthouseDir, { recursive: true });
 
-    // Save tokens to file
+    // Save tokens to file (for backward compatibility)
     const tokenFile = join(lighthouseDir, `${userType}-token.txt`);
     await writeFile(tokenFile, data.accessToken, "utf-8");
 
+    // Save cookies in format expected by lighthouse-runner.mjs
+    const cookieFile = join(
+      process.cwd(),
+      `.lighthouse-cookies-${userType}.json`
+    );
+    const cookies = [
+      {
+        name: "accessToken",
+        value: data.accessToken,
+        domain: "localhost",
+        path: "/",
+        httpOnly: true,
+        secure: false,
+      },
+    ];
+    await writeFile(cookieFile, JSON.stringify(cookies, null, 2), "utf-8");
+
     console.log(`✅ ${userType} authenticated (${data.user.username})`);
     console.log(`   Token saved to: ${tokenFile}`);
+    console.log(`   Cookies saved to: ${cookieFile}`);
   } catch (error) {
     console.error(`❌ Failed to authenticate ${userType}:`, error);
     process.exit(1);
