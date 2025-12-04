@@ -119,6 +119,23 @@ function getScoreEmoji(score: number): string {
   return "❌";
 }
 
+/**
+ * Safely strip all HTML tags from a string to prevent injection
+ * Uses multiple passes to handle nested/obfuscated tags like <<script>>
+ */
+function stripHtml(text: string): string {
+  let result = text;
+  let previousResult = "";
+
+  // Keep stripping until no more changes (handles <<tag>> patterns)
+  while (result !== previousResult) {
+    previousResult = result;
+    result = result.replace(/<[^>]*>/g, "");
+  }
+
+  return result;
+}
+
 function formatMs(ms: number): string {
   if (ms < 1000) return `${Math.round(ms)} ms`;
   return `${(ms / 1000).toFixed(2)} s`;
@@ -242,9 +259,7 @@ function analyzeLighthouseReport(reportPath: string): void {
         `\n${colorize(audit.title, "bold")} ${colorize(`(${score}%)`, color)}`
       );
       if (audit.description) {
-        log(
-          `  ${audit.description.replace(/<[^>]*>/g, "").substring(0, 150)}...`
-        );
+        log(`  ${stripHtml(audit.description).substring(0, 150)}...`);
       }
     });
   }
@@ -266,9 +281,7 @@ function analyzeLighthouseReport(reportPath: string): void {
         `\n${colorize("⚡", "yellow")} ${colorize(audit.title, "bold")} (Potential savings: ${savings})`
       );
       if (audit.description) {
-        log(
-          `  ${audit.description.replace(/<[^>]*>/g, "").substring(0, 150)}...`
-        );
+        log(`  ${stripHtml(audit.description).substring(0, 150)}...`);
       }
     });
   }
