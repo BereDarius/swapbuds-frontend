@@ -55,6 +55,16 @@ jobs:
           path: backend
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Cache Puppeteer Chromium
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/puppeteer
+            frontend/node_modules/.cache
+          key: ${{ runner.os }}-puppeteer-${{ hashFiles('frontend/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-puppeteer-
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -66,8 +76,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd backend && yarn install --frozen-lockfile
-          cd ../frontend && yarn install --frozen-lockfile
+          # Install in parallel to save time
+          cd backend && yarn install --frozen-lockfile --prefer-offline &
+          BACKEND_PID=$!
+          cd ../frontend && yarn install --frozen-lockfile --prefer-offline &
+          FRONTEND_PID=$!
+
+          # Wait for both to complete
+          wait $BACKEND_PID
+          wait $FRONTEND_PID
+          echo "✅ Dependencies installed"
 
       - name: Setup and start backend
         working-directory: backend
@@ -126,9 +144,16 @@ jobs:
           NEXT_PUBLIC_SKIP_RECAPTCHA: "true"
           NODE_ENV: production
 
-      - name: Install Lighthouse dependencies
+      - name: Verify Lighthouse dependencies
         working-directory: frontend
-        run: yarn add -D puppeteer lighthouse chrome-launcher
+        run: |
+          # Check if puppeteer is already installed (should be from package.json)
+          if ! node -e "require('puppeteer')" 2>/dev/null; then
+            echo "⚠️ Installing missing Lighthouse dependencies..."
+            yarn add -D puppeteer lighthouse chrome-launcher
+          else
+            echo "✅ Lighthouse dependencies already installed"
+          fi
 
       - name: Verify backend API is responding
         working-directory: frontend
