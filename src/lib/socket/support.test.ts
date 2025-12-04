@@ -6,11 +6,37 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useSupportSocket } from "./support";
 
+// Mock auth store
+const mockAuthStore = {
+  user: { id: "user123", username: "testuser" } as {
+    id: string;
+    username: string;
+  } | null,
+};
+vi.mock("@/stores/authStore", () => ({
+  useAuthStore: () => ({ user: mockAuthStore.user }),
+}));
+
+// Mock localStorage
+const mockLocalStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+Object.defineProperty(window, "localStorage", {
+  value: mockLocalStorage,
+  writable: true,
+});
+
 // Mock the provider
 const mockSupportSocket = {
   on: vi.fn(),
   off: vi.fn(),
   emit: vi.fn(),
+  connect: vi.fn(),
+  connected: false,
+  auth: {},
 };
 
 let mockGetSupportSocket: () => typeof mockSupportSocket | null = () =>
@@ -27,6 +53,62 @@ vi.mock("./provider", () => ({
 describe("useSupportSocket", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSupportSocket.connected = false;
+    mockLocalStorage.getItem.mockReturnValue("mock-token");
+    mockAuthStore.user = { id: "user123", username: "testuser" };
+  });
+
+  describe("lazy loading connection", () => {
+    it("should connect socket when hook is mounted with valid user and token", () => {
+      renderHook(() => useSupportSocket());
+
+      expect(mockSupportSocket.connect).toHaveBeenCalled();
+      expect(mockSupportSocket.auth).toEqual({ token: "mock-token" });
+    });
+
+    it("should not connect if user is not present", () => {
+      mockAuthStore.user = null;
+      renderHook(() => useSupportSocket());
+
+      expect(mockSupportSocket.connect).not.toHaveBeenCalled();
+    });
+
+    it("should not connect if token is not present", () => {
+      mockLocalStorage.getItem.mockReturnValue(null);
+      renderHook(() => useSupportSocket());
+
+      expect(mockSupportSocket.connect).not.toHaveBeenCalled();
+    });
+
+    it("should subscribe to user room after connection", () => {
+      mockSupportSocket.connected = false;
+      renderHook(() => useSupportSocket());
+
+      // Simulate connection event
+      const connectHandler = mockSupportSocket.on.mock.calls.find(
+        (call) => call[0] === "connect"
+      )?.[1];
+
+      if (connectHandler) {
+        act(() => {
+          mockSupportSocket.connected = true;
+          connectHandler();
+        });
+      }
+
+      expect(mockSupportSocket.emit).toHaveBeenCalledWith("support:join", {
+        userId: "user123",
+      });
+    });
+
+    it("should join support system immediately if already connected", () => {
+      mockSupportSocket.connected = true;
+      renderHook(() => useSupportSocket());
+
+      expect(mockSupportSocket.emit).toHaveBeenCalledWith("support:join", {
+        userId: "user123",
+      });
+    });
   });
 
   describe("joinChat", () => {

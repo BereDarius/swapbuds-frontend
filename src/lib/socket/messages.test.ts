@@ -6,11 +6,37 @@ import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useMessagesSocket } from "./messages";
 
+// Mock auth store
+const mockAuthStore = {
+  user: { id: "user123", username: "testuser" } as {
+    id: string;
+    username: string;
+  } | null,
+};
+vi.mock("@/stores/authStore", () => ({
+  useAuthStore: () => ({ user: mockAuthStore.user }),
+}));
+
+// Mock localStorage
+const mockLocalStorage = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+Object.defineProperty(window, "localStorage", {
+  value: mockLocalStorage,
+  writable: true,
+});
+
 // Mock the provider
 const mockSocket = {
   on: vi.fn(),
   off: vi.fn(),
   emit: vi.fn(),
+  connect: vi.fn(),
+  connected: false,
+  auth: {},
 };
 
 let mockGetSocket: () => typeof mockSocket | null = () => mockSocket;
@@ -26,6 +52,58 @@ vi.mock("./provider", () => ({
 describe("useMessagesSocket", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSocket.connected = false;
+    mockLocalStorage.getItem.mockReturnValue("mock-token");
+    mockAuthStore.user = { id: "user123", username: "testuser" };
+  });
+
+  describe("lazy loading connection", () => {
+    it("should connect socket when hook is mounted with valid user and token", () => {
+      renderHook(() => useMessagesSocket());
+
+      expect(mockSocket.connect).toHaveBeenCalled();
+      expect(mockSocket.auth).toEqual({ token: "mock-token" });
+    });
+
+    it("should not connect if user is not present", () => {
+      mockAuthStore.user = null;
+      renderHook(() => useMessagesSocket());
+
+      expect(mockSocket.connect).not.toHaveBeenCalled();
+    });
+
+    it("should not connect if token is not present", () => {
+      mockLocalStorage.getItem.mockReturnValue(null);
+      renderHook(() => useMessagesSocket());
+
+      expect(mockSocket.connect).not.toHaveBeenCalled();
+    });
+
+    it("should subscribe to user room after connection", () => {
+      mockSocket.connected = false;
+      renderHook(() => useMessagesSocket());
+
+      // Simulate connection event
+      const connectHandler = mockSocket.on.mock.calls.find(
+        (call) => call[0] === "connect"
+      )?.[1];
+
+      if (connectHandler) {
+        act(() => {
+          mockSocket.connected = true;
+          connectHandler();
+        });
+      }
+
+      expect(mockSocket.emit).toHaveBeenCalledWith("subscribe", "user123");
+    });
+
+    it("should subscribe immediately if already connected", () => {
+      mockSocket.connected = true;
+      renderHook(() => useMessagesSocket());
+
+      expect(mockSocket.emit).toHaveBeenCalledWith("subscribe", "user123");
+    });
   });
 
   describe("onMessage", () => {
