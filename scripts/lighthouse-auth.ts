@@ -95,11 +95,14 @@ async function authenticate(userType: "user" | "admin"): Promise<void> {
 }
 
 // Main
-const userType = process.argv[2] as "user" | "admin";
+const userTypeArg = process.argv[2];
 
-if (!userType || !["user", "admin"].includes(userType)) {
+// Validate and sanitize user input to prevent path traversal
+if (!userTypeArg || !["user", "admin"].includes(userTypeArg)) {
   console.error("Usage: npx tsx lighthouse-auth.ts [user|admin]");
   process.exit(1);
 }
 
+// Type narrowing after validation
+const userType = userTypeArg as "user" | "admin";
 authenticate(userType);

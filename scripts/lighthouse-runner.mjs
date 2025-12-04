@@ -73,8 +73,10 @@ async function runLighthouse(url, name, cookies = null) {
     }
 
     const timestamp = Date.now();
-    const htmlPath = path.join(reportDir, `${name}-${timestamp}.html`);
-    const jsonPath = path.join(reportDir, `${name}-${timestamp}.json`);
+    // Sanitize name to prevent path traversal
+    const safeName = name.replace(/[^a-z0-9-]/gi, "_");
+    const htmlPath = path.join(reportDir, `${safeName}-${timestamp}.html`);
+    const jsonPath = path.join(reportDir, `${safeName}-${timestamp}.json`);
 
     fs.writeFileSync(htmlPath, runnerResult.report[0]);
     fs.writeFileSync(jsonPath, runnerResult.report[1]);

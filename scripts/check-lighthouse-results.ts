@@ -333,7 +333,15 @@ function findLighthouseReports(): string[] {
     if (fs.existsSync(reportsDir)) {
       const files = fs
         .readdirSync(reportsDir)
-        .filter((f) => f.endsWith(".json") && !f.includes("token"))
+        .filter((f) => {
+          // Validate filename to prevent path traversal
+          const isValid =
+            f.endsWith(".json") &&
+            !f.includes("token") &&
+            !f.includes("..") &&
+            !f.includes("/");
+          return isValid;
+        })
         .map((f) => path.join(reportsDir, f));
       allFiles = allFiles.concat(files);
     }
