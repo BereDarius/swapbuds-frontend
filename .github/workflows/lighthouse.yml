@@ -182,7 +182,7 @@ jobs:
           echo "🔐 Authenticating test users..."
           npx tsx scripts/lighthouse-auth.ts user
           npx tsx scripts/lighthouse-auth.ts admin
-          
+
           # Verify cookie files were created
           if [ ! -f ".lighthouse-cookies-user.json" ] || [ ! -f ".lighthouse-cookies-admin.json" ]; then
             echo "❌ Cookie files not created"
