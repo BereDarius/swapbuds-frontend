@@ -77,9 +77,9 @@ jobs:
       - name: Install dependencies
         run: |
           # Install in parallel to save time
-          cd backend && yarn install --frozen-lockfile --prefer-offline &
+          (cd backend && yarn install --frozen-lockfile --prefer-offline) &
           BACKEND_PID=$!
-          cd ../frontend && yarn install --frozen-lockfile --prefer-offline &
+          (cd frontend && yarn install --frozen-lockfile --prefer-offline) &
           FRONTEND_PID=$!
 
           # Wait for both to complete
@@ -94,7 +94,7 @@ jobs:
           yarn prisma migrate deploy
           yarn prisma db seed
           yarn build
-          yarn start:prod &
+          yarn start &
           echo $! > backend.pid
 
           # Wait for backend to respond

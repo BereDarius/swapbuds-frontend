@@ -11,7 +11,7 @@ docker-compose up -d
 yarn prisma migrate deploy
 yarn prisma db seed  # Creates lighthouse test users
 yarn build
-yarn start:prod
+yarn start
 
 # 2. Start frontend (in separate terminal)
 cd ../swapbuds-frontend
@@ -86,7 +86,7 @@ Created by `backend/prisma/seed.ts`:
 ```bash
 cd ../swapbuds-backend
 docker-compose up -d
-yarn start:prod
+yarn start
 ```
 
 **Frontend not running:**

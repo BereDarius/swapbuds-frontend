@@ -156,7 +156,7 @@ docker-compose up -d  # Start postgres + redis
 yarn prisma migrate deploy
 yarn prisma db seed   # Creates lighthouse test users!
 yarn build
-yarn start:prod
+yarn start
 
 # 2. Start frontend (in frontend repo)
 cd swapbuds-frontend

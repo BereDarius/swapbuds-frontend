@@ -13,7 +13,7 @@ echo ""
 echo "1️⃣ Checking backend..."
 if ! curl -s http://localhost:3001/api/health > /dev/null 2>&1; then
   echo "❌ Backend not running on port 3001"
-  echo "   Start it with: cd ../swapbuds-backend && yarn start:prod"
+  echo "   Start it with: cd ../swapbuds-backend && yarn start"
   exit 1
 fi
 echo "✅ Backend is running"
