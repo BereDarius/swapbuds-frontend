@@ -66,13 +66,12 @@ jobs:
             ${{ runner.os }}-puppeteer-
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
-          cache: "yarn"
-          cache-dependency-path: |
-            frontend/yarn.lock
-            backend/yarn.lock
+
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
         run: |
