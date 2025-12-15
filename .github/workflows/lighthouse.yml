@@ -44,12 +44,12 @@ jobs:
 
     steps:
       - name: Checkout frontend
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: frontend
 
       - name: Checkout backend
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ github.repository_owner }}/swapbuds-backend
           path: backend
