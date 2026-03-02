@@ -92,7 +92,7 @@ jobs:
 
   #     - name: Upload test results
   #       if: always()
-  #       uses: actions/upload-artifact@v4
+  #       uses: actions/upload-artifact@v7
   #       with:
   #         name: playwright-results-${{ matrix.browser }}
   #         path: test-results/
@@ -100,7 +100,7 @@ jobs:
 
   #     - name: Upload Playwright report
   #       if: always()
-  #       uses: actions/upload-artifact@v4
+  #       uses: actions/upload-artifact@v7
   #       with:
   #         name: playwright-report-${{ matrix.browser }}
   #         path: playwright-report/
@@ -130,7 +130,7 @@ jobs:
           NODE_ENV: production
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-build
           path: |
@@ -165,7 +165,7 @@ jobs:
 
   #     - name: Upload merged report
   #       if: always()
-  #       uses: actions/upload-artifact@v4
+  #       uses: actions/upload-artifact@v7
   #       with:
   #         name: playwright-report-merged
   #         path: playwright-report/
